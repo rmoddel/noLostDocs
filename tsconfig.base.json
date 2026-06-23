@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@doc-wallet/types": [
+        "packages/types/src/index.ts"
+      ],
+      "@doc-wallet/config": [
+        "packages/config/src/index.ts"
+      ],
+      "@doc-wallet/supabase": [
+        "packages/supabase/src/index.ts"
+      ]
+    }
+  }
+}

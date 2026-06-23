@@ -1,0 +1,95 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-06-23T21:14:27Z",
+  "phase": "04",
+  "phase_name": "cloud-document-dashboard",
+  "phase_dir": ".planning/phases/04-cloud-document-dashboard",
+  "plan": 0,
+  "task": 0,
+  "total_tasks": 0,
+  "status": "paused",
+  "completed_tasks": [
+    {
+      "id": 1,
+      "name": "Implement locked-preview launcher homepage",
+      "status": "done",
+      "commit": "78d1242"
+    },
+    {
+      "id": 2,
+      "name": "Separate About and Contact Us routes",
+      "status": "done",
+      "commit": "78d1242"
+    },
+    {
+      "id": 3,
+      "name": "Upgrade the launcher typography and color system",
+      "status": "done",
+      "commit": "78d1242"
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": 4,
+      "name": "Finish visual parity between public launcher and authenticated dashboard",
+      "status": "not_started"
+    },
+    {
+      "id": 5,
+      "name": "Add Supabase-backed visible/hidden category preferences",
+      "status": "not_started"
+    },
+    {
+      "id": 6,
+      "name": "Prepare deployment/release path for production hosting",
+      "status": "not_started"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "Production deployment target and release process are not yet defined in-repo.",
+      "type": "external",
+      "workaround": "Continue implementing the web app locally until hosting/release details are provided."
+    }
+  ],
+  "human_actions_pending": [
+    {
+      "action": "Confirm the production deployment target and release workflow.",
+      "context": "The app is implemented in the repo, but not deployed from here.",
+      "blocking": false
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Use the locked-preview launcher as the public homepage.",
+      "rationale": "It preserves app-first clarity while keeping login explicit.",
+      "phase": "04"
+    },
+    {
+      "decision": "Use an A/C hybrid palette rather than pure carbon or pure editorial copper.",
+      "rationale": "It keeps the product calm and trustworthy while still giving the brand enough character.",
+      "phase": "04"
+    },
+    {
+      "decision": "Use Fraunces for headings and Manrope for body text.",
+      "rationale": "The previous font stack felt too generic and too close to the original prototype.",
+      "phase": "04"
+    }
+  ],
+  "uncommitted_files": [
+    "apps/web/src/App.tsx",
+    "apps/web/src/styles.css",
+    "apps/web/index.html",
+    ".planning/HANDOFF.json",
+    ".planning/.continue-here.md",
+    ".planning/sketches/MANIFEST.md",
+    ".planning/sketches/001-locked-preview-homepage/README.md",
+    ".planning/sketches/001-locked-preview-homepage/index.html",
+    ".planning/sketches/002-launcher-preview-color-system/README.md",
+    ".planning/sketches/002-launcher-preview-color-system/index.html",
+    ".planning/sketches/003-launcher-preview-responsive-hierarchy/README.md",
+    ".planning/sketches/003-launcher-preview-responsive-hierarchy/index.html"
+  ],
+  "next_action": "Continue with dashboard polish and Supabase-backed category visibility preferences, then define the deployment target.",
+  "context_notes": "The work shifted from concept sketching into a live frontend implementation stream. The public shell, auth entry, and routing are in place; the main gap is finishing the authenticated dashboard to match the new visual system and adding persistence for visible/hidden categories."
+}

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sketch 003 · Launcher Preview Responsive Hierarchy</title>
+    <style>
+      :root {
+        --bg: #f9f5ef;
+        --bg-deep: #efe4d8;
+        --surface: rgba(255, 252, 248, 0.94);
+        --surface-soft: rgba(252, 248, 243, 0.78);
+        --line: rgba(42, 36, 33, 0.08);
+        --ink: #282220;
+        --muted: #6d625d;
+        --primary: #2d2724;
+        --accent: #b46c58;
+        --accent-soft: rgba(180, 108, 88, 0.12);
+        --good: #18724b;
+        --good-bg: rgba(24, 114, 75, 0.12);
+        --shadow: 0 24px 60px rgba(42, 36, 33, 0.12);
+        --shadow-soft: 0 12px 28px rgba(42, 36, 33, 0.08);
+        --radius-xl: 34px;
+        --radius-lg: 26px;
+        --radius-md: 20px;
+        --radius-sm: 14px;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body {
+        font-family: "Avenir Next", "Neue Haas Grotesk Display Pro", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(180, 108, 88, 0.12), transparent 24%),
+          linear-gradient(180deg, #fcfaf7 0%, var(--bg) 52%, var(--bg-deep) 100%);
+        color: var(--ink);
+        padding: 70px 12px 24px;
+      }
+
+      button { font: inherit; cursor: pointer; transition: all 0.15s ease; }
+      #variant-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9998;
+        display: flex;
+        gap: 8px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(14, 18, 24, 0.08);
+        overflow-x: auto;
+      }
+      .variant-tab {
+        border: 1px solid rgba(14, 18, 24, 0.08);
+        background: white;
+        color: var(--muted);
+        border-radius: 999px;
+        padding: 10px 14px;
+        white-space: nowrap;
+      }
+      .variant-tab.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+      .variant { display: none; }
+      .variant.active { display: block; }
+      .shell {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: grid;
+        gap: 22px;
+      }
+      .frame {
+        display: grid;
+        gap: 18px;
+        background: rgba(255,255,255,0.52);
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 38px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+      .topbar, .row, .footer-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .push { margin-left: auto; }
+      .brand-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        box-shadow: 0 0 0 8px rgba(180, 108, 88, 0.14);
+      }
+      .brand-name {
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        font-weight: 700;
+      }
+      .eyebrow {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 0.74rem;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      h1, h2, h3, p, small, strong { margin: 0; }
+      h1 {
+        font-size: clamp(2.1rem, 6vw, 4.4rem);
+        line-height: 0.94;
+        letter-spacing: -0.06em;
+        max-width: 10ch;
+      }
+      h2 {
+        font-size: clamp(1.3rem, 2.4vw, 2rem);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
+      p, small { color: var(--muted); line-height: 1.5; }
+      .hero, .surface, .rail-card, .category-card, .doc-button, .bottom-sheet {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-soft);
+      }
+      .hero, .surface, .rail-card, .bottom-sheet { padding: 18px; }
+      .ghost, .primary {
+        border-radius: 999px;
+        padding: 10px 14px;
+      }
+      .ghost {
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.76);
+        color: var(--ink);
+      }
+      .primary {
+        border: 0;
+        background: var(--primary);
+        color: #fff8f2;
+      }
+      .ghost:hover, .primary:hover, .category-card:hover, .doc-button:hover { transform: translateY(-2px); }
+      .layout {
+        display: grid;
+        gap: 18px;
+      }
+      .category-grid {
+        display: grid;
+        gap: 14px;
+      }
+      .category-card {
+        text-align: left;
+        padding: 20px;
+        min-height: 148px;
+      }
+      .category-card strong {
+        display: block;
+        font-size: 1.15rem;
+        margin-bottom: 8px;
+        color: var(--ink);
+      }
+      .category-card.featured {
+        min-height: 188px;
+        background:
+          linear-gradient(180deg, rgba(255,255,252,0.98), rgba(248,241,236,0.92));
+      }
+      .locked-pill, .status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 700;
+      }
+      .locked-pill {
+        margin-top: 14px;
+        background: var(--accent-soft);
+        color: #8b5345;
+      }
+      .doc-list {
+        display: grid;
+        gap: 10px;
+      }
+      .doc-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+        padding: 13px 14px;
+        min-height: 74px;
+        width: 100%;
+      }
+      .doc-button strong {
+        display: block;
+        font-size: 0.98rem;
+        margin-bottom: 4px;
+        color: var(--ink);
+      }
+      .doc-button.uploaded {
+        border-color: rgba(24, 114, 75, 0.2);
+        background: rgba(239, 247, 242, 0.96);
+      }
+      .status-pill {
+        min-width: 78px;
+      }
+      .status-pill.saved {
+        background: var(--good-bg);
+        color: var(--good);
+      }
+      .status-pill.preview {
+        background: rgba(180, 108, 88, 0.12);
+        color: #955746;
+      }
+      .note-band {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .note-chip {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 9px 12px;
+        font-size: 0.875rem;
+      }
+      .bottom-sheet {
+        display: grid;
+        gap: 12px;
+      }
+      .footer-links {
+        flex-wrap: wrap;
+        font-size: 0.875rem;
+      }
+      .footer-links button {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        padding: 0;
+      }
+      .desktop-rail {
+        display: grid;
+        gap: 14px;
+      }
+      .caption {
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: rgba(180, 108, 88, 0.08);
+        border: 1px solid var(--line);
+      }
+      .hide-mobile { display: none; }
+
+      .variant-a .layout,
+      .variant-b .layout,
+      .variant-c .layout {
+        grid-template-columns: 1fr;
+      }
+      .variant-a .category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .variant-b .category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .variant-b .category-card.featured {
+        grid-column: 1 / -1;
+      }
+      .variant-c .category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      @media (min-width: 780px) {
+        .frame { padding: 24px; }
+        .variant-a .category-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .variant-b .category-grid {
+          grid-template-columns: 1.15fr repeat(2, minmax(0, 1fr));
+        }
+        .variant-b .category-card.featured {
+          grid-column: auto;
+          grid-row: span 2;
+        }
+        .variant-c .category-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 1120px) {
+        .variant-a .layout {
+          grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.75fr);
+        }
+        .variant-a .category-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .variant-b .layout {
+          grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.7fr);
+        }
+        .variant-b .category-grid {
+          grid-template-columns: 1.25fr repeat(3, minmax(0, 1fr));
+        }
+
+        .variant-c .layout {
+          grid-template-columns: minmax(0, 1.4fr) 280px;
+        }
+        .variant-c .category-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .variant-c .hide-mobile {
+          display: grid;
+        }
+      }
+
+      #sketch-tools {
+        position: fixed;
+        right: 12px;
+        bottom: 12px;
+        z-index: 9999;
+        font-family: system-ui, sans-serif;
+        font-size: 12px;
+        background: rgba(0, 0, 0, 0.72);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 10px;
+        opacity: 0.45;
+        transition: opacity 0.2s ease;
+        display: grid;
+        gap: 8px;
+      }
+      #sketch-tools:hover { opacity: 1; }
+      #sketch-tools button {
+        font-size: 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.14);
+        color: white;
+        padding: 6px 8px;
+      }
+      .annotation {
+        display: none;
+        position: fixed;
+        left: 12px;
+        bottom: 12px;
+        background: rgba(0, 0, 0, 0.78);
+        color: white;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 12px;
+        z-index: 9999;
+        max-width: 300px;
+      }
+      .annotation.show { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="variant-nav">
+      <button class="variant-tab active" data-target="a">A: Structured Grid</button>
+      <button class="variant-tab" data-target="b">B: Featured Primary Category</button>
+      <button class="variant-tab" data-target="c">C: Desktop Utility Rail</button>
+    </div>
+
+    <div class="annotation" id="annotation-box">Annotations off</div>
+
+    <section id="variant-a" class="variant variant-a active">
+      <div class="shell">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand-dot"></div>
+            <div class="brand-name">NoLostDocs</div>
+            <button class="ghost push">Login</button>
+          </div>
+          <div class="hero">
+            <p class="eyebrow">Refined Launcher Preview</p>
+            <h1>No more lost docs.</h1>
+            <p>Cleanest responsive option. Large category tiles stay dominant while the document list remains visibly secondary at every width.</p>
+          </div>
+          <div class="layout">
+            <div class="surface">
+              <div class="row">
+                <div>
+                  <p class="eyebrow">Step 1</p>
+                  <h2>Choose a category first</h2>
+                </div>
+              </div>
+              <div class="category-grid" style="margin-top: 14px;">
+                <button class="category-card">
+                  <strong>Basic</strong>
+                  <small>License, registration, insurance, passport</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Medical</strong>
+                  <small>Insurance cards, medication lists, visit records</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Professional</strong>
+                  <small>ABA, DR, PT, RN, certifications</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Family</strong>
+                  <small>School forms, child records, emergency docs</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+              </div>
+            </div>
+            <div class="surface">
+              <p class="eyebrow">Step 2</p>
+              <h2>Then pick the document</h2>
+              <div class="doc-list" style="margin-top: 14px;">
+                <button class="doc-button uploaded">
+                  <div><strong>Driver's License</strong><small>Clearly secondary, still thumb-friendly</small></div>
+                  <span class="status-pill saved">Saved</span>
+                </button>
+                <button class="doc-button uploaded">
+                  <div><strong>Vehicle Registration</strong><small>Visible upload state</small></div>
+                  <span class="status-pill saved">Saved</span>
+                </button>
+                <button class="doc-button">
+                  <div><strong>Insurance Card</strong><small>Preview before login</small></div>
+                  <span class="status-pill preview">Preview</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="note-band">
+            <div class="note-chip">A/C hybrid palette</div>
+            <div class="note-chip">Categories visually larger than document actions</div>
+            <div class="note-chip">Desktop grid expands cleanly to 4-up</div>
+          </div>
+          <div class="bottom-sheet">
+            <div class="row">
+              <div>
+                <p class="eyebrow">Unlock the real app</p>
+                <strong>Sign in to open your saved dashboard</strong>
+              </div>
+              <button class="primary push">Continue with email</button>
+            </div>
+            <div class="footer-links">
+              <button>About</button>
+              <button>Contact Us</button>
+              <button>Security</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="variant-b" class="variant variant-b">
+      <div class="shell">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand-dot"></div>
+            <div class="brand-name">NoLostDocs</div>
+            <button class="ghost push">Login</button>
+          </div>
+          <div class="hero">
+            <p class="eyebrow">Refined Launcher Preview</p>
+            <h1>No more lost docs.</h1>
+            <p>Stronger hierarchy. One primary category leads the experience, with supporting categories arranged around it as the viewport widens.</p>
+          </div>
+          <div class="layout">
+            <div class="surface">
+              <div class="row">
+                <div>
+                  <p class="eyebrow">Primary category emphasis</p>
+                  <h2>Lead with the most universal bucket</h2>
+                </div>
+              </div>
+              <div class="category-grid" style="margin-top: 14px;">
+                <button class="category-card featured">
+                  <strong>Basic</strong>
+                  <small>License, vehicle registration, insurance card, passport. The default starting point for most users.</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Medical</strong>
+                  <small>Cards, medication lists, records</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Professional</strong>
+                  <small>ABA, DR, PT, RN, certifications</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Family</strong>
+                  <small>School forms and child records</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Business</strong>
+                  <small>EIN, contracts, compliance docs</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+              </div>
+            </div>
+            <div class="surface">
+              <p class="eyebrow">Document action layer</p>
+              <h2>Still clearly smaller</h2>
+              <div class="doc-list" style="margin-top: 14px;">
+                <button class="doc-button uploaded">
+                  <div><strong>Driver's License</strong><small>Category selected: Basic</small></div>
+                  <span class="status-pill saved">Saved</span>
+                </button>
+                <button class="doc-button">
+                  <div><strong>Insurance Card</strong><small>Missing state stays visible</small></div>
+                  <span class="status-pill preview">Preview</span>
+                </button>
+              </div>
+              <div class="caption" style="margin-top: 14px;">
+                <p>Best if you want the interface to nudge most people into `Basic` first instead of presenting every category equally.</p>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-sheet">
+            <div class="row">
+              <div>
+                <p class="eyebrow">Unlock the real app</p>
+                <strong>Sign in to personalize visible categories</strong>
+              </div>
+              <button class="primary push">Continue with email</button>
+            </div>
+            <div class="footer-links">
+              <button>About</button>
+              <button>Contact Us</button>
+              <button>Security</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="variant-c" class="variant variant-c">
+      <div class="shell">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand-dot"></div>
+            <div class="brand-name">NoLostDocs</div>
+            <button class="ghost push">Login</button>
+          </div>
+          <div class="hero">
+            <p class="eyebrow">Refined Launcher Preview</p>
+            <h1>No more lost docs.</h1>
+            <p>Most desktop-specific. The main grid stays central while wider screens get a utility rail instead of just more stretched cards.</p>
+          </div>
+          <div class="layout">
+            <div class="surface">
+              <div class="row">
+                <div>
+                  <p class="eyebrow">Main app preview</p>
+                  <h2>Central grid stays the star</h2>
+                </div>
+              </div>
+              <div class="category-grid" style="margin-top: 14px;">
+                <button class="category-card">
+                  <strong>Basic</strong>
+                  <small>License, registration, insurance, passport</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Medical</strong>
+                  <small>Insurance cards, medication lists, records</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Professional</strong>
+                  <small>ABA, DR, PT, RN, certifications</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+                <button class="category-card">
+                  <strong>Family</strong>
+                  <small>School forms, emergency docs</small>
+                  <span class="locked-pill">Login required</span>
+                </button>
+              </div>
+              <div class="doc-list" style="margin-top: 14px;">
+                <button class="doc-button uploaded">
+                  <div><strong>Driver's License</strong><small>Document buttons remain secondary</small></div>
+                  <span class="status-pill saved">Saved</span>
+                </button>
+                <button class="doc-button">
+                  <div><strong>Vehicle Registration</strong><small>Preview before login</small></div>
+                  <span class="status-pill preview">Preview</span>
+                </button>
+              </div>
+            </div>
+            <div class="desktop-rail hide-mobile">
+              <div class="rail-card">
+                <p class="eyebrow">Trust model</p>
+                <h3>Cloud-backed preview</h3>
+                <p>Best for desktop if you want secondary info to move out of the main app composition.</p>
+              </div>
+              <div class="rail-card">
+                <p class="eyebrow">Account entry</p>
+                <h3>Separate login rail</h3>
+                <p>Lets the center grid stay clean while auth/actions live in a stable desktop column.</p>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-sheet">
+            <div class="row">
+              <div>
+                <p class="eyebrow">Unlock the real app</p>
+                <strong>Sign in to open your saved dashboard</strong>
+              </div>
+              <button class="primary push">Continue with email</button>
+            </div>
+            <div class="footer-links">
+              <button>About</button>
+              <button>Contact Us</button>
+              <button>Security</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="sketch-tools">
+      <div style="display:flex; gap:6px;">
+        <button data-width="390">Phone</button>
+        <button data-width="820">Tablet</button>
+        <button data-width="1320">Desktop</button>
+      </div>
+      <button id="annotation-toggle">Annotations</button>
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll(".variant-tab");
+      const variants = document.querySelectorAll(".variant");
+      const shells = document.querySelectorAll(".shell");
+      const annotationBox = document.getElementById("annotation-box");
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.target;
+          tabs.forEach((item) => item.classList.remove("active"));
+          variants.forEach((variant) => variant.classList.remove("active"));
+          tab.classList.add("active");
+          document.getElementById("variant-" + target).classList.add("active");
+        });
+      });
+
+      document.querySelectorAll("[data-width]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const width = button.dataset.width + "px";
+          shells.forEach((shell) => {
+            shell.style.maxWidth = width;
+          });
+        });
+      });
+
+      document.getElementById("annotation-toggle").addEventListener("click", () => {
+        annotationBox.classList.toggle("show");
+        annotationBox.textContent = annotationBox.classList.contains("show")
+          ? "A = safest grid system, B = strongest category hierarchy, C = best desktop-specific structure."
+          : "Annotations off";
+      });
+    </script>
+  </body>
+</html>

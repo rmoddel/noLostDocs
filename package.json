@@ -1,0 +1,21 @@
+{
+  "name": "nolostdocs",
+  "version": "0.1.0",
+  "private": true,
+  "overrides": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:web": "npm run dev -w @doc-wallet/web",
+    "dev:mobile": "npm run dev -w @doc-wallet/mobile",
+    "build:web": "npm run build -w @doc-wallet/web",
+    "lint": "npm run lint -ws --if-present",
+    "typecheck": "npm run typecheck -ws --if-present"
+  }
+}

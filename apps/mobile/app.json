@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Doc Wallet",
+    "slug": "doc-wallet",
+    "scheme": "docwallet",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#f4efe6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.placeholder.docwallet"
+    },
+    "android": {
+      "package": "com.placeholder.docwallet"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
