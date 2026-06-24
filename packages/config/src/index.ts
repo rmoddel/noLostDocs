@@ -16,6 +16,10 @@ export function isPlaceholderValue(value: string | undefined) {
   );
 }
 
+export const FREE_PLAN_DOCUMENT_LIMIT = 3;
+export const PREMIUM_PLAN_DOCUMENT_LIMIT = 50;
+export const BASIC_GROUP_CATEGORIES = ["personal", "driving", "travel"] as const;
+
 export const prototypeSnapshot: VaultSnapshot = {
   mode: "cloud",
   categories: [

@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-23T21:14:27Z",
-  "phase": "04",
-  "phase_name": "cloud-document-dashboard",
-  "phase_dir": ".planning/phases/04-cloud-document-dashboard",
+  "timestamp": "2026-06-24T00:02:00Z",
+  "phase": "06",
+  "phase_name": "hardening-and-launch-readiness",
+  "phase_dir": ".planning/phases/06-hardening-and-launch-readiness",
   "plan": 0,
   "task": 0,
   "total_tasks": 0,
@@ -26,22 +26,37 @@
       "name": "Upgrade the launcher typography and color system",
       "status": "done",
       "commit": "78d1242"
-    }
-  ],
-  "remaining_tasks": [
+    },
     {
       "id": 4,
       "name": "Finish visual parity between public launcher and authenticated dashboard",
-      "status": "not_started"
+      "status": "done"
     },
     {
       "id": 5,
       "name": "Add Supabase-backed visible/hidden category preferences",
-      "status": "not_started"
+      "status": "done"
     },
     {
       "id": 6,
-      "name": "Prepare deployment/release path for production hosting",
+      "name": "Implement login-required Free Basic versus Premium access gating",
+      "status": "done"
+    },
+    {
+      "id": 7,
+      "name": "Add backend-owned subscription sync and upload quota enforcement",
+      "status": "done"
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": 8,
+      "name": "Connect a real Supabase/Stripe environment for hardening verification",
+      "status": "not_started"
+    },
+    {
+      "id": 9,
+      "name": "Define production deployment target and release workflow",
       "status": "not_started"
     }
   ],
@@ -49,39 +64,64 @@
     {
       "description": "Production deployment target and release process are not yet defined in-repo.",
       "type": "external",
-      "workaround": "Continue implementing the web app locally until hosting/release details are provided."
+      "workaround": "AWS Amplify is now the chosen host and repo config exists, but the actual Amplify app/environment still needs to be created and validated."
     }
   ],
   "human_actions_pending": [
     {
       "action": "Confirm the production deployment target and release workflow.",
-      "context": "The app is implemented in the repo, but not deployed from here.",
-      "blocking": false
+      "context": "AWS Amplify is selected, but launch-readiness still needs the actual Amplify environment, secret wiring, and release ownership path.",
+      "blocking": true
     }
   ],
   "decisions": [
     {
-      "decision": "Use the locked-preview launcher as the public homepage.",
-      "rationale": "It preserves app-first clarity while keeping login explicit.",
+      "decision": "Keep the signed-in dashboard as the unlocked continuation of the public launcher.",
+      "rationale": "Visual parity stays strong while adding live preferences and clearer document detail.",
       "phase": "04"
     },
     {
-      "decision": "Use an A/C hybrid palette rather than pure carbon or pure editorial copper.",
-      "rationale": "It keeps the product calm and trustworthy while still giving the brand enough character.",
+      "decision": "Use explicit authorized preview/download language and realistic placeholder states instead of generic file buttons.",
+      "rationale": "The web surface needs to distinguish metadata browsing from protected file access honestly.",
       "phase": "04"
     },
     {
-      "decision": "Use Fraunces for headings and Manrope for body text.",
-      "rationale": "The previous font stack felt too generic and too close to the original prototype.",
-      "phase": "04"
+      "decision": "All users must authenticate before using the product.",
+      "rationale": "Account identity, recovery, and plan enforcement all depend on login being universal.",
+      "phase": "05"
+    },
+    {
+      "decision": "Free Basic is limited while premium unlocks the broader cloud-backed workspace.",
+      "rationale": "This gives the product a clear upgrade boundary without hiding the account model.",
+      "phase": "05"
+    },
+    {
+      "decision": "Use email-based account recovery and recovery-capable encryption language, not zero-knowledge claims.",
+      "rationale": "The product promise is recovery under pressure, so strict zero-knowledge positioning would over-constrain real recovery UX.",
+      "phase": "05"
     }
   ],
   "uncommitted_files": [
+    "apps/mobile/App.tsx",
+    "apps/mobile/.env",
     "apps/web/src/App.tsx",
     "apps/web/src/styles.css",
+    "apps/web/.env.local",
+    "amplify.yml",
+    "README.md",
     "apps/web/index.html",
+    "packages/config/src/index.ts",
+    "supabase/functions/_shared/plans.ts",
+    "supabase/functions/create-signed-download/index.ts",
+    "supabase/functions/create-signed-upload/index.ts",
+    "supabase/functions/stripe-webhook/index.ts",
+    "supabase/migrations/20260623_000006_dashboard_preferences.sql",
+    "supabase/migrations/20260623_000007_subscription_sync_indexes.sql",
     ".planning/HANDOFF.json",
+    ".planning/ROADMAP.md",
+    ".planning/STATE.md",
     ".planning/.continue-here.md",
+    ".env.local",
     ".planning/sketches/MANIFEST.md",
     ".planning/sketches/001-locked-preview-homepage/README.md",
     ".planning/sketches/001-locked-preview-homepage/index.html",
@@ -90,6 +130,6 @@
     ".planning/sketches/003-launcher-preview-responsive-hierarchy/README.md",
     ".planning/sketches/003-launcher-preview-responsive-hierarchy/index.html"
   ],
-  "next_action": "Continue with dashboard polish and Supabase-backed category visibility preferences, then define the deployment target.",
-  "context_notes": "The work shifted from concept sketching into a live frontend implementation stream. The public shell, auth entry, and routing are in place; the main gap is finishing the authenticated dashboard to match the new visual system and adding persistence for visible/hidden categories."
+  "next_action": "Create the real AWS Amplify app/environment and then perform the remaining Phase 6 hardening, audit, and launch-readiness verification.",
+  "context_notes": "Phases 4 and 5 are implemented and locally verified. Local client and server secrets are configured for Supabase and Stripe, the Supabase MCP server is authenticated, the Stripe Codex plugin is installed, and the repo now has an Amplify build contract. The remaining blocker is live environment validation."
 }

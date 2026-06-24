@@ -1,4 +1,4 @@
-import { prototypeSnapshot } from "@doc-wallet/config";
+import { BASIC_GROUP_CATEGORIES, prototypeSnapshot } from "@doc-wallet/config";
 import { createDocWalletSupabaseClient } from "@doc-wallet/supabase";
 import type { CategoryId, DocumentTemplate, VaultCategory, VaultMode } from "@doc-wallet/types";
 import { StatusBar } from "expo-status-bar";
@@ -72,14 +72,21 @@ export default function App() {
 
   const activeMode = screen.mode ?? "local";
   const filteredCategories = useMemo(() => {
-    if (!search.trim()) return visibleCategories;
+    const planScopedCategories =
+      activeMode === "local"
+        ? visibleCategories.filter((category) =>
+            BASIC_GROUP_CATEGORIES.includes(category.id as (typeof BASIC_GROUP_CATEGORIES)[number])
+          )
+        : visibleCategories;
+
+    if (!search.trim()) return planScopedCategories;
 
     const query = search.trim().toLowerCase();
-    return visibleCategories.filter((category) => {
+    return planScopedCategories.filter((category) => {
       const text = `${category.title} ${category.subtitle}`.toLowerCase();
       return text.includes(query) || groupTemplates(category.id).some((template) => template.title.toLowerCase().includes(query));
     });
-  }, [search]);
+  }, [activeMode, search]);
 
   const category = screen.name === "category"
     ? prototypeSnapshot.categories.find((entry) => entry.id === screen.categoryId) ?? null
@@ -115,10 +122,9 @@ export default function App() {
         <ScrollView contentContainerStyle={styles.container}>
           <View style={styles.hero}>
             <Text style={styles.eyebrow}>Step {screen.step + 1} of 3</Text>
-            <Text style={styles.title}>Build the wallet before the cloud.</Text>
+            <Text style={styles.title}>Every account starts with login.</Text>
             <Text style={styles.lede}>
-              This prototype now starts where the product starts: choose your storage mode,
-              understand the tradeoff, and then secure access with PIN and biometrics.
+              Choose the access tier, understand the boundary, and then secure the account with PIN and biometrics.
             </Text>
           </View>
 
@@ -126,24 +132,23 @@ export default function App() {
             <View style={styles.sheet}>
               <Text style={styles.sectionTitle}>Choose your setup</Text>
               <Text style={styles.sheetCopy}>
-                Local-only keeps encrypted copies on this phone. Cloud Backup adds restore,
-                web access, and trusted-device recovery.
+                Free Basic covers the essential document group behind login. Premium expands to the broader cloud-backed workspace with restore and web access.
               </Text>
 
               <Pressable
                 style={[styles.choiceCard, screen.mode === "local" && styles.choiceCardActive]}
                 onPress={() => selectMode("local")}
               >
-                <Text style={styles.choiceTitle}>Local-only free wallet</Text>
-                <Text style={styles.choiceCopy}>Nothing uploads. If the phone is lost or reset, your documents may be unrecoverable.</Text>
+                <Text style={styles.choiceTitle}>Free Basic</Text>
+                <Text style={styles.choiceCopy}>Login required, core identity records first, and a tighter cloud-backed limit for the basic group.</Text>
               </Pressable>
 
               <Pressable
                 style={[styles.choiceCard, screen.mode === "cloud" && styles.choiceCardActive]}
                 onPress={() => selectMode("cloud")}
               >
-                <Text style={styles.choiceTitle}>Cloud Backup</Text>
-                <Text style={styles.choiceCopy}>Encrypted backup, restore on a new device, web portal, and remote lock.</Text>
+                <Text style={styles.choiceTitle}>Premium</Text>
+                <Text style={styles.choiceCopy}>Encrypted backup, restore on a new device, the full web portal, and broader document groups.</Text>
               </Pressable>
             </View>
           ) : null}
@@ -169,8 +174,8 @@ export default function App() {
             <View style={styles.sheet}>
               <Text style={styles.sectionTitle}>Read the warnings</Text>
               <View style={styles.warningCard}>
-                <Text style={styles.warningTitle}>Local-only warning</Text>
-                <Text style={styles.warningCopy}>If this phone is lost, stolen, damaged, or reset, documents in local-only mode may not be recoverable.</Text>
+                <Text style={styles.warningTitle}>Account recovery warning</Text>
+                <Text style={styles.warningCopy}>Email-based account recovery should exist for every user, but document recovery promises must stay honest about the actual encryption design.</Text>
               </View>
               <View style={styles.warningCard}>
                 <Text style={styles.warningTitle}>Legal warning</Text>
@@ -200,7 +205,7 @@ export default function App() {
         <ScrollView contentContainerStyle={styles.container}>
           <View style={styles.walletHero}>
             <View>
-              <Text style={styles.eyebrow}>{activeMode === "cloud" ? "Cloud Backup" : "Local-only"}</Text>
+              <Text style={styles.eyebrow}>{activeMode === "cloud" ? "Premium" : "Free Basic"}</Text>
               <Text style={styles.walletTitle}>When life asks for documents, this is where they are.</Text>
             </View>
             <View style={styles.heroActions}>
@@ -208,6 +213,14 @@ export default function App() {
                 <Text style={styles.addButtonText}>+ Add document</Text>
               </Pressable>
             </View>
+          </View>
+
+          <View style={styles.banner}>
+            <Text style={styles.bannerText}>
+              {activeMode === "cloud"
+                ? "Premium unlocks the broader cloud-backed workspace and recovery-focused features."
+                : "Free Basic stays login-backed and focused on the core document group."}
+            </Text>
           </View>
 
           <TextInput

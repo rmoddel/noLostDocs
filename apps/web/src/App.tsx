@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { prototypeSnapshot } from "@doc-wallet/config";
+import { FREE_PLAN_DOCUMENT_LIMIT, prototypeSnapshot } from "@doc-wallet/config";
 import { createDocWalletSupabaseClient } from "@doc-wallet/supabase";
 import type { CategoryId, DeviceRecord, DocumentStatus, DocumentTemplate } from "@doc-wallet/types";
 
@@ -33,6 +33,24 @@ type DeviceActionState = {
   loading: boolean;
   message: string | null;
 };
+
+type ProtectedAction = "preview" | "download";
+type DocumentAccessState = "available" | "reauth-required" | "restricted" | "session-expired";
+
+type ProtectedActionState = {
+  loading: boolean;
+  message: string | null;
+};
+
+type AccountPlan = "free" | "premium";
+
+type DashboardPreferenceRow = {
+  category_key: string;
+  is_visible: boolean;
+  sort_order: number | null;
+};
+
+const DASHBOARD_PREFS_STORAGE_KEY = "nolostdocs.dashboard.hidden-groups";
 
 const launcherGroups: LauncherGroup[] = [
   {
@@ -70,6 +88,109 @@ const trustStatements = [
   "Web access is an explicit cloud-backed feature. Local-only behavior is not implied here.",
   "Large category cards lead the experience. Document buttons stay secondary and status-aware."
 ];
+
+const accessStateTone: Record<DocumentAccessState, string> = {
+  available: "Authorized now",
+  "reauth-required": "Re-check required",
+  restricted: "Restricted",
+  "session-expired": "Session expired"
+};
+
+function resolvePlan(profilePlan: string | null | undefined, cloudEnabled: boolean | null | undefined) {
+  return profilePlan === "premium" || cloudEnabled ? "premium" : "free";
+}
+
+function allowedGroupIdsForPlan(plan: AccountPlan): LauncherGroupId[] {
+  return plan === "premium" ? launcherGroups.map((group) => group.id) : ["basic"];
+}
+
+function getPlanLabel(plan: AccountPlan) {
+  return plan === "premium" ? "Premium" : "Free Basic";
+}
+
+function isLauncherGroupId(value: string): value is LauncherGroupId {
+  return launcherGroups.some((group) => group.id === value);
+}
+
+function readStoredHiddenGroups() {
+  if (typeof window === "undefined") {
+    return [] as LauncherGroupId[];
+  }
+
+  const raw = window.localStorage.getItem(DASHBOARD_PREFS_STORAGE_KEY);
+
+  if (!raw) {
+    return [] as LauncherGroupId[];
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((value): value is LauncherGroupId => typeof value === "string" && isLauncherGroupId(value)) : [];
+  } catch {
+    return [] as LauncherGroupId[];
+  }
+}
+
+function writeStoredHiddenGroups(hiddenGroupIds: LauncherGroupId[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(DASHBOARD_PREFS_STORAGE_KEY, JSON.stringify(hiddenGroupIds));
+}
+
+function getDocumentAccessState(template: DocumentTemplate): DocumentAccessState {
+  if (template.status === "uploaded") return "available";
+  if (template.status === "expiring-soon") return "reauth-required";
+  if (template.status === "expired") return "session-expired";
+  return "restricted";
+}
+
+function getDocumentCompleteness(template: DocumentTemplate) {
+  return template.status === "uploaded" ? "Complete" : "Needs attention";
+}
+
+function formatExpiration(template: DocumentTemplate) {
+  if (!template.expiresAt) {
+    return "No tracked expiration";
+  }
+
+  return new Date(`${template.expiresAt}T12:00:00Z`).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+function buildAccessMessage(action: ProtectedAction, template: DocumentTemplate) {
+  const noun = action === "preview" ? "preview" : "download";
+  const accessState = getDocumentAccessState(template);
+
+  if (accessState === "restricted") {
+    return `${template.title} is missing, so ${noun} access is restricted until the record is completed.`;
+  }
+
+  if (accessState === "reauth-required") {
+    return `${template.title} needs a fresh authorization check before ${noun} access because it is close to expiring.`;
+  }
+
+  if (accessState === "session-expired") {
+    return `${template.title} requires a renewed session or updated file before ${noun} access can continue.`;
+  }
+
+  return action === "preview"
+    ? `${template.title} passed the placeholder authorization check. A short-lived preview would open here.`
+    : `${template.title} passed the placeholder authorization check. A short-lived download would be issued here.`;
+}
+
+function getPreferencePayload(hiddenGroupIds: LauncherGroupId[], userId: string) {
+  return launcherGroups.map((group, index) => ({
+    user_id: userId,
+    category_key: group.id,
+    is_visible: !hiddenGroupIds.includes(group.id),
+    sort_order: index
+  }));
+}
 
 function normalizeDeviceRow(row: Record<string, unknown>): DeviceRecord {
   return {
@@ -117,6 +238,15 @@ export function App() {
   const [devices, setDevices] = useState<DeviceRecord[]>(prototypeSnapshot.devices);
   const [devicesLoading, setDevicesLoading] = useState(false);
   const [deviceAction, setDeviceAction] = useState<DeviceActionState>({ loading: false, message: null });
+  const [accountPlan, setAccountPlan] = useState<AccountPlan>("free");
+  const [accountLoading, setAccountLoading] = useState(false);
+  const [accountMessage, setAccountMessage] = useState<string | null>(null);
+  const [hiddenGroupIds, setHiddenGroupIds] = useState<LauncherGroupId[]>(() => readStoredHiddenGroups());
+  const [preferencesLoading, setPreferencesLoading] = useState(false);
+  const [preferenceMessage, setPreferenceMessage] = useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [protectedAction, setProtectedAction] = useState<ProtectedActionState>({ loading: false, message: null });
+  const [showAccessExplainer, setShowAccessExplainer] = useState(false);
 
   useEffect(() => {
     const onPopState = () => setRoute(normalizeRoute(window.location.pathname));
@@ -164,6 +294,32 @@ export function App() {
     void loadDevices();
   }, [session]);
 
+  useEffect(() => {
+    if (!configured || !session) {
+      const storedHiddenGroups = readStoredHiddenGroups();
+      setHiddenGroupIds(storedHiddenGroups);
+      setAccountPlan("free");
+      return;
+    }
+
+    void loadAccountPlan();
+    void loadVisibilityPreferences();
+  }, [session]);
+
+  const allowedGroupIds = useMemo(() => allowedGroupIdsForPlan(accountPlan), [accountPlan]);
+  const visibleGroups = useMemo(
+    () => launcherGroups.filter((group) => allowedGroupIds.includes(group.id) && !hiddenGroupIds.includes(group.id)),
+    [allowedGroupIds, hiddenGroupIds]
+  );
+  const hiddenGroups = useMemo(
+    () => launcherGroups.filter((group) => allowedGroupIds.includes(group.id) && hiddenGroupIds.includes(group.id)),
+    [allowedGroupIds, hiddenGroupIds]
+  );
+  const lockedGroups = useMemo(
+    () => launcherGroups.filter((group) => !allowedGroupIds.includes(group.id)),
+    [allowedGroupIds]
+  );
+
   function navigate(nextRoute: AppRoute) {
     if (window.location.pathname !== nextRoute) {
       window.history.pushState({}, "", nextRoute);
@@ -190,6 +346,109 @@ export function App() {
     }
 
     setDevices((data ?? []).map((row) => normalizeDeviceRow(row as Record<string, unknown>)));
+  }
+
+  async function loadAccountPlan() {
+    if (!configured || !session) return;
+
+    setAccountLoading(true);
+    setAccountMessage(null);
+
+    const { error: upsertError } = await client.from("profiles").upsert(
+      {
+        id: session.user.id,
+        email: session.user.email ?? null,
+        plan: "free",
+        cloud_enabled: false
+      },
+      { onConflict: "id" }
+    );
+
+    if (upsertError) {
+      setAccountPlan("free");
+      setAccountLoading(false);
+      setAccountMessage("Using Free Basic plan locally until profile sync is available.");
+      return;
+    }
+
+    const [{ data: profile, error: profileError }, { data: subscriptions, error: subscriptionError }] = await Promise.all([
+      client.from("profiles").select("plan, cloud_enabled").eq("id", session.user.id).maybeSingle(),
+      client.from("subscriptions").select("plan, status").eq("user_id", session.user.id)
+    ]);
+
+    setAccountLoading(false);
+
+    if (profileError || subscriptionError) {
+      setAccountPlan("free");
+      setAccountMessage("Using Free Basic plan until subscription state is available.");
+      return;
+    }
+
+    const activePremium = (subscriptions ?? []).some(
+      (subscription) => subscription.plan === "premium" && ["active", "trialing"].includes(subscription.status ?? "")
+    );
+    const plan = activePremium ? "premium" : resolvePlan(profile?.plan, profile?.cloud_enabled);
+    setAccountPlan(plan);
+  }
+
+  async function loadVisibilityPreferences() {
+    if (!configured || !session) return;
+
+    setPreferencesLoading(true);
+    setPreferenceMessage(null);
+
+    const { data, error } = await client
+      .from("dashboard_category_preferences")
+      .select("category_key, is_visible, sort_order")
+      .order("sort_order", { ascending: true });
+
+    setPreferencesLoading(false);
+
+    if (error) {
+      setPreferenceMessage("Using local dashboard visibility until Supabase preferences are available.");
+      return;
+    }
+
+    const hidden = (data ?? [])
+      .filter((row) => !((row as DashboardPreferenceRow).is_visible ?? true))
+      .map((row) => String((row as DashboardPreferenceRow).category_key))
+      .filter(isLauncherGroupId);
+
+    setHiddenGroupIds(hidden);
+    writeStoredHiddenGroups(hidden);
+  }
+
+  async function handleGroupVisibility(groupId: LauncherGroupId, nextVisible: boolean) {
+    const nextHidden = nextVisible
+      ? hiddenGroupIds.filter((id) => id !== groupId)
+      : hiddenGroupIds.includes(groupId)
+        ? hiddenGroupIds
+        : [...hiddenGroupIds, groupId];
+
+    if (!nextVisible && launcherGroups.length - nextHidden.length === 0) {
+      setPreferenceMessage("Keep at least one category visible on the dashboard.");
+      return;
+    }
+
+    setHiddenGroupIds(nextHidden);
+    writeStoredHiddenGroups(nextHidden);
+    setPreferenceMessage(nextVisible ? "Category restored to the dashboard." : "Category hidden from the dashboard.");
+
+    if (!configured || !session) {
+      return;
+    }
+
+    setPreferencesLoading(true);
+
+    const { error } = await client
+      .from("dashboard_category_preferences")
+      .upsert(getPreferencePayload(nextHidden, session.user.id), { onConflict: "user_id,category_key" });
+
+    setPreferencesLoading(false);
+
+    if (error) {
+      setPreferenceMessage("Saved locally. Connect the dashboard preferences table to persist this account-wide.");
+    }
   }
 
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
@@ -245,6 +504,25 @@ export function App() {
     setDevices(prototypeSnapshot.devices);
     setAuthMessage(error ? error.message : "Signed out.");
     navigate("/");
+  }
+
+  async function logProtectedAction(action: ProtectedAction, template: DocumentTemplate) {
+    if (!configured || !session) {
+      return;
+    }
+
+    await client.functions.invoke("audit-log", {
+      body: {
+        action: `${action}-document`,
+        resourceType: "document-template",
+        resourceId: template.id,
+        metadata: {
+          title: template.title,
+          category: template.category,
+          accessState: getDocumentAccessState(template)
+        }
+      }
+    });
   }
 
   async function handleRegisterBrowser() {
@@ -306,10 +584,60 @@ export function App() {
     });
   }
 
+  async function handleProtectedAction(action: ProtectedAction, template: DocumentTemplate) {
+    const accessState = getDocumentAccessState(template);
+    const baseMessage = buildAccessMessage(action, template);
+
+    if (accessState !== "available") {
+      setProtectedAction({ loading: false, message: baseMessage });
+      await logProtectedAction(action, template);
+      return;
+    }
+
+    if (action === "preview") {
+      setProtectedAction({ loading: false, message: baseMessage });
+      await logProtectedAction(action, template);
+      return;
+    }
+
+    if (!configured || !session) {
+      setProtectedAction({
+        loading: false,
+        message: `${baseMessage} Connect Supabase to replace this placeholder with a live signed download.`
+      });
+      return;
+    }
+
+    setProtectedAction({ loading: true, message: null });
+
+    const { data, error } = await client.functions.invoke("create-signed-download", {
+      body: {
+        documentId: template.id,
+        documentTitle: template.title
+      }
+    });
+
+    if (error) {
+      setProtectedAction({ loading: false, message: error.message });
+      return;
+    }
+
+    await logProtectedAction(action, template);
+    const responseMessage =
+      typeof data?.message === "string"
+        ? data.message
+        : "Authorized download placeholder completed. Replace this with a real signed URL flow when connected.";
+    setProtectedAction({ loading: false, message: responseMessage });
+  }
+
   const selectedGroup = findLauncherGroup(selectedGroupId);
   const selectedGroupDocs = useMemo(
     () => getGroupTemplates(selectedGroup, prototypeSnapshot.templates),
     [selectedGroup]
+  );
+  const selectedDocument = useMemo(
+    () => selectedGroupDocs.find((template) => template.id === selectedDocumentId) ?? selectedGroupDocs[0] ?? null,
+    [selectedDocumentId, selectedGroupDocs]
   );
 
   const uploadedCount = prototypeSnapshot.templates.filter((template) => template.status === "uploaded").length;
@@ -322,6 +650,27 @@ export function App() {
     (template) => template.status === "expiring-soon" || template.status === "missing"
   );
   const activeDeviceCount = devices.filter((device) => !device.locked).length;
+
+  useEffect(() => {
+    if (!visibleGroups.length) {
+      return;
+    }
+
+    if (hiddenGroupIds.includes(selectedGroupId) || !allowedGroupIds.includes(selectedGroupId)) {
+      setSelectedGroupId(visibleGroups[0].id);
+    }
+  }, [allowedGroupIds, hiddenGroupIds, selectedGroupId, visibleGroups]);
+
+  useEffect(() => {
+    if (!selectedGroupDocs.length) {
+      setSelectedDocumentId(null);
+      return;
+    }
+
+    if (!selectedDocumentId || !selectedGroupDocs.some((template) => template.id === selectedDocumentId)) {
+      setSelectedDocumentId(selectedGroupDocs[0].id);
+    }
+  }, [selectedDocumentId, selectedGroupDocs]);
 
   return (
     <main className="app-shell">
@@ -405,23 +754,38 @@ export function App() {
       {route === "/" && session ? (
         <DashboardHome
           activeDeviceCount={activeDeviceCount}
+          accountLoading={accountLoading}
+          accountMessage={accountMessage}
+          accountPlan={accountPlan}
           deviceAction={deviceAction}
           devices={devices}
           devicesLoading={devicesLoading}
+          hiddenGroups={hiddenGroups}
+          lockedGroups={lockedGroups}
           missingCount={missingCount}
           nextActionDocs={nextActionDocs}
           onDeviceLock={handleDeviceLock}
+          onDocumentSelect={setSelectedDocumentId}
           onGroupSelect={setSelectedGroupId}
+          onGroupVisibilityChange={handleGroupVisibility}
+          onProtectedAction={handleProtectedAction}
           onRefreshDevices={loadDevices}
           onRegisterBrowser={handleRegisterBrowser}
+          preferenceMessage={preferenceMessage}
+          preferencesLoading={preferencesLoading}
+          protectedAction={protectedAction}
+          selectedDocument={selectedDocument}
           selectedGroup={selectedGroup}
           selectedGroupDocs={selectedGroupDocs}
           session={session}
           sessionLoading={sessionLoading}
+          showAccessExplainer={showAccessExplainer}
           signedIn={Boolean(session)}
           savedInSelectedGroup={savedInSelectedGroup}
+          setShowAccessExplainer={setShowAccessExplainer}
           uploadedCount={uploadedCount}
           urgentCount={urgentCount}
+          visibleGroups={visibleGroups}
         />
       ) : null}
     </main>
@@ -624,45 +988,78 @@ function PublicHome({
 
 type DashboardHomeProps = {
   activeDeviceCount: number;
+  accountLoading: boolean;
+  accountMessage: string | null;
+  accountPlan: AccountPlan;
   deviceAction: DeviceActionState;
   devices: DeviceRecord[];
   devicesLoading: boolean;
+  hiddenGroups: LauncherGroup[];
+  lockedGroups: LauncherGroup[];
   missingCount: number;
   nextActionDocs: DocumentTemplate[];
   onDeviceLock: (deviceId: string, shouldLock: boolean) => Promise<void>;
+  onDocumentSelect: (id: string) => void;
   onGroupSelect: (id: LauncherGroupId) => void;
+  onGroupVisibilityChange: (groupId: LauncherGroupId, nextVisible: boolean) => Promise<void>;
+  onProtectedAction: (action: ProtectedAction, template: DocumentTemplate) => Promise<void>;
   onRefreshDevices: () => Promise<void>;
   onRegisterBrowser: () => Promise<void>;
+  preferenceMessage: string | null;
+  preferencesLoading: boolean;
+  protectedAction: ProtectedActionState;
+  selectedDocument: DocumentTemplate | null;
   savedInSelectedGroup: number;
   selectedGroup: LauncherGroup;
   selectedGroupDocs: DocumentTemplate[];
   session: Session;
   sessionLoading: boolean;
+  showAccessExplainer: boolean;
   signedIn: boolean;
+  setShowAccessExplainer: (show: boolean) => void;
   uploadedCount: number;
   urgentCount: number;
+  visibleGroups: LauncherGroup[];
 };
 
 function DashboardHome({
   activeDeviceCount,
+  accountLoading,
+  accountMessage,
+  accountPlan,
   deviceAction,
   devices,
   devicesLoading,
+  hiddenGroups,
+  lockedGroups,
   missingCount,
   nextActionDocs,
   onDeviceLock,
+  onDocumentSelect,
   onGroupSelect,
+  onGroupVisibilityChange,
+  onProtectedAction,
   onRefreshDevices,
   onRegisterBrowser,
+  preferenceMessage,
+  preferencesLoading,
+  protectedAction,
+  selectedDocument,
   savedInSelectedGroup,
   selectedGroup,
   selectedGroupDocs,
   session,
   sessionLoading,
+  showAccessExplainer,
   signedIn,
+  setShowAccessExplainer,
   uploadedCount,
-  urgentCount
+  urgentCount,
+  visibleGroups
 }: DashboardHomeProps) {
+  const accessState = selectedDocument ? getDocumentAccessState(selectedDocument) : null;
+  const freePlanRemainingSlots = Math.max(FREE_PLAN_DOCUMENT_LIMIT - uploadedCount, 0);
+
   return (
     <>
       <section className="dashboard-hero">
@@ -670,13 +1067,14 @@ function DashboardHome({
           <p className="eyebrow">Dashboard</p>
           <h1>Your document launcher is now the home screen.</h1>
           <p className="lede">
-            Categories are the primary navigation layer. Document actions stay smaller, status-aware, and easy to scan
-            without competing with the main grid.
+            {accountPlan === "premium"
+              ? "Premium keeps the full cloud-backed workspace open: all groups, protected access, and recovery-oriented account controls."
+              : "Free Basic keeps login and core identity records available while reserving broader cloud-backed groups and capacity for premium."}
           </p>
         </div>
 
         <div className="hero-summary-card">
-          <p className="eyebrow">Signed in</p>
+          <p className="eyebrow">{accountLoading ? "Checking account" : getPlanLabel(accountPlan)}</p>
           <h2>{session.user.email}</h2>
           <div className="summary-metrics">
             <div className="summary-metric">
@@ -692,6 +1090,12 @@ function DashboardHome({
               <span>urgent</span>
             </div>
           </div>
+          <p className="section-support">
+            {accountPlan === "premium"
+              ? "Email recovery stays enabled for the account, and premium keeps the non-basic groups unlocked."
+              : `Free Basic currently targets the core group and ${FREE_PLAN_DOCUMENT_LIMIT} saved cloud documents before upgrade is required.`}
+          </p>
+          {accountMessage ? <p className="inline-feedback">{accountMessage}</p> : null}
         </div>
       </section>
 
@@ -702,11 +1106,13 @@ function DashboardHome({
               <p className="eyebrow">Categories</p>
               <h2>Larger tiles lead the interaction.</h2>
             </div>
-            <p className="section-support">Mobile uses a 2-up grid, then expands to a cleaner desktop grid without stretching the cards into soup.</p>
+            <p className="section-support">
+              Mobile uses a 2-up grid, then expands to a cleaner desktop grid without stretching the cards into soup.
+            </p>
           </div>
 
           <div className="launcher-grid">
-            {launcherGroups.map((group) => (
+            {visibleGroups.map((group) => (
               <button
                 className={`launcher-card app-card${selectedGroup.id === group.id ? " active" : ""}`}
                 key={group.id}
@@ -719,6 +1125,68 @@ function DashboardHome({
               </button>
             ))}
           </div>
+
+          <div className="side-card visibility-card">
+            <div className="section-heading compact">
+              <div>
+                <p className="eyebrow">Category visibility</p>
+                <h3>{visibleGroups.length} visible groups</h3>
+              </div>
+              <span className="mini-pill">{preferencesLoading ? "Saving..." : "Dashboard scope"}</span>
+            </div>
+            <div className="visibility-pile">
+              {visibleGroups.map((group) => (
+                <button
+                  className="visibility-chip"
+                  key={group.id}
+                  onClick={() => void onGroupVisibilityChange(group.id, false)}
+                  type="button"
+                >
+                  Hide {group.title}
+                </button>
+              ))}
+            </div>
+            {hiddenGroups.length ? (
+              <>
+                <p className="section-support">Hidden groups stay recoverable from this dashboard.</p>
+                <div className="visibility-pile muted">
+                  {hiddenGroups.map((group) => (
+                    <button
+                      className="visibility-chip muted"
+                      key={group.id}
+                      onClick={() => void onGroupVisibilityChange(group.id, true)}
+                      type="button"
+                    >
+                      Show {group.title}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
+            {preferenceMessage ? <p className="inline-feedback">{preferenceMessage}</p> : null}
+          </div>
+
+          {lockedGroups.length ? (
+            <div className="side-card upgrade-card">
+              <div className="section-heading compact">
+                <div>
+                  <p className="eyebrow">Premium boundary</p>
+                  <h3>{lockedGroups.length} groups are reserved for premium.</h3>
+                </div>
+                <span className="mini-pill">Upgrade path</span>
+              </div>
+              <div className="visibility-pile muted">
+                {lockedGroups.map((group) => (
+                  <div className="visibility-chip muted locked" key={group.id}>
+                    Unlock {group.title}
+                  </div>
+                ))}
+              </div>
+              <p className="section-support">
+                Premium expands the dashboard beyond the Basic group and increases cloud-backed document capacity.
+              </p>
+            </div>
+          ) : null}
 
           <div className="side-card selected-group-card">
             <div className="section-heading compact">
@@ -733,7 +1201,14 @@ function DashboardHome({
 
             <div className="document-action-list">
               {selectedGroupDocs.map((template) => (
-                <button className={`document-action status-${template.status}`} key={template.id} type="button">
+                <button
+                  className={`document-action status-${template.status}${
+                    selectedDocument?.id === template.id ? " selected" : ""
+                  }`}
+                  key={template.id}
+                  onClick={() => onDocumentSelect(template.id)}
+                  type="button"
+                >
                   <div>
                     <strong>{template.title}</strong>
                     <p>{template.note ?? template.helper}</p>
@@ -743,9 +1218,107 @@ function DashboardHome({
               ))}
             </div>
           </div>
+
+          {selectedDocument ? (
+            <div className="side-card detail-card">
+              <div className="section-heading compact">
+                <div>
+                  <p className="eyebrow">Document detail</p>
+                  <h3>{selectedDocument.title}</h3>
+                </div>
+                <span className={`status-pill access-${accessState}`}>{accessStateTone[accessState ?? "restricted"]}</span>
+              </div>
+
+              <div className="detail-grid">
+                <div className="detail-stat">
+                  <span>Status</span>
+                  <strong>{statusTone[selectedDocument.status]}</strong>
+                </div>
+                <div className="detail-stat">
+                  <span>Expiration</span>
+                  <strong>{formatExpiration(selectedDocument)}</strong>
+                </div>
+                <div className="detail-stat">
+                  <span>Completeness</span>
+                  <strong>{getDocumentCompleteness(selectedDocument)}</strong>
+                </div>
+              </div>
+
+              <p className="section-support">{selectedDocument.note ?? selectedDocument.helper}</p>
+
+              <div className="button-row">
+                <button
+                  className="button primary small"
+                  disabled={protectedAction.loading}
+                  onClick={() => void onProtectedAction("preview", selectedDocument)}
+                  type="button"
+                >
+                  Authorized preview
+                </button>
+                <button
+                  className="button secondary small"
+                  disabled={protectedAction.loading}
+                  onClick={() => void onProtectedAction("download", selectedDocument)}
+                  type="button"
+                >
+                  Authorized download
+                </button>
+                <button
+                  className="button secondary small"
+                  onClick={() => setShowAccessExplainer(!showAccessExplainer)}
+                  type="button"
+                >
+                  Why protected?
+                </button>
+              </div>
+
+              {showAccessExplainer ? (
+                <div className="access-explainer">
+                  <strong>Web access stays scoped.</strong>
+                  <p>
+                    Metadata browsing is always lighter than file access. Protected actions stay short-lived, can require
+                    a fresh check, and are intended to be auditable.
+                  </p>
+                </div>
+              ) : null}
+
+              {protectedAction.message ? <p className="inline-feedback">{protectedAction.message}</p> : null}
+            </div>
+          ) : null}
         </section>
 
         <aside className="dashboard-side">
+          <div className="side-card">
+            <div className="section-heading compact">
+              <div>
+                <p className="eyebrow">Plan status</p>
+                <h3>{accountPlan === "premium" ? "Premium access is active." : "Free Basic is active."}</h3>
+              </div>
+            </div>
+            <ul className="note-list">
+              <li>
+                <strong>Login stays required for every account.</strong>
+                <span>Password reset and magic-link recovery are part of the standard entry path.</span>
+              </li>
+              <li>
+                <strong>{accountPlan === "premium" ? "All groups unlocked." : "Only the Basic group is unlocked."}</strong>
+                <span>
+                  {accountPlan === "premium"
+                    ? "Medical, professional, and family records remain available in the same signed-in dashboard."
+                    : "Upgrade to premium to unlock medical, professional, and family document groups."}
+                </span>
+              </li>
+              <li>
+                <strong>
+                  {accountPlan === "premium"
+                    ? "Premium quota policy is higher."
+                    : `${freePlanRemainingSlots} of ${FREE_PLAN_DOCUMENT_LIMIT} free cloud slots remain.`}
+                </strong>
+                <span>Upload enforcement now belongs to the backend edge function rather than just UI wording.</span>
+              </li>
+            </ul>
+          </div>
+
           <div className="side-card">
             <div className="section-heading compact">
               <div>
@@ -760,6 +1333,29 @@ function DashboardHome({
                   <span>{template.note ?? template.helper}</span>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          <div className="side-card">
+            <div className="section-heading compact">
+              <div>
+                <p className="eyebrow">Access trail</p>
+                <h3>Protected actions stay auditable.</h3>
+              </div>
+            </div>
+            <ul className="note-list">
+              <li>
+                <strong>Metadata is browseable.</strong>
+                <span>Category and status review should never imply unrestricted file ownership on the web.</span>
+              </li>
+              <li>
+                <strong>Protected actions are short-lived.</strong>
+                <span>Preview and download should re-check access instead of behaving like permanent public links.</span>
+              </li>
+              <li>
+                <strong>Suspicious patterns should be reviewable.</strong>
+                <span>The audit-log function remains the code-owned place to centralize those sensitive events.</span>
+              </li>
             </ul>
           </div>
 

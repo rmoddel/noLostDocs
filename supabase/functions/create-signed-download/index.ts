@@ -5,11 +5,17 @@ Deno.serve(async (request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const payload = await request.json().catch(() => ({}));
+  const documentTitle =
+    typeof payload?.documentTitle === "string" && payload.documentTitle.length > 0
+      ? payload.documentTitle
+      : "Document";
+
   return Response.json(
     {
       ok: true,
       function: "create-signed-download",
-      message: "Placeholder Edge Function. Verify access and return short-lived download access here."
+      message: `${documentTitle} cleared the placeholder authorization check. Replace this response with a real short-lived signed URL.`
     },
     { headers: corsHeaders }
   );

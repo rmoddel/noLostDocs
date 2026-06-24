@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 3 completed; autonomous can advance to Phase 4
-last_updated: "2026-06-23T16:10:00.000Z"
-last_activity: 2026-06-23 -- Implemented locked-preview launcher home, public routes, and category-first signed-in dashboard
+stopped_at: Phase 5 completed; autonomous is blocked on live hardening and release-path inputs for Phase 6
+last_updated: "2026-06-23T23:15:00.000Z"
+last_activity: 2026-06-23 -- Selected AWS Amplify as the deployment target and added repo deployment config; remaining Phase 6 work is live hardening and launch verification
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 50
+  completed_phases: 5
+  total_plans: 14
+  completed_plans: 14
+  percent: 83
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-18)
 
 **Core value:** No more lost docs. Everything the user needs in one app.
-**Current focus:** Phase 04 — cloud-document-dashboard
+**Current focus:** Phase 06 — hardening-and-launch-readiness
 
 ## Current Position
 
-Phase: 04 (cloud-document-dashboard) — READY TO PLAN
+Phase: 06 (hardening-and-launch-readiness) — BLOCKED
 Plan: 0 of 3
-Status: Phase 03 complete; Phase 04 next
-Last activity: 2026-06-19 -- Phase 03 completed with auth, device visibility, and remote-lock scaffolding
+Status: Phase 05 complete; Phase 06 next
+Last activity: 2026-06-23 -- AWS Amplify is now the deployment target and repo build config is in place; remaining launch-readiness work depends on live validation
 
-Progress: [█████░░░░░] 50%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9
+- Total plans completed: 14
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -47,6 +47,8 @@ Progress: [█████░░░░░] 50%
 | 01 | 3 | 40 min | 13 min |
 | 02 | 3 | 40 min | 13 min |
 | 03 | 3 | 42 min | 14 min |
+| 04 | 3 | - | - |
+| 05 | 2 | - | - |
 
 **Recent Trend:**
 
@@ -75,6 +77,8 @@ Recent decisions affecting current work:
 - [Phase 1]: UAT passed and the retroactive security audit closed the browser-credential and trust-messaging threats for the web-first shell.
 - [Phase 2]: The portal information architecture now centers on a sidebar, workspace, and support rail with explicit cloud-only policy messaging.
 - [Phase 3]: The web portal now has Supabase-backed sign-in scaffolding, trusted-device queries, and code-owned remote-lock edge functions with demo fallback.
+- [Phase 4]: The signed-in dashboard now preserves category-first hierarchy, supports persistent visible/hidden groups, and frames preview/download as authorized short-lived actions.
+- [Phase 5]: Every user now authenticates, Free Basic stays limited, premium unlocks broader groups, and backend upload quotas are enforced in code-owned functions.
 
 ### Pending Todos
 
@@ -82,10 +86,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Final free-tier limits are still open and should be resolved before subscription enforcement work.
-- Whether the encryption model is fully zero-knowledge remains undecided and affects recovery UX.
 - HIPAA positioning must remain excluded until legal and vendor readiness are verified.
-- Free-tier boundaries still need final product decisions before premium gating work hardens.
+- AWS Amplify is the chosen host, but the actual Amplify app/environment and release wiring still need to be created and validated.
 
 ## Deferred Items
 
@@ -97,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-23 16:10
-Stopped at: Phase 3 closed out; Phase 4 is next
+Last session: 2026-06-23 23:15
+Stopped at: Phase 5 closed out; Phase 6 is blocked pending live environment and release-path inputs
 Resume file: None

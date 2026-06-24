@@ -13,8 +13,8 @@ NoLostDocs now moves through a web-first execution path. The immediate sequence 
 - [x] **Phase 1: Brand, Positioning, and Web Experience** - Make the website feel premium, trustworthy, and unmistakably clear about what NoLostDocs is and is not.
 - [x] **Phase 2: Portal Information Architecture** - Deliver the core web portal structure for categories, document states, and cloud-only expectations.
 - [x] **Phase 3: Auth, Devices, and Recovery Controls** - Add account access, trusted devices, and lost-device control flows.
-- [ ] **Phase 4: Cloud Document Dashboard** - Show real cloud-backed document metadata, status, and secure access patterns.
-- [ ] **Phase 5: Premium Access and Billing Surface** - Make free versus premium boundaries and billing behavior coherent on the web.
+- [x] **Phase 4: Cloud Document Dashboard** - Show real cloud-backed document metadata, status, and secure access patterns.
+- [x] **Phase 5: Premium Access and Billing Surface** - Make free versus premium boundaries and billing behavior coherent on the web.
 - [ ] **Phase 6: Hardening and Launch Readiness** - Verify security promises, trust language, and production readiness before mobile resumes.
 
 ## Phase Details
@@ -83,9 +83,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Wire dashboard data and category listings.
-- [ ] 04-02: Add secure document detail and preview/download states.
-- [ ] 04-03: Reinforce access control and audit-aware UI flows.
+- [x] 04-01: Wire dashboard data and category listings.
+- [x] 04-02: Add secure document detail and preview/download states.
+- [x] 04-03: Reinforce access control and audit-aware UI flows.
 
 ### Phase 5: Plan Enforcement & Premium Access
 **Goal**: As a NoLostDocs account owner, I want to have premium access boundaries and billing state enforced consistently, so that web access, backup, and recovery features match the plan I actually have.
@@ -100,8 +100,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: Add subscriptions schema, Stripe webhook flow, and plan state sync.
-- [ ] 05-02: Enforce plan-based feature access, quotas, and upgrade messaging across web and mobile.
+- [x] 05-01: Add subscriptions schema, Stripe webhook flow, and plan state sync.
+- [x] 05-02: Enforce plan-based feature access, quotas, and upgrade messaging across web and mobile.
 
 ### Phase 6: Hardening, Audit, and Beta Readiness
 **Goal**: As the NoLostDocs team preparing for beta, I want to verify the platform's security promises, auditability, and abuse protections, so that we can launch with evidence instead of assumptions.
@@ -130,6 +130,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Brand, Positioning, and Web Experience | 3/3 | Complete | 2026-06-19 |
 | 2. Portal Information Architecture | 3/3 | Complete | 2026-06-19 |
 | 3. Auth, Devices, and Recovery Controls | 3/3 | Complete | 2026-06-19 |
-| 4. Cloud Document Dashboard | 0/3 | Not started | - |
-| 5. Plan Enforcement & Premium Access | 0/2 | Not started | - |
+| 4. Cloud Document Dashboard | 3/3 | Complete | 2026-06-23 |
+| 5. Plan Enforcement & Premium Access | 2/2 | Complete | 2026-06-23 |
 | 6. Hardening, Audit, and Beta Readiness | 0/3 | Not started | - |

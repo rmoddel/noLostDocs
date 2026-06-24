@@ -442,6 +442,11 @@ label {
   background: rgba(255, 255, 255, 0.72);
 }
 
+.document-action.selected {
+  border-color: rgba(35, 29, 27, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(35, 29, 27, 0.06);
+}
+
 .document-action strong {
   display: block;
   font-size: 0.93rem;
@@ -503,6 +508,93 @@ label {
 .status-expired {
   background: rgba(160, 64, 64, 0.12);
   color: var(--danger);
+}
+
+.status-pill.access-available {
+  background: rgba(24, 114, 75, 0.12);
+  color: var(--good);
+}
+
+.status-pill.access-reauth-required {
+  background: rgba(148, 97, 15, 0.12);
+  color: var(--warn);
+}
+
+.status-pill.access-restricted,
+.status-pill.access-session-expired {
+  background: rgba(160, 64, 64, 0.12);
+  color: var(--danger);
+}
+
+.visibility-card,
+.detail-card,
+.access-explainer {
+  display: grid;
+  gap: 16px;
+}
+
+.visibility-pile,
+.detail-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.visibility-pile {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.visibility-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--ink);
+  text-align: left;
+}
+
+.visibility-chip.locked {
+  border-style: dashed;
+  background: rgba(169, 93, 77, 0.08);
+  color: #8a4c40;
+}
+
+.visibility-chip.muted,
+.visibility-pile.muted .visibility-chip {
+  background: rgba(250, 242, 235, 0.84);
+  color: var(--muted);
+}
+
+.detail-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detail-stat {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.detail-stat span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.detail-stat strong,
+.access-explainer strong {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.access-explainer {
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(35, 29, 27, 0.08);
+  background: linear-gradient(180deg, rgba(255, 252, 248, 0.98), rgba(248, 241, 236, 0.92));
 }
 
 .auth-card,
@@ -666,7 +758,8 @@ label {
 
   .launcher-grid,
   .summary-metrics,
-  .trust-strip {
+  .trust-strip,
+  .detail-grid {
     grid-template-columns: 1fr;
   }
 
