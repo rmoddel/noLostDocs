@@ -1,0 +1,335 @@
+{
+  "project": "NoLostDocs",
+  "url": "https://nolostdocs.rmoddel.com/",
+  "audit_version": "2026-06-24",
+  "overall_assessment": {
+    "verdict": "The concept, logo direction, and color palette are usable, but the site must shift from decorative document brand to trusted utility for sensitive documents.",
+    "primary_problem": "The website does not clearly communicate trust, utility, security, and product specificity above the fold. The page also appears to expose little or no meaningful server-rendered/crawlable HTML content.",
+    "top_priority": "Make the homepage crawlable, specific, trust-building, and conversion-oriented."
+  },
+  "brand_tokens": {
+    "primary": "#231d1b",
+    "accent": "#a95d4d",
+    "background": "#f7f1ea",
+    "surface": "#ffffff",
+    "soft_accent": "rgba(169, 93, 77, 0.12)",
+    "border": "rgba(35, 29, 27, 0.12)",
+    "muted": "rgba(35, 29, 27, 0.66)",
+    "success": "#3f7f68"
+  },
+  "copy": {
+    "headline": "No more lost docs.",
+    "subheadline": "Securely store, organize, and find your important documents \u2014 license, insurance, registration, medical cards, and more \u2014 all in one place.",
+    "primary_cta": "Get Started",
+    "secondary_cta": "See how it works",
+    "disclaimer": "NoLostDocs helps you keep secure copies organized. Acceptance of digital copies depends on the situation, provider, agency, or law.",
+    "security_heading": "Built for documents you don\u2019t want floating around.",
+    "lost_phone_heading": "Lost your phone?",
+    "lost_phone_copy": "Lock your account from the web portal and protect your documents."
+  },
+  "priority_tasks": [
+    {
+      "id": "P0-001",
+      "title": "Expose crawlable homepage content",
+      "priority": "P0",
+      "type": "seo/ssr",
+      "problem": "The live site appears to expose little/no meaningful HTML content to non-browser fetchers.",
+      "implementation": [
+        "Ensure homepage is server-rendered or statically rendered in Next.js.",
+        "Render h1, subheadline, category cards, security section, and CTA in initial HTML.",
+        "Do not rely on client-only rendering for core marketing text."
+      ],
+      "acceptance_criteria": [
+        "curl -L https://nolostdocs.rmoddel.com/ returns visible text including 'No more lost docs.'",
+        "View-source contains h1 and meta tags.",
+        "No blank page for crawler-like user agents."
+      ]
+    },
+    {
+      "id": "P0-002",
+      "title": "Implement metadata and social unfurl",
+      "priority": "P0",
+      "type": "seo/unfurl",
+      "implementation": [
+        "Add Next.js metadata export for title, description, canonical, openGraph, twitter.",
+        "Add /og-image.png or dynamic OG route.",
+        "Add site.webmanifest, robots.txt, sitemap.xml."
+      ],
+      "acceptance_criteria": [
+        "Page title is 'NoLostDocs | No more lost docs. Everything you need in one app.'",
+        "Meta description exists and is under 160 chars.",
+        "og:title, og:description, og:image, twitter:card, twitter:image exist.",
+        "Unfurl works in WhatsApp/Slack/iMessage/LinkedIn-style previews."
+      ]
+    },
+    {
+      "id": "P0-003",
+      "title": "Fix above-the-fold clarity",
+      "priority": "P0",
+      "type": "ux/copy",
+      "implementation": [
+        "Hero headline: 'No more lost docs.'",
+        "Subheadline clearly explains secure document storage and examples.",
+        "Primary CTA: 'Get Started'. Secondary CTA: 'See how it works'.",
+        "Show visual product/dashboard mockup or document category cards."
+      ],
+      "acceptance_criteria": [
+        "Within 5 seconds, user understands what the app does.",
+        "Hero mentions concrete document examples.",
+        "CTA is visible without scrolling on desktop and mobile."
+      ]
+    },
+    {
+      "id": "P0-004",
+      "title": "Add clear trust/security section",
+      "priority": "P0",
+      "type": "trust/security-copy",
+      "implementation": [
+        "Add section: 'Built for documents you don\u2019t want floating around.'",
+        "Use specific claims only if implemented: private storage, secure login, cloud backup controls, remote account lock.",
+        "Avoid overclaims like 'military-grade' or 'bank-level' unless substantiated."
+      ],
+      "acceptance_criteria": [
+        "Security section appears on homepage.",
+        "No legally risky or technically unverified claims.",
+        "Users understand the difference between storage and legal document replacement."
+      ]
+    },
+    {
+      "id": "P1-001",
+      "title": "Add document category cards",
+      "priority": "P1",
+      "type": "ux/content",
+      "implementation": [
+        "Add cards for Personal, Driving, Medical, Business.",
+        "Each card lists 2-4 example document types.",
+        "Use consistent icon style matching the logo."
+      ],
+      "acceptance_criteria": [
+        "Cards are visible on homepage and/or dashboard.",
+        "Cards are tappable/clickable if part of app portal.",
+        "Examples include license, registration, insurance, medical cards."
+      ]
+    },
+    {
+      "id": "P1-002",
+      "title": "Add lost-phone story section",
+      "priority": "P1",
+      "type": "ux/trust",
+      "implementation": [
+        "Add a homepage section explaining remote account lock.",
+        "Do not imply recovery is possible for local-only data unless cloud backup is enabled.",
+        "Link to security or account settings page if available."
+      ],
+      "acceptance_criteria": [
+        "Section clearly says account can be locked from web portal.",
+        "Copy distinguishes local-only vs cloud backup behavior."
+      ]
+    },
+    {
+      "id": "P1-003",
+      "title": "Simplify logo usage in navbar",
+      "priority": "P1",
+      "type": "visual-design",
+      "implementation": [
+        "Use small icon mark + NoLostDocs wordmark in navbar.",
+        "Do not use full tagline in navbar.",
+        "Use 'Lost' in accent color #a95d4d; rest #231d1b."
+      ],
+      "acceptance_criteria": [
+        "Navbar logo remains readable at mobile sizes.",
+        "Icon is not visually muddy at 32px height.",
+        "Brown accent is controlled and not overused."
+      ]
+    }
+  ],
+  "recommended_information_architecture": [
+    {
+      "route": "/",
+      "purpose": "Public landing page"
+    },
+    {
+      "route": "/login",
+      "purpose": "Authentication"
+    },
+    {
+      "route": "/signup",
+      "purpose": "Account creation"
+    },
+    {
+      "route": "/dashboard",
+      "purpose": "Portal home with categories and recent docs"
+    },
+    {
+      "route": "/documents",
+      "purpose": "All documents/search"
+    },
+    {
+      "route": "/documents/[id]",
+      "purpose": "Secure document viewer/details"
+    },
+    {
+      "route": "/categories/[slug]",
+      "purpose": "Category document list"
+    },
+    {
+      "route": "/security",
+      "purpose": "Public security/trust page"
+    },
+    {
+      "route": "/privacy",
+      "purpose": "Privacy policy"
+    },
+    {
+      "route": "/settings/devices",
+      "purpose": "Device management and remote lock"
+    },
+    {
+      "route": "/settings/billing",
+      "purpose": "Subscription/billing"
+    }
+  ],
+  "homepage_sections": [
+    "Header/navbar",
+    "Hero with headline, subheadline, CTAs, product visual",
+    "Document category cards",
+    "How it works: upload/organize/find",
+    "Security/trust section",
+    "Lost-phone/remote-lock section",
+    "Legal/acceptance disclaimer",
+    "Final CTA",
+    "Footer with privacy/security links"
+  ],
+  "functionality_tests": [
+    {
+      "area": "Authentication",
+      "tests": [
+        "User can sign up with email and password.",
+        "User cannot access /dashboard while logged out.",
+        "User is redirected to dashboard after login.",
+        "Invalid login shows non-leaky error message.",
+        "Password reset flow sends email and accepts valid reset token.",
+        "Session persists across refresh but respects logout."
+      ]
+    },
+    {
+      "area": "Document upload",
+      "tests": [
+        "User can upload image/PDF document.",
+        "User can assign category and document type.",
+        "Upload rejects unsupported file types.",
+        "Upload rejects files above configured limit.",
+        "Upload failure shows clear retry message.",
+        "Uploaded document appears in category and recent docs."
+      ]
+    },
+    {
+      "area": "Document viewing",
+      "tests": [
+        "User can open own document.",
+        "User cannot open another user's document by guessing ID.",
+        "Viewer handles image, PDF, and unknown file gracefully.",
+        "Download/share buttons obey permissions and subscription tier.",
+        "Document metadata can be edited by owner only."
+      ]
+    },
+    {
+      "area": "Search and organization",
+      "tests": [
+        "Search finds documents by title/type/category.",
+        "Empty search state is useful.",
+        "Category filters work.",
+        "Recent docs sorts newest first.",
+        "Deleted/archived docs do not appear in normal lists."
+      ]
+    },
+    {
+      "area": "Remote lock",
+      "tests": [
+        "User can lock account/device from settings.",
+        "Locked device/session cannot access documents.",
+        "Remote lock revokes active sessions or blocks access on next request.",
+        "Unlock/re-authorize path is explicit and secure.",
+        "User receives lock confirmation notification/email if implemented."
+      ]
+    },
+    {
+      "area": "Local-only vs cloud",
+      "tests": [
+        "UI clearly marks when cloud backup is off.",
+        "UI clearly marks when cloud backup is on.",
+        "Web portal does not falsely show local-only mobile docs as cloud backed up.",
+        "Deleting cloud backup does not imply local deletion unless intended.",
+        "Upgrade flow explains what changes when enabling cloud backup."
+      ]
+    }
+  ],
+  "audit_tests": {
+    "seo": [
+      "curl homepage and assert core copy exists in HTML.",
+      "Validate title, description, canonical.",
+      "Validate Open Graph and Twitter tags.",
+      "Validate robots.txt returns 200.",
+      "Validate sitemap.xml returns 200 and includes homepage/security/privacy.",
+      "Run Lighthouse SEO score target >= 95."
+    ],
+    "accessibility": [
+      "Exactly one h1 on homepage.",
+      "All images have meaningful alt text or empty alt when decorative.",
+      "Buttons/links have accessible names.",
+      "Keyboard navigation works through nav, CTAs, upload controls, dashboard cards.",
+      "Focus states are visible.",
+      "Contrast ratio passes WCAG AA for text and CTAs.",
+      "Run axe checks with zero serious/critical issues."
+    ],
+    "performance": [
+      "Lighthouse Performance target >= 90 on desktop and >= 80 mobile initially.",
+      "Hero image optimized with next/image or static optimized asset.",
+      "No huge unused JS bundles for public landing page.",
+      "Fonts are optimized and do not block rendering unnecessarily.",
+      "Largest Contentful Paint target < 2.5s."
+    ],
+    "security": [
+      "No service-role or secret keys in client bundle.",
+      "Supabase RLS enabled on all user data tables.",
+      "Private storage buckets for user documents.",
+      "Signed URLs expire quickly.",
+      "All document access checks server-side or via enforced RLS.",
+      "Security headers configured: CSP, frame-ancestors, Referrer-Policy, X-Content-Type-Options.",
+      "No sensitive document metadata leaks in public HTML or client logs.",
+      "Audit logs record sensitive actions if implemented."
+    ],
+    "responsive": [
+      "Homepage works at 360px width.",
+      "Navbar does not overflow mobile width.",
+      "Hero CTA remains visible on mobile.",
+      "Category cards stack cleanly on mobile.",
+      "Dashboard card grid usable on mobile and tablet."
+    ]
+  },
+  "suggested_files": [
+    "app/page.tsx",
+    "app/layout.tsx",
+    "app/security/page.tsx",
+    "app/privacy/page.tsx",
+    "app/dashboard/page.tsx",
+    "app/documents/page.tsx",
+    "app/settings/devices/page.tsx",
+    "app/robots.ts",
+    "app/sitemap.ts",
+    "public/og-image.png",
+    "public/site.webmanifest",
+    "components/marketing/Hero.tsx",
+    "components/marketing/CategoryCards.tsx",
+    "components/marketing/SecuritySection.tsx",
+    "components/marketing/LostPhoneSection.tsx",
+    "components/marketing/Disclaimer.tsx",
+    "components/layout/Navbar.tsx",
+    "components/layout/Footer.tsx",
+    "components/dashboard/DocumentCategoryCard.tsx",
+    "components/dashboard/RecentDocuments.tsx",
+    "lib/supabase/client.ts",
+    "lib/supabase/server.ts",
+    "lib/security/headers.ts"
+  ]
+}

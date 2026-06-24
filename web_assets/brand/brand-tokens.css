@@ -1,0 +1,10 @@
+:root {
+  --nld-primary: #231d1b;
+  --nld-accent: #a95d4d;
+  --nld-background: #f7f1ea;
+  --nld-surface: #ffffff;
+  --nld-soft-accent: rgba(169, 93, 77, 0.12);
+  --nld-border: rgba(35, 29, 27, 0.12);
+  --nld-muted: rgba(35, 29, 27, 0.66);
+  --nld-success: #3f7f68;
+}

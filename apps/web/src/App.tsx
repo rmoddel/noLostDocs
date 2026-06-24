@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { FREE_PLAN_DOCUMENT_LIMIT, prototypeSnapshot } from "@doc-wallet/config";
 import { createDocWalletSupabaseClient } from "@doc-wallet/supabase";
@@ -17,7 +17,7 @@ const statusTone: Record<DocumentStatus, string> = {
   expired: "Expired"
 };
 
-type AppRoute = "/" | "/about" | "/contact";
+type AppRoute = "/" | "/login" | "/dashboard" | "/scan" | "/security" | "/contact";
 type LauncherGroupId = "basic" | "medical" | "professional" | "family";
 
 type LauncherGroup = {
@@ -80,12 +80,6 @@ const launcherGroups: LauncherGroup[] = [
     helper: "Shared household paperwork without the scavenger hunt.",
     categories: ["family"]
   }
-];
-
-const trustStatements = [
-  "NoLostDocs is a secure document vault, not a legal replacement for original documents.",
-  "Web access is an explicit cloud-backed feature. Local-only behavior is not implied here.",
-  "Large category cards lead the experience. Document buttons stay secondary and status-aware."
 ];
 
 const accessStateTone: Record<DocumentAccessState, string> = {
@@ -211,7 +205,10 @@ function getBrowserFingerprint() {
 }
 
 function normalizeRoute(pathname: string): AppRoute {
-  if (pathname === "/about") return "/about";
+  if (pathname === "/login") return "/login";
+  if (pathname === "/dashboard") return "/dashboard";
+  if (pathname === "/scan") return "/scan";
+  if (pathname === "/security" || pathname === "/about") return "/security";
   if (pathname === "/contact") return "/contact";
   return "/";
 }
@@ -224,6 +221,82 @@ function getGroupTemplates(group: LauncherGroup, templates: DocumentTemplate[]) 
   return templates.filter((template) => group.categories.includes(template.category));
 }
 
+function getUserDisplayName(session: Session | null) {
+  if (!session) {
+    return null;
+  }
+
+  const metadataName = session.user.user_metadata?.full_name;
+  if (typeof metadataName === "string" && metadataName.trim()) {
+    return metadataName.trim();
+  }
+
+  return session.user.email ?? null;
+}
+
+function getFileExtension(fileName: string, mimeType: string) {
+  const match = fileName.match(/\.([a-z0-9]+)$/i);
+  if (match?.[1]) {
+    return match[1].toLowerCase();
+  }
+
+  if (mimeType.includes("jpeg")) return "jpg";
+  if (mimeType.includes("png")) return "png";
+  if (mimeType.includes("webp")) return "webp";
+  if (mimeType.includes("heic")) return "heic";
+  return "jpg";
+}
+
+function buildDisplayFileName(baseName: string) {
+  return baseName.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase() || "scan";
+}
+
+async function rotateImageFile(file: File, rotation: number) {
+  const angle = ((rotation % 360) + 360) % 360;
+  const blobUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("Unable to load the selected image."));
+      img.src = blobUrl;
+    });
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("Canvas is not available in this browser.");
+    }
+
+    const swapDimensions = angle === 90 || angle === 270;
+    canvas.width = swapDimensions ? image.height : image.width;
+    canvas.height = swapDimensions ? image.width : image.height;
+
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.rotate((angle * Math.PI) / 180);
+    context.drawImage(image, -image.width / 2, -image.height / 2);
+
+    const mimeType = file.type || "image/jpeg";
+
+    const rotatedBlob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error("Unable to process the scan image."));
+          return;
+        }
+
+        resolve(blob);
+      }, mimeType, 0.95);
+    });
+
+    return new File([rotatedBlob], file.name, { type: mimeType, lastModified: Date.now() });
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+}
+
 export function App() {
   const [route, setRoute] = useState<AppRoute>(() => normalizeRoute(window.location.pathname));
   const [selectedGroupId, setSelectedGroupId] = useState<LauncherGroupId>("basic");
@@ -232,6 +305,7 @@ export function App() {
   const [email, setEmail] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactSubject, setContactSubject] = useState("Support request");
@@ -250,6 +324,7 @@ export function App() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [protectedAction, setProtectedAction] = useState<ProtectedActionState>({ loading: false, message: null });
   const [showAccessExplainer, setShowAccessExplainer] = useState(false);
+  const userDisplayName = getUserDisplayName(session);
 
   useEffect(() => {
     const onPopState = () => setRoute(normalizeRoute(window.location.pathname));
@@ -257,6 +332,18 @@ export function App() {
 
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  useEffect(() => {
+    if (session && route === "/login") {
+      setRoute("/dashboard");
+      window.history.replaceState({}, "", "/dashboard");
+    }
+
+    if (!session && (route === "/dashboard" || route === "/scan")) {
+      setRoute("/login");
+      window.history.replaceState({}, "", "/login");
+    }
+  }, [route, session]);
 
   useEffect(() => {
     if (!configured) {
@@ -302,10 +389,8 @@ export function App() {
       return;
     }
 
-    const fullName =
-      typeof session.user.user_metadata?.full_name === "string" ? session.user.user_metadata.full_name : "";
-
     setContactEmail((current) => (current ? current : session.user.email ?? ""));
+    const fullName = getUserDisplayName(session) ?? "";
     setContactName((current) => (current ? current : fullName));
   }, [session]);
 
@@ -339,6 +424,7 @@ export function App() {
     if (window.location.pathname !== nextRoute) {
       window.history.pushState({}, "", nextRoute);
     }
+    setMenuOpen(false);
     setRoute(nextRoute);
   }
 
@@ -420,7 +506,7 @@ export function App() {
     setPreferencesLoading(false);
 
     if (error) {
-      setPreferenceMessage("Using local dashboard visibility until Supabase preferences are available.");
+      setPreferenceMessage("Using local dashboard visibility until preferences are ready.");
       return;
     }
 
@@ -470,7 +556,7 @@ export function App() {
     event.preventDefault();
 
     if (!configured) {
-      setAuthMessage("Connect Supabase in apps/web/.env.local to enable live sign-in.");
+      setAuthMessage("Login is not connected yet.");
       return;
     }
 
@@ -498,7 +584,8 @@ export function App() {
       return;
     }
 
-    setAuthMessage("Check your email for the sign-in link. It verifies your address and opens the dashboard.");
+    setAuthMessage("Check your email for the link.");
+    navigate("/login");
   }
 
   async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
@@ -515,7 +602,7 @@ export function App() {
     }
 
     if (!configured) {
-      setContactStatus("Connect Supabase to enable contact submissions.");
+      setContactStatus("Messages can't be sent yet.");
       return;
     }
 
@@ -582,7 +669,7 @@ export function App() {
     if (!configured || !session) {
       setDeviceAction({
         loading: false,
-        message: "Connect Supabase to enable live device registration."
+        message: "Device setup isn't connected yet."
       });
       return;
     }
@@ -656,7 +743,7 @@ export function App() {
     if (!configured || !session) {
       setProtectedAction({
         loading: false,
-        message: `${baseMessage} Connect Supabase to enable a live signed download.`
+        message: `${baseMessage} The download flow isn't connected yet.`
       });
       return;
     }
@@ -729,49 +816,87 @@ export function App() {
     <main className="app-shell">
       <header className="site-topbar">
         <button className="brand-lockup" onClick={() => navigate("/")} type="button">
-          <img alt="" aria-hidden="true" className="brand-mark" src="/nolostdocs-mark.svg" />
-          <span>NoLostDocs</span>
+          <img alt="NoLostDocs" aria-hidden="true" className="brand-mark" src="/public/navbar-logo-transparent.png" />
         </button>
 
-        <nav className="site-nav">
-          <button className={`nav-link${route === "/" ? " active" : ""}`} onClick={() => navigate("/")} type="button">
-            Home
-          </button>
+        <div className="topbar-actions">
           <button
-            className={`nav-link${route === "/about" ? " active" : ""}`}
-            onClick={() => navigate("/about")}
+            className="button secondary small"
+            onClick={() => navigate(session ? "/dashboard" : "/login")}
             type="button"
           >
-            About
+            {session ? "Open dashboard" : "Get started"}
           </button>
           <button
-            className={`nav-link${route === "/contact" ? " active" : ""}`}
-            onClick={() => navigate("/contact")}
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            className="menu-toggle"
+            onClick={() => setMenuOpen((current) => !current)}
             type="button"
           >
-            Contact Us
+            <span />
+            <span />
+            <span />
           </button>
-          {session ? (
-            <button className="button secondary small" onClick={() => void handleSignOut()} type="button">
-              Sign out
-            </button>
-          ) : (
-            <button className="button primary small" onClick={() => navigate("/")} type="button">
-              Sign in
-            </button>
-          )}
-        </nav>
+        </div>
+
+        {menuOpen ? (
+          <div className="site-drawer" role="dialog" aria-label="Site menu">
+            <div className="drawer-card">
+              {session ? (
+                <div className="drawer-user">
+                  <strong>{userDisplayName ?? "Signed in"}</strong>
+                  <span>{session.user.email}</span>
+                  <span>{getPlanLabel(accountPlan)}</span>
+                </div>
+              ) : (
+                <div className="drawer-user">
+                  <strong>Guest</strong>
+                  <span>Use your email to continue.</span>
+                </div>
+              )}
+              <div className="drawer-links">
+                <button className="drawer-link" onClick={() => navigate("/")} type="button">
+                  Home
+                </button>
+                <button className="drawer-link" onClick={() => navigate("/security")} type="button">
+                  Security
+                </button>
+                <button className="drawer-link" onClick={() => navigate("/contact")} type="button">
+                  Contact
+                </button>
+                {session ? (
+                  <>
+                    <button className="drawer-link" onClick={() => navigate("/dashboard")} type="button">
+                      Dashboard
+                    </button>
+                    <button className="drawer-link" onClick={() => navigate("/scan")} type="button">
+                      Scan
+                    </button>
+                    <button
+                      className="drawer-link"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        void handleSignOut();
+                      }}
+                      type="button"
+                    >
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <button className="drawer-link" onClick={() => navigate("/login")} type="button">
+                    Login
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </header>
 
-      {route === "/about" ? (
-        <InfoPage
-          eyebrow="About"
-          title="A document vault built for real pressure moments."
-          body="NoLostDocs is designed to reduce panic around personal and professional records. The product keeps categories, document status, and cloud-backed recovery flows clear without pretending saved copies replace original documents."
-          secondary="The web surface exists so cloud-backed users can reach their organized records, understand what is missing, and manage secure access with less guesswork."
-          onPrimary={() => navigate("/")}
-          primaryLabel={session ? "Back to dashboard" : "Open the launcher preview"}
-        />
+      {route === "/security" ? (
+        <SecurityPage onPrimary={() => navigate(session ? "/dashboard" : "/login")} />
       ) : null}
 
       {route === "/contact" ? (
@@ -788,27 +913,30 @@ export function App() {
           onContactSubmit={handleContactSubmit}
           onContactSubjectChange={setContactSubject}
           onPrimary={() => navigate("/")}
-          primaryLabel={session ? "Back to dashboard" : "Back to home"}
+          primaryLabel="Back home"
           sessionEmail={session?.user.email ?? null}
         />
       ) : null}
 
-      {route === "/" && !session ? (
-        <PublicHome
+      {route === "/login" ? (
+        <LoginPage
           authLoading={authLoading}
           authMessage={authMessage}
           configured={configured}
           email={email}
           onEmailChange={setEmail}
-          onGroupSelect={setSelectedGroupId}
           onSignIn={handleSignIn}
-          selectedGroup={selectedGroup}
-          selectedGroupDocs={selectedGroupDocs}
-          uploadedCount={uploadedCount}
         />
       ) : null}
 
-      {route === "/" && session ? (
+      {route === "/" ? (
+        <PublicHome
+          onPrimary={() => navigate("/login")}
+          onSecondary={() => navigate("/security")}
+        />
+      ) : null}
+
+      {route === "/dashboard" && session ? (
         <DashboardHome
           activeDeviceCount={activeDeviceCount}
           accountLoading={accountLoading}
@@ -828,6 +956,7 @@ export function App() {
           onProtectedAction={handleProtectedAction}
           onRefreshDevices={loadDevices}
           onRegisterBrowser={handleRegisterBrowser}
+          onOpenScan={() => navigate("/scan")}
           preferenceMessage={preferenceMessage}
           preferencesLoading={preferencesLoading}
           protectedAction={protectedAction}
@@ -845,161 +974,130 @@ export function App() {
           visibleGroups={visibleGroups}
         />
       ) : null}
+
+      {route === "/scan" && session ? (
+        <ScanPage
+          configured={configured}
+          onBack={() => navigate("/dashboard")}
+          selectedGroup={selectedGroup}
+          session={session}
+        />
+      ) : null}
     </main>
   );
 }
 
 type PublicHomeProps = {
-  authLoading: boolean;
-  authMessage: string | null;
-  configured: boolean;
-  email: string;
-  onEmailChange: (value: string) => void;
-  onGroupSelect: (id: LauncherGroupId) => void;
-  onSignIn: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  selectedGroup: LauncherGroup;
-  selectedGroupDocs: DocumentTemplate[];
-  uploadedCount: number;
+  onPrimary: () => void;
+  onSecondary: () => void;
 };
 
-function PublicHome({
-  authLoading,
-  authMessage,
-  configured,
-  email,
-  onEmailChange,
-  onGroupSelect,
-  onSignIn,
-  selectedGroup,
-  selectedGroupDocs,
-  uploadedCount
-}: PublicHomeProps) {
+function PublicHome({ onPrimary, onSecondary }: PublicHomeProps) {
   return (
     <>
-      <section className="launcher-hero">
+      <section className="landing-hero">
         <div className="hero-copy-card">
-          <p className="eyebrow">Secure preview</p>
-          <h1>No more lost docs. Everything you need in one app.</h1>
+          <p className="eyebrow">NoLostDocs</p>
+          <h1>No more lost docs.</h1>
           <p className="lede">
-            The homepage now behaves like a locked version of the real app: category-first, cloud-backed, and honest
-            about what web access is for.
+            Securely store, organize, and find your important documents - license, insurance, registration, medical cards,
+            and more - all in one place.
           </p>
-          <div className="hero-chip-row">
-            <span className="trust-chip">Secure document vault</span>
-            <span className="trust-chip">Cloud-backed access</span>
-            <span className="trust-chip">Not a replacement for originals</span>
+          <div className="button-row">
+            <button className="button primary" onClick={onPrimary} type="button">
+              Get Started
+            </button>
+            <button className="button secondary" onClick={onSecondary} type="button">
+              See how it works
+            </button>
           </div>
         </div>
 
-        <div className="hero-summary-card">
-          <p className="eyebrow">Why the app leads</p>
-          <h2>Users should understand the category model before they ever sign in.</h2>
-          <p>
-            Large category tiles introduce the structure. Smaller document buttons preview the next layer. Login
-            unlocks saved state and the real dashboard.
-          </p>
-          <div className="summary-metrics">
-            <div className="summary-metric">
-              <strong>{launcherGroups.length}</strong>
-              <span>top-level groups</span>
-            </div>
-            <div className="summary-metric">
-              <strong>{uploadedCount}</strong>
-              <span>saved preview docs</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="launcher-layout">
-        <section className="launcher-main">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Step 1</p>
-              <h2>Pick a high-level category.</h2>
-            </div>
-            <p className="section-support">Category cards stay visually larger than document actions at every breakpoint.</p>
-          </div>
-
-          <div className="launcher-grid">
+        <div className="hero-summary-card hero-visual-card">
+          <div className="visual-stack">
             {launcherGroups.map((group) => (
-              <button
-                className={`launcher-card${selectedGroup.id === group.id ? " active" : ""}`}
-                key={group.id}
-                onClick={() => onGroupSelect(group.id)}
-                type="button"
-              >
-                <span className="launcher-card-badge">Login required</span>
+              <div className="visual-card" key={group.id}>
                 <strong>{group.title}</strong>
-                <p>{group.description}</p>
-                <small>{group.helper}</small>
-              </button>
+                <span>{group.description}</span>
+              </div>
             ))}
           </div>
-        </section>
-
-        <aside className="launcher-side">
-          <div className="side-card">
-            <div className="section-heading compact">
-              <div>
-                <p className="eyebrow">Step 2</p>
-                <h3>{selectedGroup.title} documents</h3>
-              </div>
-            </div>
-
-            <div className="document-action-list">
-              {selectedGroupDocs.slice(0, 4).map((template) => (
-                <button className={`document-action preview status-${template.status}`} key={template.id} type="button">
-                  <div>
-                    <strong>{template.title}</strong>
-                    <p>{template.note ?? template.helper}</p>
-                  </div>
-                  <span className={`status-pill status-${template.status}`}>{statusTone[template.status]}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-            <div className="side-card auth-card">
-              <div className="section-heading compact">
-                <div>
-                  <p className="eyebrow">Unlock</p>
-                  <h3>Sign in with email to open your dashboard.</h3>
-                </div>
-                <span className="mini-pill">{configured ? "Email verification" : "Not connected"}</span>
-              </div>
-
-              <form className="auth-form" onSubmit={(event) => void onSignIn(event)}>
-                <label className="field">
-                  <span>Email</span>
-                  <input
-                    autoComplete="email"
-                    onChange={(event) => onEmailChange(event.target.value)}
-                  placeholder="you@example.com"
-                    type="email"
-                    value={email}
-                  />
-                </label>
-
-                <button className="button primary block" disabled={authLoading} type="submit">
-                  {authLoading ? "Working..." : "Send sign-in link"}
-                </button>
-              </form>
-
-              <p className="support-copy">
-                Real saved state, device controls, and cloud-backed document status all live behind this login gate.
-              </p>
-              {authMessage ? <p className="inline-feedback">{authMessage}</p> : null}
-            </div>
-        </aside>
+        </div>
       </section>
 
-      <section className="trust-strip">
-        {trustStatements.map((statement) => (
-          <article className="trust-card" key={statement}>
-            <p>{statement}</p>
+      <section className="landing-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Documents</p>
+            <h2>Category cards that map to real life.</h2>
+          </div>
+        </div>
+        <div className="launcher-grid">
+          {launcherGroups.map((group) => (
+            <article className="launcher-card" key={group.id}>
+              <strong>{group.title}</strong>
+              <p>{group.description}</p>
+              <small>{group.helper}</small>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Security</p>
+            <h2>Built for documents you don't want floating around.</h2>
+          </div>
+        </div>
+        <div className="trust-strip">
+          <article className="trust-card">
+            <p>Private storage keeps files behind your account.</p>
           </article>
-        ))}
+          <article className="trust-card">
+            <p>Sign in protects web access and recovery flows.</p>
+          </article>
+          <article className="trust-card">
+            <p>Remote lock helps when a device goes missing.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="landing-section">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Lost phone</p>
+              <h2>Lock your account from here.</h2>
+            </div>
+          </div>
+        <div className="trust-strip">
+          <article className="trust-card">
+            <p>Lock the device and stop access until it is re-authorized.</p>
+          </article>
+          <article className="trust-card">
+            <p>Digital copies help with access. Acceptance still depends on the situation.</p>
+          </article>
+          <article className="trust-card">
+            <p>Cloud-backed web access is explicit. Local-only behavior is not implied.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <div className="trust-strip">
+          <article className="trust-card">
+            <p>NoLostDocs helps you keep secure copies organized. Acceptance of digital copies depends on the situation,
+            provider, agency, or law.</p>
+          </article>
+          <article className="trust-card">
+            <p>Save. Scan. Search. Recover.</p>
+          </article>
+          <article className="trust-card">
+            <button className="button primary block" onClick={onPrimary} type="button">
+              Get Started
+            </button>
+          </article>
+        </div>
       </section>
     </>
   );
@@ -1024,6 +1122,7 @@ type DashboardHomeProps = {
   onProtectedAction: (action: ProtectedAction, template: DocumentTemplate) => Promise<void>;
   onRefreshDevices: () => Promise<void>;
   onRegisterBrowser: () => Promise<void>;
+  onOpenScan: () => void;
   preferenceMessage: string | null;
   preferencesLoading: boolean;
   protectedAction: ProtectedActionState;
@@ -1060,6 +1159,7 @@ function DashboardHome({
   onProtectedAction,
   onRefreshDevices,
   onRegisterBrowser,
+  onOpenScan,
   preferenceMessage,
   preferencesLoading,
   protectedAction,
@@ -1084,11 +1184,11 @@ function DashboardHome({
       <section className="dashboard-hero">
         <div className="hero-copy-card">
           <p className="eyebrow">Dashboard</p>
-          <h1>Your document launcher is now the home screen.</h1>
+          <h1>Documents and devices.</h1>
           <p className="lede">
             {accountPlan === "premium"
-              ? "Premium keeps the full cloud-backed workspace open: all groups, protected access, and recovery-oriented account controls."
-              : "Free Basic keeps login and core identity records available while reserving broader cloud-backed groups and capacity for premium."}
+              ? "Premium unlocks every group and keeps protected actions available."
+              : "Free Basic keeps the core group and login access available."}
           </p>
         </div>
 
@@ -1111,8 +1211,8 @@ function DashboardHome({
           </div>
           <p className="section-support">
             {accountPlan === "premium"
-              ? "Email recovery stays enabled for the account, and premium keeps the non-basic groups unlocked."
-              : `Free Basic currently targets the core group and ${FREE_PLAN_DOCUMENT_LIMIT} saved cloud documents before upgrade is required.`}
+              ? "Email recovery stays enabled."
+              : `Free Basic keeps ${FREE_PLAN_DOCUMENT_LIMIT} saved cloud documents in the core group.`}
           </p>
           {accountMessage ? <p className="inline-feedback">{accountMessage}</p> : null}
         </div>
@@ -1123,11 +1223,9 @@ function DashboardHome({
           <div className="section-heading">
             <div>
               <p className="eyebrow">Categories</p>
-              <h2>Larger tiles lead the interaction.</h2>
+              <h2>Categories.</h2>
             </div>
-            <p className="section-support">
-              Mobile uses a 2-up grid, then expands to a cleaner desktop grid without stretching the cards into soup.
-            </p>
+            <p className="section-support">Categories lead. Documents stay secondary.</p>
           </div>
 
           <div className="launcher-grid">
@@ -1185,6 +1283,19 @@ function DashboardHome({
             {preferenceMessage ? <p className="inline-feedback">{preferenceMessage}</p> : null}
           </div>
 
+          <div className="side-card">
+            <div className="section-heading compact">
+              <div>
+                <p className="eyebrow">Scan</p>
+                <h3>Capture a new document.</h3>
+              </div>
+            </div>
+            <p className="section-support">Use the bank-style scan flow to capture a document.</p>
+            <button className="button primary block" onClick={onOpenScan} type="button">
+              Start scan
+            </button>
+          </div>
+
           {lockedGroups.length ? (
             <div className="side-card upgrade-card">
               <div className="section-heading compact">
@@ -1201,9 +1312,7 @@ function DashboardHome({
                   </div>
                 ))}
               </div>
-              <p className="section-support">
-                Premium expands the dashboard beyond the Basic group and increases cloud-backed document capacity.
-              </p>
+              <p className="section-support">Premium expands the dashboard beyond Basic.</p>
             </div>
           ) : null}
 
@@ -1317,7 +1426,7 @@ function DashboardHome({
             <ul className="note-list">
               <li>
                 <strong>Login stays required for every account.</strong>
-                <span>Email verification and magic-link recovery are part of the standard entry path.</span>
+                <span>Use your email to continue when you need access again.</span>
               </li>
               <li>
                 <strong>{accountPlan === "premium" ? "All groups unlocked." : "Only the Basic group is unlocked."}</strong>
@@ -1333,7 +1442,7 @@ function DashboardHome({
                     ? "Premium quota policy is higher."
                     : `${freePlanRemainingSlots} of ${FREE_PLAN_DOCUMENT_LIMIT} free cloud slots remain.`}
                 </strong>
-                <span>Upload enforcement now belongs to the backend edge function rather than just UI wording.</span>
+                <span>Upload limits are enforced before a new file is saved.</span>
               </li>
             </ul>
           </div>
@@ -1342,7 +1451,7 @@ function DashboardHome({
             <div className="section-heading compact">
               <div>
                 <p className="eyebrow">Next actions</p>
-                <h3>Keep the pressure visible.</h3>
+                <h3>Next up.</h3>
               </div>
             </div>
             <ul className="note-list">
@@ -1359,7 +1468,7 @@ function DashboardHome({
             <div className="section-heading compact">
               <div>
                 <p className="eyebrow">Access trail</p>
-                <h3>Protected actions stay auditable.</h3>
+                <h3>Access trail.</h3>
               </div>
             </div>
             <ul className="note-list">
@@ -1490,28 +1599,25 @@ function ContactPage({
       <div className="contact-page-grid">
         <div className="info-page-card contact-intro-card">
           <p className="eyebrow">Contact</p>
-          <h1>Reach the team without digging.</h1>
-          <p className="lede">
-            Use this form for support, product questions, access problems, and early feedback. Messages land in Supabase
-            so the app can stay cloud-backed without pretending email is a fake button.
-          </p>
+          <h1>Send a message.</h1>
+          <p className="lede">Messages are saved for follow-up.</p>
           <p className="section-text">
             {sessionEmail
-              ? `You are signed in as ${sessionEmail}. That address can be reused below, or you can send from a different one.`
-              : "Signed-out users can still contact the team. Authenticated users can send from their logged-in address or a different one."}
+              ? `Signed in as ${sessionEmail}.`
+              : "Send from any email address."}
           </p>
           <ul className="note-list">
             <li>
-              <strong>Use it for real product issues.</strong>
-              <span>Support, billing, access, and trust questions all belong here.</span>
+              <strong>Support</strong>
+              <span>Billing, access, and trust questions.</span>
             </li>
             <li>
-              <strong>Keep the message specific.</strong>
-              <span>Include the feature, device, or account state that needs attention.</span>
+              <strong>Be specific</strong>
+              <span>Include the feature, device, or account state.</span>
             </li>
             <li>
-              <strong>Responses stay human.</strong>
-              <span>The form creates a queueable record instead of a dead-end mailto link.</span>
+              <strong>Tracked</strong>
+              <span>The message is saved for follow-up.</span>
             </li>
           </ul>
           <div className="button-row">
@@ -1524,10 +1630,9 @@ function ContactPage({
         <div className="side-card contact-form-card">
           <div className="section-heading compact">
             <div>
-              <p className="eyebrow">Send a message</p>
-              <h3>We'll route it from the portal.</h3>
+              <p className="eyebrow">Message</p>
+              <h3>Send your message.</h3>
             </div>
-            <span className="mini-pill">Supabase-backed</span>
           </div>
 
           <form className="auth-form contact-form" onSubmit={(event) => void onContactSubmit(event)}>
@@ -1536,7 +1641,6 @@ function ContactPage({
               <input
                 autoComplete="name"
                 onChange={(event) => onContactNameChange(event.target.value)}
-                placeholder="Your name"
                 type="text"
                 value={contactName}
               />
@@ -1547,7 +1651,6 @@ function ContactPage({
               <input
                 autoComplete="email"
                 onChange={(event) => onContactEmailChange(event.target.value)}
-                placeholder="you@example.com"
                 type="email"
                 value={contactEmail}
               />
@@ -1557,7 +1660,6 @@ function ContactPage({
               <span>Subject</span>
               <input
                 onChange={(event) => onContactSubjectChange(event.target.value)}
-                placeholder="What do you need help with?"
                 type="text"
                 value={contactSubject}
               />
@@ -1567,7 +1669,6 @@ function ContactPage({
               <span>Message</span>
               <textarea
                 onChange={(event) => onContactMessageChange(event.target.value)}
-                placeholder="Give us the context, the problem, and what you were trying to do."
                 rows={7}
                 value={contactMessage}
               />
@@ -1579,9 +1680,273 @@ function ContactPage({
           </form>
 
           <p className="support-copy">
-            We use the same portal language here: cloud-backed, explicit, and never pretending the web is local-only.
+            Messages are saved with your account.
           </p>
           {contactStatus ? <p className="inline-feedback">{contactStatus}</p> : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+type LoginPageProps = {
+  authLoading: boolean;
+  authMessage: string | null;
+  configured: boolean;
+  email: string;
+  onEmailChange: (value: string) => void;
+  onSignIn: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+};
+
+function LoginPage({ authLoading, authMessage, configured, email, onEmailChange, onSignIn }: LoginPageProps) {
+  return (
+    <section className="info-page login-page">
+      <div className="info-page-card login-card">
+        <p className="eyebrow">Login</p>
+        <h1>Use your email to continue.</h1>
+        <p className="section-text">We will email a link to your inbox.</p>
+        <form className="auth-form" onSubmit={(event) => void onSignIn(event)}>
+          <label className="field">
+            <span>Email</span>
+            <input
+              autoComplete="email"
+              onChange={(event) => onEmailChange(event.target.value)}
+              type="email"
+              value={email}
+            />
+          </label>
+          <button className="button primary block" disabled={authLoading} type="submit">
+            {authLoading ? "Sending..." : "Continue"}
+          </button>
+        </form>
+        <p className="support-copy">{configured ? "Email access is ready." : "Login will be ready soon."}</p>
+        {authMessage ? <p className="inline-feedback">{authMessage}</p> : null}
+      </div>
+    </section>
+  );
+}
+
+type SecurityPageProps = {
+  onPrimary: () => void;
+};
+
+function SecurityPage({ onPrimary }: SecurityPageProps) {
+  return (
+    <section className="info-page security-page">
+        <div className="info-page-card">
+          <p className="eyebrow">Security</p>
+          <h1>Built for documents you don't want floating around.</h1>
+          <div className="trust-strip">
+            <article className="trust-card">
+              <p>Private storage keeps files behind your account.</p>
+            </article>
+            <article className="trust-card">
+              <p>Signed-in access protects your account.</p>
+            </article>
+            <article className="trust-card">
+              <p>Device lock and re-authorization are built in.</p>
+            </article>
+          </div>
+        <div className="button-row">
+          <button className="button primary" onClick={onPrimary} type="button">
+            Continue
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+type ScanPageProps = {
+  configured: boolean;
+  onBack: () => void;
+  selectedGroup: LauncherGroup;
+  session: Session;
+};
+
+function ScanPage({ configured, onBack, selectedGroup, session }: ScanPageProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [rotation, setRotation] = useState(0);
+  const [scanTitle, setScanTitle] = useState("New scan");
+  const [saving, setSaving] = useState(false);
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const nextFile = event.target.files?.[0] ?? null;
+    setScanMessage(null);
+    setRotation(0);
+    setFile(nextFile);
+  }
+
+  async function handleSave() {
+    if (!file) {
+      setScanMessage("Choose a document image first.");
+      return;
+    }
+
+    if (!configured) {
+      setScanMessage("Scan saving is not ready yet.");
+      return;
+    }
+
+    setSaving(true);
+    setScanMessage(null);
+
+    try {
+      const rotatedFile = rotation ? await rotateImageFile(file, rotation) : file;
+      const safeTitle = buildDisplayFileName(scanTitle);
+      const uploadResponse = await client.functions.invoke("create-signed-upload", {
+        body: {
+          documentTitle: scanTitle,
+          fileName: rotatedFile.name,
+          mimeType: rotatedFile.type,
+          safeTitle
+        }
+      });
+
+      if (uploadResponse.error) {
+        throw new Error(uploadResponse.error.message);
+      }
+
+      const payload = uploadResponse.data as {
+        path: string;
+        token: string;
+        message?: string;
+      } | null;
+
+      if (!payload?.path || !payload.token) {
+        throw new Error("Upload authorization failed.");
+      }
+
+      const uploadResult = await client.storage
+        .from("user-documents")
+        .uploadToSignedUrl(payload.path, payload.token, rotatedFile, {
+          contentType: rotatedFile.type || "image/jpeg",
+          upsert: true
+        });
+
+      if (uploadResult.error) {
+        throw new Error(uploadResult.error.message);
+      }
+
+      const { data: documentRow, error: documentError } = await client
+        .from("documents")
+        .insert({
+          user_id: session.user.id,
+          title: scanTitle,
+          description: `Captured from ${selectedGroup.title}`,
+          status: "uploaded",
+          metadata: {
+            scan: true,
+            category: selectedGroup.id,
+            source: "web-scan"
+          }
+        })
+        .select("id")
+        .single();
+
+      if (documentError) {
+        throw new Error(documentError.message);
+      }
+
+      const fileInsert = await client.from("document_files").insert({
+        document_id: documentRow.id,
+        user_id: session.user.id,
+        storage_bucket: "user-documents",
+        storage_path: payload.path,
+        local_only: false,
+        mime_type: rotatedFile.type || "image/jpeg",
+        size_bytes: rotatedFile.size,
+        encryption_version: "v1"
+      });
+
+      if (fileInsert.error) {
+        throw new Error(fileInsert.error.message);
+      }
+
+      setScanMessage("Scan saved.");
+      setFile(null);
+      setRotation(0);
+      onBack();
+    } catch (error) {
+      setScanMessage(error instanceof Error ? error.message : "Scan save failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className="info-page scan-page">
+      <div className="scan-shell">
+        <div className="info-page-card scan-intro-card">
+          <p className="eyebrow">Scan</p>
+          <h1>Capture it like a bank deposit.</h1>
+          <p className="section-text">Use your camera or an image file. Rotate, review, then save it to your account.</p>
+          <div className="button-row">
+            <button className="button secondary" onClick={onBack} type="button">
+              Back to dashboard
+            </button>
+          </div>
+        </div>
+
+        <div className="side-card scan-card">
+          <div className="section-heading compact">
+            <div>
+              <p className="eyebrow">Capture</p>
+              <h3>{scanTitle}</h3>
+            </div>
+            <span className="mini-pill">{selectedGroup.title}</span>
+          </div>
+
+          <label className="field">
+            <span>Scan name</span>
+            <input onChange={(event) => setScanTitle(event.target.value)} type="text" value={scanTitle} />
+          </label>
+
+          <label className="scan-dropzone" htmlFor="scan-file">
+            <input
+              accept="image/*"
+              capture="environment"
+              id="scan-file"
+              onChange={(event) => void handleFileChange(event)}
+              type="file"
+            />
+            <strong>{file ? file.name : "Tap to take a photo or choose a file"}</strong>
+            <span>Front-lit, flat, and within the frame works best.</span>
+          </label>
+
+          {previewUrl ? (
+            <div className="scan-preview">
+              <img alt="Scan preview" src={previewUrl} style={{ transform: `rotate(${rotation}deg)` }} />
+            </div>
+          ) : null}
+
+          <div className="button-row">
+            <button className="button secondary small" disabled={!file || saving} onClick={() => setRotation((r) => r + 90)} type="button">
+              Rotate
+            </button>
+            <button className="button secondary small" disabled={!file || saving} onClick={() => setFile(null)} type="button">
+              Retake
+            </button>
+            <button className="button primary small" disabled={!file || saving} onClick={() => void handleSave()} type="button">
+              {saving ? "Saving..." : "Save scan"}
+            </button>
+          </div>
+
+          {scanMessage ? <p className="inline-feedback">{scanMessage}</p> : null}
         </div>
       </div>
     </section>
