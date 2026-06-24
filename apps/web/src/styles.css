@@ -146,6 +146,32 @@ label {
   gap: 12px;
 }
 
+.site-footer {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  padding: 18px 0 10px;
+}
+
+.footer-brand-image {
+  display: block;
+  width: min(100%, 860px);
+  height: auto;
+}
+
+.footer-links {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-link {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  padding: 10px 14px;
+  border-radius: 999px;
+}
+
 .brand-lockup {
   display: inline-flex;
   align-items: center;

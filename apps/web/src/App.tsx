@@ -816,7 +816,7 @@ export function App() {
     <main className="app-shell">
       <header className="site-topbar">
         <button className="brand-lockup" onClick={() => navigate("/")} type="button">
-          <img alt="NoLostDocs" aria-hidden="true" className="brand-mark" src="/public/navbar-logo-transparent.png" />
+          <img alt="NoLostDocs" aria-hidden="true" className="brand-mark" src="/navbar-logo-transparent.png" />
         </button>
 
         <div className="topbar-actions">
@@ -983,6 +983,24 @@ export function App() {
           session={session}
         />
       ) : null}
+
+      <footer className="site-footer">
+        <img alt="NoLostDocs" className="footer-brand-image" src="/transparent_slogan.png" />
+        <div className="footer-links">
+          <button className="footer-link" onClick={() => navigate("/")} type="button">
+            Home
+          </button>
+          <button className="footer-link" onClick={() => navigate("/security")} type="button">
+            Security
+          </button>
+          <button className="footer-link" onClick={() => navigate("/contact")} type="button">
+            Contact
+          </button>
+          <button className="footer-link" onClick={() => navigate(session ? "/dashboard" : "/login")} type="button">
+            {session ? "Dashboard" : "Login"}
+          </button>
+        </div>
+      </footer>
     </main>
   );
 }

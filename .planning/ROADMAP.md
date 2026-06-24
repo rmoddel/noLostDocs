@@ -1,135 +1,125 @@
-# Roadmap: NoLostDocs
+# Roadmap: NoLostDocs Rearchitecture
 
 ## Overview
 
-NoLostDocs now moves through a web-first execution path. The immediate sequence is brand and trust clarity, portal structure, secure account and device foundations, cloud-backed document visibility, premium plan enforcement, and then production hardening before native surfaces resume.
+NoLostDocs is shifting from a Vite prototype into a production-grade Next.js web architecture. The current roadmap tracks the rearchitecture sequence only. Legacy web-first milestone artifacts remain archived for reference and do not define the active execution order.
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-- [x] **Phase 1: Brand, Positioning, and Web Experience** - Make the website feel premium, trustworthy, and unmistakably clear about what NoLostDocs is and is not.
-- [x] **Phase 2: Portal Information Architecture** - Deliver the core web portal structure for categories, document states, and cloud-only expectations.
-- [x] **Phase 3: Auth, Devices, and Recovery Controls** - Add account access, trusted devices, and lost-device control flows.
-- [x] **Phase 4: Cloud Document Dashboard** - Show real cloud-backed document metadata, status, and secure access patterns.
-- [x] **Phase 5: Premium Access and Billing Surface** - Make free versus premium boundaries and billing behavior coherent on the web.
-- [ ] **Phase 6: Hardening and Launch Readiness** - Verify security promises, trust language, and production readiness before mobile resumes.
+- [x] **Phase 1: Next Foundation** - Build a parallel `apps/web-next` App Router foundation with real homepage content, metadata, isolated runtime assets, and baseline Supabase scaffolding.
+- [x] **Phase 2: Asset and Design Source-of-Truth Cleanup** - Consolidate runtime asset usage and tighten the design system so the new app has one clear visual and asset pipeline.
+- [x] **Phase 3: Supabase, Auth, and Dashboard Port** - Port login, session handling, protected routes, and dashboard skeleton behavior into the Next app.
+- [ ] **Phase 4: Protected Flows Port** - Port device controls, protected downloads, scan/upload, contact, and plan-boundary flows into the Next app.
+- [ ] **Phase 5: Parity and Verification** - Prove that the Next app reaches launch-ready parity across homepage, auth, dashboard, assets, metadata, and backend safety.
+- [ ] **Phase 6: Swap and Archive** - Replace the Vite app only after parity is verified by promoting `apps/web-next` to the final web app and archiving the Vite prototype safely.
+- [ ] **Phase 7: Package Naming Cleanup** - Rename internal `@doc-wallet/*` packages to `@nolostdocs/*` after the rearchitecture is stable.
 
 ## Phase Details
 
-### Phase 1: Brand, Positioning, and Web Experience
-**Goal**: As a person evaluating a secure document vault, I want to experience a premium NoLostDocs website that clearly explains what the product is and how cloud-backed access works, so that I can quickly decide whether it solves my document-access problem.
+### Phase 1: Next Foundation
+**Goal**: As the NoLostDocs team, we need a production-grade Next.js foundation running in parallel with the Vite prototype so that future web work lands on the right architecture without breaking the reference implementation.
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
-**Requirements**: [BRND-01, BRND-02, BRND-03, WEB-01, WEB-03, WEB-04]
+**Requirements**: [ARCH-01, WEB-FOUND-01]
 **Success Criteria** (what must be TRUE):
-  1. The website clearly communicates that NoLostDocs is a secure document vault, not a legal replacement for originals.
-  2. The homepage feels intentional, premium, and memorable rather than like a placeholder dashboard.
-  3. Local-only versus cloud-backed behavior is explained without ambiguity.
-  4. The active frontend naming is NoLostDocs everywhere user-facing.
-**Plans**: 3 plans
+  1. `apps/web-next` exists as a valid Next.js App Router app.
+  2. The homepage renders real NoLostDocs content and reflects the approved visual direction.
+  3. Metadata, robots, sitemap, manifest, and social preview assets are wired in the new app.
+  4. Runtime assets load only from `apps/web-next/public`.
+  5. The existing Vite app remains untouched and runnable as the reference implementation.
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: Rename the project and realign planning artifacts for web-only execution.
-- [ ] 01-02: Rebuild the web experience and product copy around NoLostDocs.
-- [ ] 01-03: Align client config and frontend messaging with current docs and trust constraints.
+- [x] 01-01: Build the parallel Next.js foundation in `apps/web-next`.
 
-### Phase 2: Portal Information Architecture
-**Goal**: As a cloud-backed NoLostDocs user, I want to use a clear portal shell for categories, statuses, and access expectations, so that I can understand where my documents live before deeper account features arrive.
+### Phase 2: Asset and Design Source-of-Truth Cleanup
+**Goal**: As the NoLostDocs team, we need one clear runtime asset pipeline and a tighter design system so that the Next app can scale without visual drift or asset ambiguity.
 **Mode:** mvp
 **Depends on**: Phase 1
-**Requirements**: [WEB-02, PORT-02, PLAN-01]
+**Requirements**: [ARCH-02, DS-01]
 **Success Criteria** (what must be TRUE):
-  1. Users can understand how categories, document statuses, and cloud-backed access work from the web portal.
-  2. The portal shell has a clear dashboard, category, device, and security navigation model.
-  3. The UI reinforces that web access is for cloud-backed users only.
-  4. The design system is strong enough to carry into auth and dashboard work.
-**Plans**: 3 plans
+  1. Runtime assets have one canonical home for the Next app.
+  2. Duplicate or conflicting asset usage is resolved intentionally.
+  3. Shared UI primitives and tokens are tightened for reuse.
+  4. The new app no longer depends on legacy runtime asset paths.
+**Plans**: 1 plan
 
 Plans:
-- [x] 02-01: Build the portal navigation and account shell.
-- [x] 02-02: Implement category and document-status views.
-- [x] 02-03: Add cloud-only messaging, search entry points, and upgrade framing.
+- [x] 02-01: Centralize runtime assets and tighten the shared design surface in the Next app.
 
-### Phase 3: Auth, Devices, and Recovery Controls
-**Goal**: As a cloud-enabled NoLostDocs user, I want to have secure sign-in, trusted-device visibility, and lost-device controls, so that I can protect my account when a device is shared, lost, or stolen.
+### Phase 3: Supabase, Auth, and Dashboard Port
+**Goal**: As a NoLostDocs user, I need the Next app to handle signed-in access and core dashboard structure so that the production foundation becomes a real portal instead of a shell.
 **Mode:** mvp
 **Depends on**: Phase 2
-**Requirements**: [PORT-01, PORT-03, PORT-04, SECU-02]
+**Requirements**: [AUTH-01, DASH-01]
 **Success Criteria** (what must be TRUE):
-  1. Cloud-enabled users can log in securely to the portal.
-  2. Trusted devices and last-seen data are visible and understandable.
-  3. A lost device can be marked and remotely locked from the web.
-  4. Web security messaging reflects shared-device and recovery risks honestly.
-**Plans**: 3 plans
+  1. The Next app supports login and session-aware routing.
+  2. Protected dashboard and scan routes behave correctly when logged out.
+  3. The dashboard skeleton and category structure are ported into reusable components.
+  4. The Supabase browser/server split is correct and does not expose secrets.
+**Plans**: 1 plan
 
 Plans:
-- [x] 03-01: Add auth shell and secure session handling.
-- [x] 03-02: Implement devices view and remote-lock interactions.
-- [x] 03-03: Connect account security and recovery UX.
+- [x] 03-01: Add Supabase-backed auth, protected routing, and the reusable dashboard shell in the Next app.
 
-### Phase 4: Cloud Document Dashboard
-**Goal**: As a cloud-backed NoLostDocs user, I want to browse my document metadata and understand secure access patterns from the portal, so that I can find what I need without guessing what the web surface can and cannot do.
+### Phase 4: Protected Flows Port
+**Goal**: As a signed-in NoLostDocs user, I need the sensitive product flows in the Next app so that the new architecture supports the real trust model rather than just its outer shell.
 **Mode:** mvp
 **Depends on**: Phase 3
-**Requirements**: [PORT-02, SECU-01]
+**Requirements**: [FLOW-01, FLOW-02]
 **Success Criteria** (what must be TRUE):
-  1. Users can inspect cloud-backed categories and document listings from the web.
-  2. The portal distinguishes metadata browsing from secure file access.
-  3. Download and preview actions are framed as authorized, short-lived operations.
-  4. Document status, expiration, and completeness are visually obvious.
-**Plans**: 3 plans
+  1. Device lock and recovery controls are ported.
+  2. Protected preview/download flows preserve the existing access model.
+  3. Scan/upload and contact flows are ported with validation and user-safe error handling.
+  4. Plan boundaries remain clear and enforced in the new app.
+**Plans**: 0 plans
 
-Plans:
-- [x] 04-01: Wire dashboard data and category listings.
-- [x] 04-02: Add secure document detail and preview/download states.
-- [x] 04-03: Reinforce access control and audit-aware UI flows.
-
-### Phase 5: Plan Enforcement & Premium Access
-**Goal**: As a NoLostDocs account owner, I want to have premium access boundaries and billing state enforced consistently, so that web access, backup, and recovery features match the plan I actually have.
+### Phase 5: Parity and Verification
+**Goal**: As the NoLostDocs team, we need evidence that the Next app is ready to replace the prototype so that the swap is based on verification rather than optimism.
 **Mode:** mvp
 **Depends on**: Phase 4
-**Requirements**: [PLAN-01, PLAN-02, PLAN-03]
+**Requirements**: [VERIFY-01, VERIFY-02]
 **Success Criteria** (what must be TRUE):
-  1. Free users keep a useful local-only mobile experience without accidental cloud access.
-  2. Premium status unlocks cloud backup, web access, and restore features consistently.
-  3. Storage or document limits are enforced on the backend rather than just hidden in the UI.
-  4. Billing and subscription state can be reasoned about before launch, even if UI remains minimal.
-**Plans**: 2 plans
+  1. Core homepage, auth, dashboard, and protected-flow scenarios are verified.
+  2. Assets, metadata, and unfurl behavior are correct in the Next app.
+  3. No browser secrets are exposed and backend assumptions remain intact.
+  4. The Vite prototype is still available as a fallback/reference until the swap happens.
+**Plans**: 0 plans
 
-Plans:
-- [x] 05-01: Add subscriptions schema, Stripe webhook flow, and plan state sync.
-- [x] 05-02: Enforce plan-based feature access, quotas, and upgrade messaging across web and mobile.
-
-### Phase 6: Hardening, Audit, and Beta Readiness
-**Goal**: As the NoLostDocs team preparing for beta, I want to verify the platform's security promises, auditability, and abuse protections, so that we can launch with evidence instead of assumptions.
+### Phase 6: Swap and Archive
+**Goal**: As the NoLostDocs team, we need to promote the verified Next app into the final `apps/web` slot only when all earlier rearchitecture phases are complete, so that the production path changes safely and reversibly.
 **Mode:** mvp
 **Depends on**: Phase 5
-**Requirements**: [SECU-02, SECU-03, SECU-04, SECU-05]
+**Requirements**: [CUTOVER-01]
 **Success Criteria** (what must be TRUE):
-  1. Locked devices cannot sync or fetch cloud documents until re-authorized.
-  2. Sensitive actions are captured in audit events with enough detail for incident review.
-  3. Private storage access uses short-lived authorized downloads only.
-  4. RLS, storage isolation, and backup/restore behaviors are tested against cross-user abuse cases.
-**Plans**: 3 plans
+  1. The verified Next app replaces the active web app path.
+  2. The Vite prototype is archived as `apps/web-vite-reference` or equivalent.
+  3. Build and deploy paths are updated only after parity is confirmed.
+  4. The repo remains runnable after the swap.
+**Plans**: 0 plans
 
-Plans:
-- [ ] 06-01: Add audit logging, signed access helpers, and lost-device session cleanup.
-- [ ] 06-02: Write RLS, storage-policy, and restore-path verification tests.
-- [ ] 06-03: Close launch gaps, document beta-readiness checks, and prepare Android beta release.
+### Phase 7: Package Naming Cleanup
+**Goal**: As the NoLostDocs team, we need internal package naming to match the product name after the architecture is stable, so that code and docs stop carrying obsolete branding debt.
+**Mode:** mvp
+**Depends on**: Phase 6
+**Requirements**: [NAME-01]
+**Success Criteria** (what must be TRUE):
+  1. Internal package names use `@nolostdocs/*`.
+  2. Imports, lockfile, and docs are updated consistently.
+  3. Build and verification still pass after the rename.
+**Plans**: 0 plans
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Brand, Positioning, and Web Experience | 3/3 | Complete | 2026-06-19 |
-| 2. Portal Information Architecture | 3/3 | Complete | 2026-06-19 |
-| 3. Auth, Devices, and Recovery Controls | 3/3 | Complete | 2026-06-19 |
-| 4. Cloud Document Dashboard | 3/3 | Complete | 2026-06-23 |
-| 5. Plan Enforcement & Premium Access | 2/2 | Complete | 2026-06-23 |
-| 6. Hardening, Audit, and Beta Readiness | 0/3 | Not started | - |
+| 1. Next Foundation | 1/1 | Complete | 2026-06-24 |
+| 2. Asset and Design Source-of-Truth Cleanup | 1/1 | Complete | 2026-06-24 |
+| 3. Supabase, Auth, and Dashboard Port | 1/1 | Complete | 2026-06-24 |
+| 4. Protected Flows Port | 0/0 | Not started | - |
+| 5. Parity and Verification | 0/0 | Not started | - |
+| 6. Swap and Archive | 0/0 | Blocked on Phase 5 | - |
+| 7. Package Naming Cleanup | 0/0 | Blocked on Phase 6 | - |

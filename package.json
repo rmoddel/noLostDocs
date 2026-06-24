@@ -13,8 +13,10 @@
   "scripts": {
     "dev": "npm run dev:web",
     "dev:web": "npm run dev -w @doc-wallet/web",
+    "dev:web-next": "npm run dev -w @doc-wallet/web-next",
     "dev:mobile": "npm run dev -w @doc-wallet/mobile",
     "build:web": "npm run build -w @doc-wallet/web",
+    "build:web-next": "npm run build -w @doc-wallet/web-next",
     "lint": "npm run lint -ws --if-present",
     "typecheck": "npm run typecheck -ws --if-present"
   }
