@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --font-body: "Manrope", "Segoe UI", sans-serif;
-  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", serif;
+  --font-body: "Manrope", "Inter", "Segoe UI", sans-serif;
+  --font-display: "Manrope", "Inter", "Segoe UI", sans-serif;
   --bg: #f7f1ea;
   --bg-deep: #e9ddd0;
   --surface: rgba(255, 251, 246, 0.88);
@@ -53,7 +53,8 @@ body {
 
 a,
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -651,6 +652,22 @@ label {
   border-color: rgba(180, 108, 88, 0.42);
 }
 
+.field textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--ink);
+  resize: vertical;
+}
+
+.field textarea:focus {
+  outline: 2px solid rgba(180, 108, 88, 0.14);
+  border-color: rgba(180, 108, 88, 0.42);
+}
+
 .trust-strip {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -708,6 +725,26 @@ label {
   align-items: center;
 }
 
+.contact-page {
+  align-items: stretch;
+}
+
+.contact-page-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.92fr);
+  gap: 20px;
+}
+
+.contact-intro-card,
+.contact-form-card {
+  height: 100%;
+}
+
+.contact-page .info-page-card {
+  max-width: none;
+}
+
 .info-page-card {
   max-width: 760px;
 }
@@ -734,6 +771,7 @@ label {
   .dashboard-hero,
   .launcher-layout,
   .dashboard-layout,
+  .contact-page-grid,
   .trust-strip {
     grid-template-columns: 1fr;
   }
@@ -755,6 +793,10 @@ label {
 
   .site-nav {
     justify-content: flex-start;
+  }
+
+  .contact-page-grid {
+    grid-template-columns: 1fr;
   }
 
   .launcher-grid,

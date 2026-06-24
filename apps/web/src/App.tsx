@@ -17,7 +17,6 @@ const statusTone: Record<DocumentStatus, string> = {
   expired: "Expired"
 };
 
-type AuthMode = "password" | "magic";
 type AppRoute = "/" | "/about" | "/contact";
 type LauncherGroupId = "basic" | "medical" | "professional" | "family";
 
@@ -179,8 +178,8 @@ function buildAccessMessage(action: ProtectedAction, template: DocumentTemplate)
   }
 
   return action === "preview"
-    ? `${template.title} passed the placeholder authorization check. A short-lived preview would open here.`
-    : `${template.title} passed the placeholder authorization check. A short-lived download would be issued here.`;
+    ? `${template.title} passed the authorization check. A short-lived preview would open here.`
+    : `${template.title} passed the authorization check. A short-lived download would be issued here.`;
 }
 
 function getPreferencePayload(hiddenGroupIds: LauncherGroupId[], userId: string) {
@@ -230,11 +229,15 @@ export function App() {
   const [selectedGroupId, setSelectedGroupId] = useState<LauncherGroupId>("basic");
   const [session, setSession] = useState<Session | null>(null);
   const [sessionLoading, setSessionLoading] = useState(configured);
-  const [authMode, setAuthMode] = useState<AuthMode>("password");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactSubject, setContactSubject] = useState("Support request");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactStatus, setContactStatus] = useState<string | null>(null);
   const [devices, setDevices] = useState<DeviceRecord[]>(prototypeSnapshot.devices);
   const [devicesLoading, setDevicesLoading] = useState(false);
   const [deviceAction, setDeviceAction] = useState<DeviceActionState>({ loading: false, message: null });
@@ -292,6 +295,18 @@ export function App() {
     }
 
     void loadDevices();
+  }, [session]);
+
+  useEffect(() => {
+    if (!session?.user.email) {
+      return;
+    }
+
+    const fullName =
+      typeof session.user.user_metadata?.full_name === "string" ? session.user.user_metadata.full_name : "";
+
+    setContactEmail((current) => (current ? current : session.user.email ?? ""));
+    setContactName((current) => (current ? current : fullName));
   }, [session]);
 
   useEffect(() => {
@@ -459,25 +474,21 @@ export function App() {
       return;
     }
 
-    setAuthLoading(true);
-    setAuthMessage(null);
+    const trimmedEmail = email.trim();
 
-    if (authMode === "magic") {
-      const { error } = await client.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: window.location.origin
-        }
-      });
-
-      setAuthLoading(false);
-      setAuthMessage(error ? error.message : "Magic link sent. Check your email to continue.");
+    if (!trimmedEmail) {
+      setAuthMessage("Enter the email address you want to use.");
       return;
     }
 
-    const { error } = await client.auth.signInWithPassword({
-      email,
-      password
+    setAuthLoading(true);
+    setAuthMessage(null);
+
+    const { error } = await client.auth.signInWithOtp({
+      email: trimmedEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`
+      }
     });
 
     setAuthLoading(false);
@@ -487,9 +498,51 @@ export function App() {
       return;
     }
 
-    setPassword("");
-    setAuthMessage("Signed in. Opening your dashboard.");
-    navigate("/");
+    setAuthMessage("Check your email for the sign-in link. It verifies your address and opens the dashboard.");
+  }
+
+  async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const trimmedName = contactName.trim();
+    const trimmedEmail = contactEmail.trim();
+    const trimmedSubject = contactSubject.trim();
+    const trimmedMessage = contactMessage.trim();
+
+    if (!trimmedName || !trimmedEmail || !trimmedSubject || !trimmedMessage) {
+      setContactStatus("Fill in your name, email, subject, and message.");
+      return;
+    }
+
+    if (!configured) {
+      setContactStatus("Connect Supabase to enable contact submissions.");
+      return;
+    }
+
+    setContactLoading(true);
+    setContactStatus(null);
+
+    const { error } = await client.functions.invoke("contact-submit", {
+      body: {
+        name: trimmedName,
+        email: trimmedEmail,
+        subject: trimmedSubject,
+        message: trimmedMessage,
+        page: route,
+        userId: session?.user.id ?? null
+      }
+    });
+
+    setContactLoading(false);
+
+    if (error) {
+      setContactStatus(error.message);
+      return;
+    }
+
+    setContactStatus("Message sent. We'll review it and reply by email.");
+    setContactSubject("Support request");
+    setContactMessage("");
   }
 
   async function handleSignOut() {
@@ -529,7 +582,7 @@ export function App() {
     if (!configured || !session) {
       setDeviceAction({
         loading: false,
-        message: "Demo mode only. Add Supabase credentials to enable live device registration."
+        message: "Connect Supabase to enable live device registration."
       });
       return;
     }
@@ -603,7 +656,7 @@ export function App() {
     if (!configured || !session) {
       setProtectedAction({
         loading: false,
-        message: `${baseMessage} Connect Supabase to replace this placeholder with a live signed download.`
+        message: `${baseMessage} Connect Supabase to enable a live signed download.`
       });
       return;
     }
@@ -626,7 +679,7 @@ export function App() {
     const responseMessage =
       typeof data?.message === "string"
         ? data.message
-        : "Authorized download placeholder completed. Replace this with a real signed URL flow when connected.";
+        : "Authorized download flow completed. Replace this with a real signed URL flow when connected.";
     setProtectedAction({ loading: false, message: responseMessage });
   }
 
@@ -722,13 +775,21 @@ export function App() {
       ) : null}
 
       {route === "/contact" ? (
-        <InfoPage
-          eyebrow="Contact"
-          title="Reach the team without digging."
-          body="Use this page for support, product questions, or early access conversations. In the real product this would route to a contact form, support inbox, and security contact path."
-          secondary="For the current prototype, the important thing is structural: Contact lives as its own route instead of being shoved into the app shell."
+        <ContactPage
+          contactEmail={contactEmail}
+          contactLoading={contactLoading}
+          contactMessage={contactMessage}
+          contactName={contactName}
+          contactStatus={contactStatus}
+          contactSubject={contactSubject}
+          onContactEmailChange={setContactEmail}
+          onContactMessageChange={setContactMessage}
+          onContactNameChange={setContactName}
+          onContactSubmit={handleContactSubmit}
+          onContactSubjectChange={setContactSubject}
           onPrimary={() => navigate("/")}
-          primaryLabel={session ? "Return to dashboard" : "Return to home"}
+          primaryLabel={session ? "Back to dashboard" : "Back to home"}
+          sessionEmail={session?.user.email ?? null}
         />
       ) : null}
 
@@ -736,15 +797,11 @@ export function App() {
         <PublicHome
           authLoading={authLoading}
           authMessage={authMessage}
-          authMode={authMode}
           configured={configured}
           email={email}
-          onAuthModeChange={setAuthMode}
           onEmailChange={setEmail}
           onGroupSelect={setSelectedGroupId}
-          onPasswordChange={setPassword}
           onSignIn={handleSignIn}
-          password={password}
           selectedGroup={selectedGroup}
           selectedGroupDocs={selectedGroupDocs}
           uploadedCount={uploadedCount}
@@ -795,15 +852,11 @@ export function App() {
 type PublicHomeProps = {
   authLoading: boolean;
   authMessage: string | null;
-  authMode: AuthMode;
   configured: boolean;
   email: string;
-  onAuthModeChange: (mode: AuthMode) => void;
   onEmailChange: (value: string) => void;
   onGroupSelect: (id: LauncherGroupId) => void;
-  onPasswordChange: (value: string) => void;
   onSignIn: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  password: string;
   selectedGroup: LauncherGroup;
   selectedGroupDocs: DocumentTemplate[];
   uploadedCount: number;
@@ -812,15 +865,11 @@ type PublicHomeProps = {
 function PublicHome({
   authLoading,
   authMessage,
-  authMode,
   configured,
   email,
-  onAuthModeChange,
   onEmailChange,
   onGroupSelect,
-  onPasswordChange,
   onSignIn,
-  password,
   selectedGroup,
   selectedGroupDocs,
   uploadedCount
@@ -829,7 +878,7 @@ function PublicHome({
     <>
       <section className="launcher-hero">
         <div className="hero-copy-card">
-          <p className="eyebrow">Locked preview</p>
+          <p className="eyebrow">Secure preview</p>
           <h1>No more lost docs. Everything you need in one app.</h1>
           <p className="lede">
             The homepage now behaves like a locked version of the real app: category-first, cloud-backed, and honest
@@ -911,67 +960,37 @@ function PublicHome({
             </div>
           </div>
 
-          <div className="side-card auth-card">
-            <div className="section-heading compact">
-              <div>
-                <p className="eyebrow">Unlock</p>
-                <h3>Sign in to open your dashboard.</h3>
-              </div>
-              <span className="mini-pill">{configured ? "Live auth" : "Demo mode"}</span>
-            </div>
-
-            <form className="auth-form" onSubmit={(event) => void onSignIn(event)}>
-              <div className="segmented-control" role="tablist" aria-label="Sign-in mode">
-                <button
-                  className={`segment${authMode === "password" ? " active" : ""}`}
-                  onClick={() => onAuthModeChange("password")}
-                  type="button"
-                >
-                  Password
-                </button>
-                <button
-                  className={`segment${authMode === "magic" ? " active" : ""}`}
-                  onClick={() => onAuthModeChange("magic")}
-                  type="button"
-                >
-                  Magic link
-                </button>
+            <div className="side-card auth-card">
+              <div className="section-heading compact">
+                <div>
+                  <p className="eyebrow">Unlock</p>
+                  <h3>Sign in with email to open your dashboard.</h3>
+                </div>
+                <span className="mini-pill">{configured ? "Email verification" : "Not connected"}</span>
               </div>
 
-              <label className="field">
-                <span>Email</span>
-                <input
-                  autoComplete="email"
-                  onChange={(event) => onEmailChange(event.target.value)}
-                  placeholder="you@example.com"
-                  type="email"
-                  value={email}
-                />
-              </label>
-
-              {authMode === "password" ? (
+              <form className="auth-form" onSubmit={(event) => void onSignIn(event)}>
                 <label className="field">
-                  <span>Password</span>
+                  <span>Email</span>
                   <input
-                    autoComplete="current-password"
-                    onChange={(event) => onPasswordChange(event.target.value)}
-                    placeholder="Enter your password"
-                    type="password"
-                    value={password}
+                    autoComplete="email"
+                    onChange={(event) => onEmailChange(event.target.value)}
+                  placeholder="you@example.com"
+                    type="email"
+                    value={email}
                   />
                 </label>
-              ) : null}
 
-              <button className="button primary block" disabled={authLoading} type="submit">
-                {authLoading ? "Working..." : authMode === "password" ? "Sign in" : "Send magic link"}
-              </button>
-            </form>
+                <button className="button primary block" disabled={authLoading} type="submit">
+                  {authLoading ? "Working..." : "Send sign-in link"}
+                </button>
+              </form>
 
-            <p className="support-copy">
-              Real saved state, device controls, and cloud-backed document status all live behind this login gate.
-            </p>
-            {authMessage ? <p className="inline-feedback">{authMessage}</p> : null}
-          </div>
+              <p className="support-copy">
+                Real saved state, device controls, and cloud-backed document status all live behind this login gate.
+              </p>
+              {authMessage ? <p className="inline-feedback">{authMessage}</p> : null}
+            </div>
         </aside>
       </section>
 
@@ -1298,7 +1317,7 @@ function DashboardHome({
             <ul className="note-list">
               <li>
                 <strong>Login stays required for every account.</strong>
-                <span>Password reset and magic-link recovery are part of the standard entry path.</span>
+                <span>Email verification and magic-link recovery are part of the standard entry path.</span>
               </li>
               <li>
                 <strong>{accountPlan === "premium" ? "All groups unlocked." : "Only the Basic group is unlocked."}</strong>
@@ -1427,6 +1446,142 @@ function InfoPage({ body, eyebrow, onPrimary, primaryLabel, secondary, title }: 
           <button className="button primary" onClick={onPrimary} type="button">
             {primaryLabel}
           </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+type ContactPageProps = {
+  contactEmail: string;
+  contactLoading: boolean;
+  contactMessage: string;
+  contactName: string;
+  contactStatus: string | null;
+  contactSubject: string;
+  onContactEmailChange: (value: string) => void;
+  onContactMessageChange: (value: string) => void;
+  onContactNameChange: (value: string) => void;
+  onContactSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  onContactSubjectChange: (value: string) => void;
+  onPrimary: () => void;
+  primaryLabel: string;
+  sessionEmail: string | null;
+};
+
+function ContactPage({
+  contactEmail,
+  contactLoading,
+  contactMessage,
+  contactName,
+  contactStatus,
+  contactSubject,
+  onContactEmailChange,
+  onContactMessageChange,
+  onContactNameChange,
+  onContactSubmit,
+  onContactSubjectChange,
+  onPrimary,
+  primaryLabel,
+  sessionEmail
+}: ContactPageProps) {
+  return (
+    <section className="info-page contact-page">
+      <div className="contact-page-grid">
+        <div className="info-page-card contact-intro-card">
+          <p className="eyebrow">Contact</p>
+          <h1>Reach the team without digging.</h1>
+          <p className="lede">
+            Use this form for support, product questions, access problems, and early feedback. Messages land in Supabase
+            so the app can stay cloud-backed without pretending email is a fake button.
+          </p>
+          <p className="section-text">
+            {sessionEmail
+              ? `You are signed in as ${sessionEmail}. That address can be reused below, or you can send from a different one.`
+              : "Signed-out users can still contact the team. Authenticated users can send from their logged-in address or a different one."}
+          </p>
+          <ul className="note-list">
+            <li>
+              <strong>Use it for real product issues.</strong>
+              <span>Support, billing, access, and trust questions all belong here.</span>
+            </li>
+            <li>
+              <strong>Keep the message specific.</strong>
+              <span>Include the feature, device, or account state that needs attention.</span>
+            </li>
+            <li>
+              <strong>Responses stay human.</strong>
+              <span>The form creates a queueable record instead of a dead-end mailto link.</span>
+            </li>
+          </ul>
+          <div className="button-row">
+            <button className="button secondary" onClick={onPrimary} type="button">
+              {primaryLabel}
+            </button>
+          </div>
+        </div>
+
+        <div className="side-card contact-form-card">
+          <div className="section-heading compact">
+            <div>
+              <p className="eyebrow">Send a message</p>
+              <h3>We'll route it from the portal.</h3>
+            </div>
+            <span className="mini-pill">Supabase-backed</span>
+          </div>
+
+          <form className="auth-form contact-form" onSubmit={(event) => void onContactSubmit(event)}>
+            <label className="field">
+              <span>Name</span>
+              <input
+                autoComplete="name"
+                onChange={(event) => onContactNameChange(event.target.value)}
+                placeholder="Your name"
+                type="text"
+                value={contactName}
+              />
+            </label>
+
+            <label className="field">
+              <span>Email</span>
+              <input
+                autoComplete="email"
+                onChange={(event) => onContactEmailChange(event.target.value)}
+                placeholder="you@example.com"
+                type="email"
+                value={contactEmail}
+              />
+            </label>
+
+            <label className="field">
+              <span>Subject</span>
+              <input
+                onChange={(event) => onContactSubjectChange(event.target.value)}
+                placeholder="What do you need help with?"
+                type="text"
+                value={contactSubject}
+              />
+            </label>
+
+            <label className="field">
+              <span>Message</span>
+              <textarea
+                onChange={(event) => onContactMessageChange(event.target.value)}
+                placeholder="Give us the context, the problem, and what you were trying to do."
+                rows={7}
+                value={contactMessage}
+              />
+            </label>
+
+            <button className="button primary block" disabled={contactLoading} type="submit">
+              {contactLoading ? "Sending..." : "Send message"}
+            </button>
+          </form>
+
+          <p className="support-copy">
+            We use the same portal language here: cloud-backed, explicit, and never pretending the web is local-only.
+          </p>
+          {contactStatus ? <p className="inline-feedback">{contactStatus}</p> : null}
         </div>
       </div>
     </section>
