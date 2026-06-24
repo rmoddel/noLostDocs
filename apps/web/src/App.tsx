@@ -676,7 +676,7 @@ export function App() {
     <main className="app-shell">
       <header className="site-topbar">
         <button className="brand-lockup" onClick={() => navigate("/")} type="button">
-          <span className="brand-orb" />
+          <img alt="" aria-hidden="true" className="brand-mark" src="/nolostdocs-mark.svg" />
           <span>NoLostDocs</span>
         </button>
 

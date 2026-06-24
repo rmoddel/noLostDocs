@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  publicDir: fileURLToPath(new URL("../../nolostdocs_brand_assets", import.meta.url)),
   plugins: [react()],
   server: {
     host: "127.0.0.1",
