@@ -9,8 +9,8 @@ NoLostDocs is shifting from a Vite prototype into a production-grade Next.js web
 - [x] **Phase 1: Next Foundation** - Build a parallel `apps/web-next` App Router foundation with real homepage content, metadata, isolated runtime assets, and baseline Supabase scaffolding.
 - [x] **Phase 2: Asset and Design Source-of-Truth Cleanup** - Consolidate runtime asset usage and tighten the design system so the new app has one clear visual and asset pipeline.
 - [x] **Phase 3: Supabase, Auth, and Dashboard Port** - Port login, session handling, protected routes, and dashboard skeleton behavior into the Next app.
-- [ ] **Phase 4: Protected Flows Port** - Port device controls, protected downloads, scan/upload, contact, and plan-boundary flows into the Next app.
-- [ ] **Phase 5: Parity and Verification** - Prove that the Next app reaches launch-ready parity across homepage, auth, dashboard, assets, metadata, and backend safety.
+- [x] **Phase 4: Protected Flows Port** - Port device controls, protected downloads, scan/upload, contact, and plan-boundary flows into the Next app.
+- [x] **Phase 5: Parity and Verification** - Prove that the Next app reaches launch-ready parity across homepage, auth, dashboard, assets, metadata, and backend safety.
 - [ ] **Phase 6: Swap and Archive** - Replace the Vite app only after parity is verified by promoting `apps/web-next` to the final web app and archiving the Vite prototype safely.
 - [ ] **Phase 7: Package Naming Cleanup** - Rename internal `@doc-wallet/*` packages to `@nolostdocs/*` after the rearchitecture is stable.
 
@@ -72,7 +72,10 @@ Plans:
   2. Protected preview/download flows preserve the existing access model.
   3. Scan/upload and contact flows are ported with validation and user-safe error handling.
   4. Plan boundaries remain clear and enforced in the new app.
-**Plans**: 0 plans
+**Plans**: 1 plan
+
+Plans:
+- [x] 04-01: Port protected document actions, devices, scan/upload, and contact flows into the Next app.
 
 ### Phase 5: Parity and Verification
 **Goal**: As the NoLostDocs team, we need evidence that the Next app is ready to replace the prototype so that the swap is based on verification rather than optimism.
@@ -84,7 +87,10 @@ Plans:
   2. Assets, metadata, and unfurl behavior are correct in the Next app.
   3. No browser secrets are exposed and backend assumptions remain intact.
   4. The Vite prototype is still available as a fallback/reference until the swap happens.
-**Plans**: 0 plans
+**Plans**: 1 plan
+
+Plans:
+- [x] 05-01: Verify the Next app across routes, metadata, assets, auth behavior, and backend-safety boundaries.
 
 ### Phase 6: Swap and Archive
 **Goal**: As the NoLostDocs team, we need to promote the verified Next app into the final `apps/web` slot only when all earlier rearchitecture phases are complete, so that the production path changes safely and reversibly.
@@ -119,7 +125,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Next Foundation | 1/1 | Complete | 2026-06-24 |
 | 2. Asset and Design Source-of-Truth Cleanup | 1/1 | Complete | 2026-06-24 |
 | 3. Supabase, Auth, and Dashboard Port | 1/1 | Complete | 2026-06-24 |
-| 4. Protected Flows Port | 0/0 | Not started | - |
-| 5. Parity and Verification | 0/0 | Not started | - |
-| 6. Swap and Archive | 0/0 | Blocked on Phase 5 | - |
+| 4. Protected Flows Port | 1/1 | Complete | 2026-06-24 |
+| 5. Parity and Verification | 1/1 | Complete with blockers | 2026-06-24 |
+| 6. Swap and Archive | 0/0 | Blocked on Phase 5 findings | - |
 | 7. Package Naming Cleanup | 0/0 | Blocked on Phase 6 | - |

@@ -42,7 +42,8 @@ body {
 a,
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -62,6 +63,15 @@ img {
 
 input,
 textarea {
+  width: 100%;
+  border: 1px solid var(--nld-border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--nld-primary);
+  padding: 14px 16px;
+}
+
+select {
   width: 100%;
   border: 1px solid var(--nld-border);
   border-radius: 16px;
@@ -166,7 +176,9 @@ li {
 .site-header-actions,
 .hero-actions,
 .hero-facts,
-.footer-links {
+.footer-links,
+.button-row,
+.device-actions {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -326,7 +338,9 @@ li {
 .empty-state,
 .final-cta,
 .disclaimer-card,
-.recovery-card {
+.recovery-card,
+.contact-form-card,
+.scan-card {
   padding: clamp(24px, 4vw, 36px);
 }
 
@@ -390,6 +404,17 @@ li {
 .page-section {
   display: grid;
   gap: 20px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-heading.compact {
+  align-items: center;
 }
 
 .section-header {
@@ -625,9 +650,17 @@ li {
 .summary-metrics,
 .dashboard-layout,
 .dashboard-main,
-.dashboard-side {
+.dashboard-side,
+.contact-page-grid,
+.scan-shell {
   display: grid;
   gap: 16px;
+}
+
+.contact-page-grid,
+.scan-shell {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: flex-start;
 }
 
 .field span {
@@ -662,6 +695,12 @@ li {
 .dashboard-summary-card,
 .side-card {
   padding: 24px;
+}
+
+.contact-intro-card,
+.scan-intro-card {
+  position: sticky;
+  top: 96px;
 }
 
 .summary-metrics {
@@ -751,6 +790,34 @@ li {
   background: rgba(247, 241, 234, 0.88);
 }
 
+.scan-dropzone {
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+  border: 1px dashed rgba(169, 93, 77, 0.32);
+  border-radius: 22px;
+  background: rgba(247, 241, 234, 0.6);
+}
+
+.scan-dropzone input {
+  display: none;
+}
+
+.scan-preview {
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(35, 29, 27, 0.08);
+  background: rgba(247, 241, 234, 0.8);
+}
+
+.scan-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 241, 234, 0.8));
+}
+
 .document-action-list {
   gap: 12px;
 }
@@ -827,6 +894,22 @@ li {
   border: 1px solid rgba(35, 29, 27, 0.08);
 }
 
+.device-list {
+  display: grid;
+  gap: 12px;
+}
+
+.device-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(247, 241, 234, 0.72);
+  border: 1px solid rgba(35, 29, 27, 0.08);
+}
+
 .note-list {
   gap: 14px;
 }
@@ -845,6 +928,8 @@ li {
   .security-grid,
   .dashboard-hero,
   .dashboard-layout,
+  .contact-page-grid,
+  .scan-shell,
   .launcher-grid,
   .detail-grid {
     grid-template-columns: 1fr;
@@ -864,6 +949,11 @@ li {
 
   .section-header {
     display: grid;
+  }
+
+  .contact-intro-card,
+  .scan-intro-card {
+    position: static;
   }
 }
 

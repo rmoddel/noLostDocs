@@ -1,25 +1,35 @@
 "use client";
 
 import { prototypeSnapshot } from "@doc-wallet/config";
-import type { DocumentTemplate } from "@doc-wallet/types";
+import type { DeviceRecord, DocumentTemplate } from "@doc-wallet/types";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { dashboardGroups, type DashboardGroupId } from "@/constants/launcherGroups";
+import { runProtectedDocumentAction } from "@/lib/documents/download";
+import { loadDevices, registerBrowser, setDeviceLocked, type DeviceActionState } from "@/lib/devices/actions";
 import { allowedGroupIdsForPlan, resolveAccountPlan, type AccountPlan } from "@/lib/plans/resolvePlan";
 import { getPreferencePayload, readStoredHiddenGroups, writeStoredHiddenGroups } from "@/lib/preferences/dashboardPreferences";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
+import { AccessTrailPanel } from "./AccessTrailPanel";
 import { CategoryGrid } from "./CategoryGrid";
 import { CategoryVisibilityPanel } from "./CategoryVisibilityPanel";
 import { DashboardHero } from "./DashboardHero";
+import { DevicePanel } from "./DevicePanel";
 import { DocumentDetail } from "./DocumentDetail";
 import { DocumentList } from "./DocumentList";
+import { NextActionsPanel } from "./NextActionsPanel";
 import { PlanStatusCard } from "./PlanStatusCard";
 
 type DashboardPreferenceRow = {
   category_key: string;
   is_visible: boolean;
+};
+
+type ProtectedActionState = {
+  loading: boolean;
+  message: string | null;
 };
 
 export function DashboardShell() {
@@ -33,6 +43,11 @@ export function DashboardShell() {
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
   const [preferencesLoading, setPreferencesLoading] = useState(false);
   const [preferenceMessage, setPreferenceMessage] = useState<string | null>(null);
+  const [devices, setDevices] = useState<DeviceRecord[]>(prototypeSnapshot.devices);
+  const [devicesLoading, setDevicesLoading] = useState(false);
+  const [deviceAction, setDeviceAction] = useState<DeviceActionState>({ loading: false, message: null });
+  const [protectedAction, setProtectedAction] = useState<ProtectedActionState>({ loading: false, message: null });
+  const [showAccessExplainer, setShowAccessExplainer] = useState(false);
 
   useEffect(() => {
     if (!configured || !session) {
@@ -43,6 +58,15 @@ export function DashboardShell() {
 
     void loadAccountPlan();
     void loadVisibilityPreferences();
+  }, [configured, session]);
+
+  useEffect(() => {
+    if (!configured || !session) {
+      setDevices(prototypeSnapshot.devices);
+      return;
+    }
+
+    void refreshDevices();
   }, [configured, session]);
 
   async function loadAccountPlan() {
@@ -148,6 +172,66 @@ export function DashboardShell() {
     }
   }
 
+  async function refreshDevices() {
+    setDevicesLoading(true);
+    setDeviceAction((current) => ({ ...current, message: null }));
+
+    const result = await loadDevices(client, configured, session);
+
+    setDevicesLoading(false);
+    setDevices(result.devices);
+
+    if (result.message) {
+      setDeviceAction({ loading: false, message: result.message });
+    }
+  }
+
+  async function handleRegisterBrowser() {
+    setDeviceAction({ loading: true, message: null });
+    const result = await registerBrowser(client, configured, session);
+
+    if (result.message !== "Browser registered or refreshed.") {
+      setDeviceAction({ loading: false, message: result.message });
+      return;
+    }
+
+    await refreshDevices();
+    setDeviceAction({ loading: false, message: result.message });
+  }
+
+  async function handleDeviceLock(deviceId: string, shouldLock: boolean) {
+    setDeviceAction({ loading: true, message: null });
+    const result = await setDeviceLocked(client, configured, session, deviceId, shouldLock);
+
+    if (!configured || !session) {
+      setDevices((current) => current.map((device) => (device.id === deviceId ? { ...device, locked: shouldLock } : device)));
+      setDeviceAction({ loading: false, message: result.message });
+      return;
+    }
+
+    if (result.message !== (shouldLock ? "Device marked lost and locked." : "Device unlocked and re-authorized.")) {
+      setDeviceAction({ loading: false, message: result.message });
+      return;
+    }
+
+    await refreshDevices();
+    setDeviceAction({ loading: false, message: result.message });
+  }
+
+  async function handleProtectedAction(action: "preview" | "download", template: DocumentTemplate) {
+    setProtectedAction({ loading: true, message: null });
+
+    const result = await runProtectedDocumentAction({
+      action,
+      client,
+      configured,
+      session,
+      template
+    });
+
+    setProtectedAction({ loading: false, message: result.message });
+  }
+
   const allowedGroupIds = useMemo(() => allowedGroupIdsForPlan(accountPlan), [accountPlan]);
   const visibleGroups = useMemo(
     () => dashboardGroups.filter((group) => allowedGroupIds.includes(group.id) && !hiddenGroupIds.includes(group.id)),
@@ -204,6 +288,7 @@ export function DashboardShell() {
   const nextActionDocs = prototypeSnapshot.templates.filter(
     (template) => template.status === "expiring-soon" || template.status === "missing"
   );
+  const activeDeviceCount = devices.filter((device) => !device.locked).length;
 
   return (
     <>
@@ -246,7 +331,7 @@ export function DashboardShell() {
               </div>
             </div>
             <p className="section-support">
-              The route is protected now. Full capture, validation, and signed upload behavior land in the next phase.
+              Capture, rotation, validation, and signed upload are now wired into the protected scan route.
             </p>
             <Button href="/scan">Open scan route</Button>
           </Card>
@@ -281,7 +366,15 @@ export function DashboardShell() {
             uploadedCount={savedInSelectedGroup}
           />
 
-          <DocumentDetail document={selectedDocument as DocumentTemplate | null} />
+          <DocumentDetail
+            actionLoading={protectedAction.loading}
+            actionMessage={protectedAction.message}
+            document={selectedDocument as DocumentTemplate | null}
+            onDownload={(document) => void handleProtectedAction("download", document)}
+            onPreview={(document) => void handleProtectedAction("preview", document)}
+            onToggleAccessExplainer={() => setShowAccessExplainer((current) => !current)}
+            showAccessExplainer={showAccessExplainer}
+          />
         </section>
 
         <aside className="dashboard-side">
@@ -289,60 +382,24 @@ export function DashboardShell() {
             accountPlan={accountPlan}
             hiddenGroups={hiddenGroups}
             lockedGroups={lockedGroups}
+            uploadedCount={uploadedCount}
             visibleGroupCount={visibleGroups.length}
           />
 
-          <Card className="side-card">
-            <div className="section-heading compact">
-              <div>
-                <p className="eyebrow">Next actions</p>
-                <h3>Next up.</h3>
-              </div>
-            </div>
-            <ul className="note-list">
-              {nextActionDocs.slice(0, 4).map((template) => (
-                <li key={template.id}>
-                  <strong>{template.title}</strong>
-                  <span>{template.note ?? template.helper}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <NextActionsPanel documents={nextActionDocs} />
 
-          <Card className="side-card">
-            <div className="section-heading compact">
-              <div>
-                <p className="eyebrow">Route protection</p>
-                <h3>Protected pages now behave correctly when logged out.</h3>
-              </div>
-            </div>
-            <ul className="note-list">
-              <li>
-                <strong>Dashboard is gated.</strong>
-                <span>Signed-out visits are redirected through the login route.</span>
-              </li>
-              <li>
-                <strong>Scan is gated.</strong>
-                <span>The scan shell is no longer publicly reachable in the new app.</span>
-              </li>
-              <li>
-                <strong>Server/client split is preserved.</strong>
-                <span>Browser auth uses publishable credentials while the server helper stays isolated for later SSR work.</span>
-              </li>
-            </ul>
-          </Card>
+          <AccessTrailPanel />
 
-          <Card className="side-card">
-            <div className="section-heading compact">
-              <div>
-                <p className="eyebrow">Prototype fallback</p>
-                <h3>Reference data stays visible while live flows are ported.</h3>
-              </div>
-            </div>
-            <p className="section-support">
-              This dashboard intentionally uses the prototype snapshot for category and document structure until protected actions, device controls, and live mutations are ported in later phases.
-            </p>
-          </Card>
+          <DevicePanel
+            actionLoading={deviceAction.loading}
+            activeDeviceCount={activeDeviceCount}
+            devices={devices}
+            devicesLoading={devicesLoading}
+            message={deviceAction.message}
+            onRefreshDevices={() => void refreshDevices()}
+            onRegisterBrowser={() => void handleRegisterBrowser()}
+            onToggleDeviceLock={(deviceId, shouldLock) => void handleDeviceLock(deviceId, shouldLock)}
+          />
         </aside>
       </section>
     </>

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: rearchitecture
-status: ready
-stopped_at: Phase 3 complete; next executable work is Phase 4 protected flows port
-last_updated: "2026-06-24T02:00:00.000Z"
-last_activity: 2026-06-24 -- Completed the Next auth and dashboard port and advanced the roadmap to the protected-flow phase
+status: blocked
+stopped_at: Phase 5 complete; Phase 6 remains blocked by parity findings around protected-route exposure and missing live-env verification
+last_updated: "2026-06-25T02:45:00.000Z"
+last_activity: 2026-06-24 -- Completed parity verification and found blockers that must be fixed before the swap/archive phase
 progress:
   total_phases: 7
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 43
+  completed_phases: 5
+  total_plans: 5
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -21,22 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-18)
 
 **Core value:** No more lost docs. Everything the user needs in one app.
-**Current focus:** Phase 04 — protected-flows-port
+**Current focus:** Phase 06 — swap-and-archive (blocked)
 
 ## Current Position
 
-Phase: 04 (protected-flows-port) — READY
+Phase: 06 (swap-and-archive) — BLOCKED
 Plan: 0 of 0
-Status: Phase 03 complete; Phase 04 next
-Last activity: 2026-06-24 -- Login, protected routing, and the category-first dashboard shell were ported into the Next app
+Status: Phase 05 verification completed; cutover is blocked pending remediation
+Last activity: 2026-06-24 -- Route, metadata, asset, and secret-boundary verification completed; protected-route exposure and live-env gaps remain
 
-Progress: [████░░░░░░] 43%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: -
 - Total execution time: -
 
@@ -47,6 +48,8 @@ Progress: [████░░░░░░] 43%
 | 01 | 1 | - | - |
 | 02 | 1 | - | - |
 | 03 | 1 | - | - |
+| 04 | 1 | - | - |
+| 05 | 1 | - | - |
 
 ## Accumulated Context
 
@@ -62,19 +65,21 @@ Recent decisions affecting current work:
 - Archive SEO and brand exports remain in `web_assets`; runtime references stay app-local.
 - Protected dashboard and scan routing now live in the Next app through client-side session gates.
 - The dashboard shell uses reusable components and prototype snapshot data until later protected-flow ports land.
+- The Next app now owns the protected document-action, device, scan/upload, and contact surfaces while keeping the backend unchanged.
+- Phase 5 verification confirmed that metadata/assets are in good shape and browser secret boundaries are clean, but protected-route exposure still blocks cutover.
 - Mobile remains frozen until the web rearchitecture is stable.
 - Internal `@doc-wallet/*` package names stay untouched until a dedicated cleanup phase after the swap.
 
 ### Pending Todos
 
-- Define executable plans for Phase 4 before running `$gsd-execute-phase 4`.
-- Port protected downloads, device controls, and scan/upload flows on top of the auth-enabled dashboard shell.
-- Do not execute Phase 6 swap work before Phase 5 parity and verification complete.
+- Remediate protected route exposure by moving auth gating server-side or equivalent and by removing protected URLs from the sitemap.
+- Re-run Phase 5 verification with real `NEXT_PUBLIC_SUPABASE_*` values in a safe local or preview environment.
+- Do not execute Phase 6 swap work until those parity blockers are cleared.
 
 ### Blockers/Concerns
 
 - The active GSD phase artifacts from the legacy roadmap are archived and preserved for reference only.
-- New rearchitecture phases 4 through 7 do not yet have plan artifacts, so execute-phase on those phases will fail until planning is done.
+- Phase 6 remains blocked even though Phase 5 artifacts are complete because the verification result did not clear the app for cutover.
 
 ## Deferred Items
 
@@ -87,5 +92,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-24
-Stopped at: Rearchitecture Phase 3 complete; Phase 4 is the next valid execution target
+Stopped at: Rearchitecture Phase 5 complete with blockers; Phase 6 is not yet a valid execution target
 Resume file: None
