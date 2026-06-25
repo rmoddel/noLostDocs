@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: rearchitecture
-status: blocked
-stopped_at: Phase 5 complete; Phase 6 remains blocked by parity findings around protected-route exposure and missing live-env verification
-last_updated: "2026-06-25T02:45:00.000Z"
-last_activity: 2026-06-24 -- Completed parity verification and found blockers that must be fixed before the swap/archive phase
+status: active
+stopped_at: Phase 6 complete; Phase 7 package naming cleanup pending
+last_updated: "2026-06-25T03:05:00.000Z"
+last_activity: 2026-06-25 -- Cut over the verified Next app into apps/web and archived the Vite prototype as the reference app
 progress:
-  total_phases: 7
-  completed_phases: 5
-  total_plans: 5
-  completed_plans: 5
-  percent: 71
+  total_phases: 8
+  completed_phases: 6
+  total_plans: 6
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-18)
 
 **Core value:** No more lost docs. Everything the user needs in one app.
-**Current focus:** Phase 06 — swap-and-archive (blocked)
+**Current focus:** Phase 07 — package naming cleanup (pending)
 
 ## Current Position
 
-Phase: 06 (swap-and-archive) — BLOCKED
+Phase: 07 (package naming cleanup) — PENDING
 Plan: 0 of 0
-Status: Phase 05 verification completed; cutover is blocked pending remediation
-Last activity: 2026-06-24 -- Route, metadata, asset, and secret-boundary verification completed; protected-route exposure and live-env gaps remain
+Status: Phase 06 cutover completed; package rename cleanup is the next remaining phase
+Last activity: 2026-06-25 -- Verified the live Next app after cutover and archived the Vite prototype
 
-Progress: [███████░░░] 71%
+Progress: [███████▒░░] 75%
 
 ## Performance Metrics
 
@@ -59,27 +59,27 @@ Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - The Vite app remains the reference implementation until parity is verified.
-- The production-grade path is now a parallel Next.js App Router app in `apps/web-next`.
-- Runtime assets for the new app must resolve only from `apps/web-next/public`.
+- The production-grade path is now the live Next.js App Router app in `apps/web`.
+- Runtime assets for the live app resolve only from `apps/web/public`.
 - The generated Next manifest route is now the canonical manifest target for the new app.
 - Archive SEO and brand exports remain in `web_assets`; runtime references stay app-local.
-- Protected dashboard and scan routing now live in the Next app through client-side session gates.
+- Protected dashboard and scan routing now live in the Next app through server-side redirects.
 - The dashboard shell uses reusable components and prototype snapshot data until later protected-flow ports land.
 - The Next app now owns the protected document-action, device, scan/upload, and contact surfaces while keeping the backend unchanged.
-- Phase 5 verification confirmed that metadata/assets are in good shape and browser secret boundaries are clean, but protected-route exposure still blocks cutover.
+- Phase 5 verification was followed by a cutover pass that moved the verified Next app into `apps/web` and archived the Vite prototype as `apps/web-vite-reference`.
 - Mobile remains frozen until the web rearchitecture is stable.
-- Internal `@doc-wallet/*` package names stay untouched until a dedicated cleanup phase after the swap.
+- Internal `@doc-wallet/*` package names stay untouched until the dedicated cleanup phase.
 
 ### Pending Todos
 
 - Remediate protected route exposure by moving auth gating server-side or equivalent and by removing protected URLs from the sitemap.
 - Re-run Phase 5 verification with real `NEXT_PUBLIC_SUPABASE_*` values in a safe local or preview environment.
-- Do not execute Phase 6 swap work until those parity blockers are cleared.
+- Start Phase 7 package naming cleanup when ready.
 
 ### Blockers/Concerns
 
 - The active GSD phase artifacts from the legacy roadmap are archived and preserved for reference only.
-- Phase 6 remains blocked even though Phase 5 artifacts are complete because the verification result did not clear the app for cutover.
+- Phase 6 is complete; the repo is now on the live Next app path and only package naming cleanup remains.
 
 ## Deferred Items
 
@@ -91,6 +91,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-24
-Stopped at: Rearchitecture Phase 5 complete with blockers; Phase 6 is not yet a valid execution target
+Last session: 2026-06-25
+Stopped at: Rearchitecture Phase 6 complete; Phase 7 package naming cleanup is next
 Resume file: None

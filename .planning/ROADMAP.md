@@ -11,8 +11,9 @@ NoLostDocs is shifting from a Vite prototype into a production-grade Next.js web
 - [x] **Phase 3: Supabase, Auth, and Dashboard Port** - Port login, session handling, protected routes, and dashboard skeleton behavior into the Next app.
 - [x] **Phase 4: Protected Flows Port** - Port device controls, protected downloads, scan/upload, contact, and plan-boundary flows into the Next app.
 - [x] **Phase 5: Parity and Verification** - Prove that the Next app reaches launch-ready parity across homepage, auth, dashboard, assets, metadata, and backend safety.
-- [ ] **Phase 6: Swap and Archive** - Replace the Vite app only after parity is verified by promoting `apps/web-next` to the final web app and archiving the Vite prototype safely.
-- [ ] **Phase 7: Package Naming Cleanup** - Rename internal `@doc-wallet/*` packages to `@nolostdocs/*` after the rearchitecture is stable.
+- [x] **Phase 6: Swap and Archive** - Replace the Vite app only after parity is verified by promoting the verified Next app into `apps/web` and archiving the Vite prototype safely.
+- [ ] **Phase 7: OCR Capture and Extraction** - Make scanning and OCR the first product-quality focus after cutover, with strong live feedback and a better capture-to-text workflow.
+- [ ] **Phase 8: Package Naming Cleanup** - Rename internal `@doc-wallet/*` packages to `@nolostdocs/*` after the rearchitecture is stable.
 
 ## Phase Details
 
@@ -102,12 +103,30 @@ Plans:
   2. The Vite prototype is archived as `apps/web-vite-reference` or equivalent.
   3. Build and deploy paths are updated only after parity is confirmed.
   4. The repo remains runnable after the swap.
-**Plans**: 0 plans
+**Plans**: 1 plan
 
-### Phase 7: Package Naming Cleanup
-**Goal**: As the NoLostDocs team, we need internal package naming to match the product name after the architecture is stable, so that code and docs stop carrying obsolete branding debt.
+Plans:
+- [x] 06-01: Cut over the verified Next app into `apps/web` and archive the Vite prototype.
+
+### Phase 7: OCR Capture and Extraction
+**Goal**: As the NoLostDocs team, we need the scan flow to feel modern and reliable, so that document capture becomes the product's first standout workflow instead of a basic file upload.
 **Mode:** mvp
 **Depends on**: Phase 6
+**Requirements**: [OCR-01]
+**Success Criteria** (what must be TRUE):
+  1. The scan flow gives strong live guidance for good vs bad capture conditions.
+  2. OCR extraction is integrated into the upload/review flow.
+  3. The user can see quality feedback before saving an image or text result.
+  4. The new workflow is launchable without reintroducing amateurish copy or temporary scaffolding language.
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01: Build the OCR-first scan and extraction experience.
+
+### Phase 8: Package Naming Cleanup
+**Goal**: As the NoLostDocs team, we need internal package naming to match the product name after the architecture is stable, so that code and docs stop carrying obsolete branding debt.
+**Mode:** mvp
+**Depends on**: Phase 7
 **Requirements**: [NAME-01]
 **Success Criteria** (what must be TRUE):
   1. Internal package names use `@nolostdocs/*`.
@@ -118,7 +137,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -126,6 +145,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Asset and Design Source-of-Truth Cleanup | 1/1 | Complete | 2026-06-24 |
 | 3. Supabase, Auth, and Dashboard Port | 1/1 | Complete | 2026-06-24 |
 | 4. Protected Flows Port | 1/1 | Complete | 2026-06-24 |
-| 5. Parity and Verification | 1/1 | Complete with blockers | 2026-06-24 |
-| 6. Swap and Archive | 0/0 | Blocked on Phase 5 findings | - |
-| 7. Package Naming Cleanup | 0/0 | Blocked on Phase 6 | - |
+| 5. Parity and Verification | 1/1 | Complete | 2026-06-24 |
+| 6. Swap and Archive | 1/1 | Complete | 2026-06-25 |
+| 7. OCR Capture and Extraction | 0/1 | Pending | - |
+| 8. Package Naming Cleanup | 0/0 | Pending | - |
