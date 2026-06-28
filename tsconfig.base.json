@@ -17,13 +17,13 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@doc-wallet/types": [
+      "@nolostdocs/types": [
         "packages/types/src/index.ts"
       ],
-      "@doc-wallet/config": [
+      "@nolostdocs/config": [
         "packages/config/src/index.ts"
       ],
-      "@doc-wallet/supabase": [
+      "@nolostdocs/supabase": [
         "packages/supabase/src/index.ts"
       ]
     }

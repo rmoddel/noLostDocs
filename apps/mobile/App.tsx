@@ -1,6 +1,6 @@
-import { BASIC_GROUP_CATEGORIES, prototypeSnapshot } from "@doc-wallet/config";
-import { createDocWalletSupabaseClient } from "@doc-wallet/supabase";
-import type { CategoryId, DocumentTemplate, VaultCategory, VaultMode } from "@doc-wallet/types";
+import { BASIC_GROUP_CATEGORIES, prototypeSnapshot } from "@nolostdocs/config";
+import { createNoLostDocsSupabaseClient } from "@nolostdocs/supabase";
+import type { CategoryId, DocumentTemplate, VaultCategory, VaultMode } from "@nolostdocs/types";
 import { StatusBar } from "expo-status-bar";
 import { useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,7 +14,7 @@ import {
   View
 } from "react-native";
 
-const { configured } = createDocWalletSupabaseClient({
+const { configured } = createNoLostDocsSupabaseClient({
   url: process.env.EXPO_PUBLIC_SUPABASE_URL,
   publishableKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 });

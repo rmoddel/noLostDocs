@@ -1,5 +1,5 @@
 {
-  "name": "@doc-wallet/mobile",
+  "name": "@nolostdocs/mobile",
   "version": "0.1.0",
   "private": true,
   "main": "index.js",
@@ -11,9 +11,9 @@
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@doc-wallet/config": "0.1.0",
-    "@doc-wallet/supabase": "0.1.0",
-    "@doc-wallet/types": "0.1.0",
+    "@nolostdocs/config": "0.1.0",
+    "@nolostdocs/supabase": "0.1.0",
+    "@nolostdocs/types": "0.1.0",
     "expo": "~53.0.9",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",

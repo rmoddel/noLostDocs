@@ -1,15 +1,16 @@
 import { Button } from "../ui/Button";
 
 type ScanActionsProps = {
-  canSave: boolean;
+  actionLabel?: string;
+  canAct: boolean;
   loading: boolean;
-  onSave: () => void;
+  onAction: () => void;
 };
 
-export function ScanActions({ canSave, loading, onSave }: ScanActionsProps) {
+export function ScanActions({ actionLabel = "Save scan", canAct, loading, onAction }: ScanActionsProps) {
   return (
-    <Button disabled={!canSave || loading} onClick={onSave}>
-      {loading ? "Saving..." : "Save scan"}
+    <Button disabled={!canAct || loading} onClick={onAction}>
+      {loading ? "Working..." : actionLabel}
     </Button>
   );
 }

@@ -12,11 +12,11 @@
   ],
   "scripts": {
     "dev": "npm run dev:web",
-    "dev:web": "npm run dev -w @doc-wallet/web",
-    "dev:web-next": "npm run dev -w @doc-wallet/web",
-    "dev:mobile": "npm run dev -w @doc-wallet/mobile",
-    "build:web": "npm run build -w @doc-wallet/web",
-    "build:web-next": "npm run build -w @doc-wallet/web",
+    "dev:web": "npm run dev -w @nolostdocs/web",
+    "dev:web-next": "npm run dev -w @nolostdocs/web",
+    "dev:mobile": "npm run dev -w @nolostdocs/mobile",
+    "build:web": "npm run build -w @nolostdocs/web",
+    "build:web-next": "npm run build -w @nolostdocs/web",
     "lint": "npm run lint -ws --if-present",
     "typecheck": "npm run typecheck -ws --if-present"
   }

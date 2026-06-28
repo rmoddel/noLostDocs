@@ -1,5 +1,5 @@
-import { prototypeSnapshot } from "@doc-wallet/config";
-import type { DeviceRecord } from "@doc-wallet/types";
+import { prototypeSnapshot } from "@nolostdocs/config";
+import type { DeviceRecord } from "@nolostdocs/types";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
 export type DeviceActionState = {

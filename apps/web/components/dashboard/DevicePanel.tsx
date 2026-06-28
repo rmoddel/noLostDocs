@@ -1,4 +1,4 @@
-import type { DeviceRecord } from "@doc-wallet/types";
+import type { DeviceRecord } from "@nolostdocs/types";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 

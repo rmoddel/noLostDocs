@@ -77,6 +77,7 @@ type SaveScanArgs = {
   groupId: string;
   groupTitle: string;
   rotation: number;
+  scanMetadata?: Record<string, unknown>;
   session: Session;
 };
 
@@ -101,6 +102,7 @@ export async function saveScan({
   groupId,
   groupTitle,
   rotation,
+  scanMetadata,
   session
 }: SaveScanArgs) {
   if (!configured) {
@@ -158,7 +160,11 @@ export async function saveScan({
       metadata: {
         scan: true,
         category: groupId,
-        source: "web-scan"
+        source: "web-scan",
+        captureProvider: scanMetadata?.captureProvider ?? "browser-file-input",
+        ocrProvider: scanMetadata?.ocrProvider ?? "abbyy-finereader",
+        ocrStatus: scanMetadata?.ocrReady ? "queued" : "not-configured",
+        ...scanMetadata
       }
     })
     .select("id")

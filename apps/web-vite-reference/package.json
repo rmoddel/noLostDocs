@@ -1,5 +1,5 @@
 {
-  "name": "@doc-wallet/web-vite-reference",
+  "name": "@nolostdocs/web-vite-reference",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,9 @@
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@doc-wallet/config": "0.1.0",
-    "@doc-wallet/supabase": "0.1.0",
-    "@doc-wallet/types": "0.1.0",
+    "@nolostdocs/config": "0.1.0",
+    "@nolostdocs/supabase": "0.1.0",
+    "@nolostdocs/types": "0.1.0",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },

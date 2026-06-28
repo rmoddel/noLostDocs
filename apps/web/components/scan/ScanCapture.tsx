@@ -1,8 +1,10 @@
 import type { DashboardGroup, DashboardGroupId } from "@/constants/launcherGroups";
+import { scanPipeline } from "@/lib/scan/pipeline";
 
 type ScanCaptureProps = {
   fileName: string | null;
   groups: DashboardGroup[];
+  metadataEnabled?: boolean;
   onFileChange: (file: File | null) => void;
   onGroupChange: (groupId: DashboardGroupId) => void;
   onTitleChange: (value: string) => void;
@@ -13,6 +15,7 @@ type ScanCaptureProps = {
 export function ScanCapture({
   fileName,
   groups,
+  metadataEnabled = true,
   onFileChange,
   onGroupChange,
   onTitleChange,
@@ -21,21 +24,25 @@ export function ScanCapture({
 }: ScanCaptureProps) {
   return (
     <>
-      <label className="field">
-        <span>Category group</span>
-        <select onChange={(event) => onGroupChange(event.target.value as DashboardGroupId)} value={selectedGroupId}>
-          {groups.map((group) => (
-            <option key={group.id} value={group.id}>
-              {group.title}
-            </option>
-          ))}
-        </select>
-      </label>
+      {metadataEnabled ? (
+        <>
+          <label className="field">
+            <span>Category group</span>
+            <select onChange={(event) => onGroupChange(event.target.value as DashboardGroupId)} value={selectedGroupId}>
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.title}
+                </option>
+              ))}
+            </select>
+          </label>
 
-      <label className="field">
-        <span>Scan name</span>
-        <input onChange={(event) => onTitleChange(event.target.value)} type="text" value={title} />
-      </label>
+          <label className="field">
+            <span>Scan name</span>
+            <input onChange={(event) => onTitleChange(event.target.value)} type="text" value={title} />
+          </label>
+        </>
+      ) : null}
 
       <label className="scan-dropzone" htmlFor="scan-file">
         <input
@@ -46,8 +53,20 @@ export function ScanCapture({
           type="file"
         />
         <strong>{fileName ?? "Tap to take a photo or choose a file"}</strong>
-        <span>Front-lit, flat, and within the frame works best.</span>
+        <span>{scanPipeline.capture.guidance[0]}</span>
+        <span>
+          {scanPipeline.capture.fallbackLabel}: {scanPipeline.capture.fallbackValue}
+        </span>
       </label>
+
+      <div className="scan-guidance-panel">
+        <p className="scan-pipeline-label">Capture guidance</p>
+        <ul className="note-list">
+          {scanPipeline.capture.guidance.map((tip) => (
+            <li key={tip}>{tip}</li>
+          ))}
+        </ul>
+      </div>
     </>
   );
 }

@@ -72,8 +72,9 @@ Required frontend environment variables for the web app:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_SCANBOT_LICENSE_KEY` when enabling guided Scanbot capture
 
-Server-side secrets such as the service-role key and payment secret key should stay in trusted backend/operator workflows, not browser-exposed frontend env vars.
+Server-side secrets such as the service-role key, payment secret key, and ABBYY OCR connector values should stay in trusted backend/operator workflows, not browser-exposed frontend env vars.
 
 ## Current App Direction
 
@@ -96,8 +97,8 @@ Server-side secrets such as the service-role key and payment secret key should s
 
 - The live web app is deployed from `apps/web`
 - The archived Vite reference app remains available in `apps/web-vite-reference`
-- The next product priority is OCR capture and extraction
-- Package naming cleanup is still pending
+- The selected Phase 7 stack is `Scanbot SDK` for guided capture and `ABBYY FineReader` for accuracy-oriented OCR
+- Active internal workspace packages now use the `@nolostdocs/*` scope
 
 ## Verification
 

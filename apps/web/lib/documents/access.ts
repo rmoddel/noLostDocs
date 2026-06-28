@@ -1,4 +1,4 @@
-import type { DocumentTemplate } from "@doc-wallet/types";
+import type { DocumentTemplate } from "@nolostdocs/types";
 
 export type ProtectedAction = "preview" | "download";
 export type DocumentAccessState = "available" | "reauth-required" | "restricted" | "session-expired";

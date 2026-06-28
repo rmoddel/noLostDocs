@@ -1,4 +1,4 @@
-import type { VaultSnapshot } from "@doc-wallet/types";
+import type { VaultSnapshot } from "@nolostdocs/types";
 
 export const DEFAULT_SUPABASE_URL = "https://your-project-ref.supabase.co";
 export const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "your-supabase-publishable-key";

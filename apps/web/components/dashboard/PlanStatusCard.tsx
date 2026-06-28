@@ -1,5 +1,5 @@
 import type { DashboardGroup } from "@/constants/launcherGroups";
-import { FREE_PLAN_DOCUMENT_LIMIT } from "@doc-wallet/config";
+import { FREE_PLAN_DOCUMENT_LIMIT } from "@nolostdocs/config";
 import type { AccountPlan } from "@/lib/plans/resolvePlan";
 import { Card } from "../ui/Card";
 

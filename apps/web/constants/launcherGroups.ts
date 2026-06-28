@@ -1,4 +1,4 @@
-import type { CategoryId } from "@doc-wallet/types";
+import type { CategoryId } from "@nolostdocs/types";
 
 export type LauncherGroup = {
   id: "personal" | "driving" | "medical" | "professional" | "family";

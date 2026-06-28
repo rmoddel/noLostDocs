@@ -1,4 +1,4 @@
-import type { DocumentTemplate } from "@doc-wallet/types";
+import type { DocumentTemplate } from "@nolostdocs/types";
 import { Card } from "../ui/Card";
 
 type NextActionsPanelProps = {

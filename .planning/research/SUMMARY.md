@@ -14,3 +14,4 @@ The minimum credible product is not just storage. It includes wallet-style organ
 - Do not treat RLS as sufficient if storage path authorization is weaker.
 - Do not claim stronger privacy guarantees than the recovery/encryption design actually supports.
 - Do not expand into OCR or sharing before storage, restore, and device lock behavior are proven.
+- Do not treat accessibility as optional; it is part of engineering quality and trust.

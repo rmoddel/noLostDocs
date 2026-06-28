@@ -4,6 +4,15 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
+      "@nolostdocs/types": [
+        "../../packages/types/src/index.ts"
+      ],
+      "@nolostdocs/config": [
+        "../../packages/config/src/index.ts"
+      ],
+      "@nolostdocs/supabase": [
+        "../../packages/supabase/src/index.ts"
+      ],
       "@/*": [
         "./*"
       ]

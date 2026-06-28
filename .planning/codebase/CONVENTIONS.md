@@ -4,13 +4,14 @@
 
 - Product-facing name is `NoLostDocs`
 - Frontend copy should avoid `wallet` branding
-- Internal package scope still uses `@doc-wallet/*`, which is currently a technical carryover
+- Internal package scope uses `@nolostdocs/*`
 
 ## Environment Handling
 
 - Checked-in env files must use placeholders only
 - Real Supabase values are intended to be dropped in locally after scaffold completion
-- Web uses `VITE_SUPABASE_*` naming
+- Web uses `NEXT_PUBLIC_SUPABASE_*` naming
+- Guided capture and OCR toggles depend on deploy-time Scanbot and ABBYY credentials
 - Shared code prefers `publishableKey` terminology while allowing legacy `anonKey` fallback
 
 ## Workspace Patterns
@@ -29,4 +30,3 @@
 - Database and access-control intent must live in code under `supabase/`
 - Edge functions are organized one function per folder with Deno `index.ts` entrypoints
 - Security-sensitive backend behavior is expected to stay out of client code
-

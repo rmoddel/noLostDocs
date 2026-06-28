@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { FREE_PLAN_DOCUMENT_LIMIT, prototypeSnapshot } from "@doc-wallet/config";
-import { createDocWalletSupabaseClient } from "@doc-wallet/supabase";
-import type { CategoryId, DeviceRecord, DocumentStatus, DocumentTemplate } from "@doc-wallet/types";
+import { FREE_PLAN_DOCUMENT_LIMIT, prototypeSnapshot } from "@nolostdocs/config";
+import { createNoLostDocsSupabaseClient } from "@nolostdocs/supabase";
+import type { CategoryId, DeviceRecord, DocumentStatus, DocumentTemplate } from "@nolostdocs/types";
 
-const { configured, client } = createDocWalletSupabaseClient({
+const { configured, client } = createNoLostDocsSupabaseClient({
   url: import.meta.env.VITE_SUPABASE_URL,
   publishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 });

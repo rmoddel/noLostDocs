@@ -1,4 +1,4 @@
-import type { DocumentTemplate } from "@doc-wallet/types";
+import type { DocumentTemplate } from "@nolostdocs/types";
 import {
   buildAccessMessage,
   documentAccessTone,

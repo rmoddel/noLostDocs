@@ -5,6 +5,7 @@
 - Root workspace typecheck via `npm run typecheck`
 - Web production build via `npm run build:web`
 - Mobile TypeScript compile has also been run successfully in prior work
+- Accessibility review guidance now lives in `.planning/research/ACCESSIBILITY-EVALUATION.md`
 
 ## What Exists Today
 
@@ -27,4 +28,4 @@
 - Add lightweight React component or smoke tests for the web shell
 - Add Supabase policy verification scripts once a project is connected
 - Add function-level tests for device lock and signed download behavior
-
+- Add a repeatable accessibility review pass for key routes, using the guidance in `.planning/research/ACCESSIBILITY-EVALUATION.md`

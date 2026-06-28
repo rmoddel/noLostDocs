@@ -1,7 +1,7 @@
 "use client";
 
-import { prototypeSnapshot } from "@doc-wallet/config";
-import type { DeviceRecord, DocumentTemplate } from "@doc-wallet/types";
+import { prototypeSnapshot } from "@nolostdocs/config";
+import type { DeviceRecord, DocumentTemplate } from "@nolostdocs/types";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { dashboardGroups, type DashboardGroupId } from "@/constants/launcherGroups";

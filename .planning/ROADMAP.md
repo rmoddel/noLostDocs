@@ -12,8 +12,8 @@ NoLostDocs is shifting from a Vite prototype into a production-grade Next.js web
 - [x] **Phase 4: Protected Flows Port** - Port device controls, protected downloads, scan/upload, contact, and plan-boundary flows into the Next app.
 - [x] **Phase 5: Parity and Verification** - Prove that the Next app reaches launch-ready parity across homepage, auth, dashboard, assets, metadata, and backend safety.
 - [x] **Phase 6: Swap and Archive** - Replace the Vite app only after parity is verified by promoting the verified Next app into `apps/web` and archiving the Vite prototype safely.
-- [ ] **Phase 7: OCR Capture and Extraction** - Make scanning and OCR the first product-quality focus after cutover, with strong live feedback and a better capture-to-text workflow.
-- [ ] **Phase 8: Package Naming Cleanup** - Rename internal `@doc-wallet/*` packages to `@nolostdocs/*` after the rearchitecture is stable.
+- [x] **Phase 7: OCR Capture and Extraction** - Make scanning and OCR the first product-quality focus after cutover, with strong live feedback and a better capture-to-text workflow.
+- [x] **Phase 8: Package Naming Cleanup** - Rename internal `@doc-wallet/*` packages to `@nolostdocs/*` after the rearchitecture is stable.
 
 ## Phase Details
 
@@ -121,7 +121,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 07-01: Build the OCR-first scan and extraction experience.
+- [x] 07-01: Build the OCR-first scan and extraction experience.
 
 ### Phase 8: Package Naming Cleanup
 **Goal**: As the NoLostDocs team, we need internal package naming to match the product name after the architecture is stable, so that code and docs stop carrying obsolete branding debt.
@@ -132,7 +132,10 @@ Plans:
   1. Internal package names use `@nolostdocs/*`.
   2. Imports, lockfile, and docs are updated consistently.
   3. Build and verification still pass after the rename.
-**Plans**: 0 plans
+**Plans**: 1 plan
+
+Plans:
+- [x] 08-01: Rename internal packages and imports to `@nolostdocs/*`.
 
 ## Progress
 
@@ -147,5 +150,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 4. Protected Flows Port | 1/1 | Complete | 2026-06-24 |
 | 5. Parity and Verification | 1/1 | Complete | 2026-06-24 |
 | 6. Swap and Archive | 1/1 | Complete | 2026-06-25 |
-| 7. OCR Capture and Extraction | 0/1 | Pending | - |
-| 8. Package Naming Cleanup | 0/0 | Pending | - |
+| 7. OCR Capture and Extraction | 1/1 | Complete | 2026-06-25 |
+| 8. Package Naming Cleanup | 1/1 | Complete | 2026-06-25 |

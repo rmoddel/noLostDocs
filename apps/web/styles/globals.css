@@ -644,6 +644,7 @@ li {
 .auth-form,
 .field,
 .note-list,
+.scan-chip-list,
 .document-action-list,
 .visibility-pile,
 .dashboard-copy,
@@ -797,6 +798,90 @@ li {
   border: 1px dashed rgba(169, 93, 77, 0.32);
   border-radius: 22px;
   background: rgba(247, 241, 234, 0.6);
+}
+
+.scan-guidance-panel,
+.scan-pipeline-card,
+.scan-pipeline-panel,
+.scan-review-card,
+.scan-signal,
+.scan-ocr-note {
+  display: grid;
+  gap: 12px;
+}
+
+.scan-guidance-panel,
+.scan-pipeline-panel,
+.scan-review-card,
+.scan-signal,
+.scan-ocr-note {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(35, 29, 27, 0.08);
+  background: rgba(247, 241, 234, 0.52);
+}
+
+.scan-pipeline-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.scan-pipeline-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nld-muted);
+}
+
+.scan-chip-list {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.scan-signal-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.scan-signal strong {
+  color: var(--nld-primary);
+}
+
+.scan-signal span {
+  color: var(--nld-muted);
+}
+
+.scan-signal-ready {
+  background: rgba(63, 127, 104, 0.08);
+}
+
+.scan-signal-warning,
+.quality-warning {
+  background: rgba(169, 93, 77, 0.14);
+  color: var(--nld-accent);
+}
+
+.scan-signal-blocked,
+.quality-blocked {
+  background: rgba(35, 29, 27, 0.08);
+  color: var(--nld-primary);
+}
+
+.quality-ready {
+  background: rgba(63, 127, 104, 0.12);
+  color: var(--nld-success);
+}
+
+.quality-waiting {
+  background: rgba(247, 241, 234, 0.88);
+  color: var(--nld-muted);
 }
 
 .scan-dropzone input {

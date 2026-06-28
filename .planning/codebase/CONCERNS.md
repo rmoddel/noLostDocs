@@ -8,8 +8,7 @@
 
 ## Medium Priority
 
-- Product rename is incomplete internally: package names remain `@doc-wallet/*`, which is acceptable short term but will create drag if left unresolved.
-- The active web prototype is still a single large component, which is fine for fast iteration but will become expensive once auth, billing, and document workflows land.
+- The Scanbot and ABBYY selections are product-approved, but live commercial credentials and backend connector setup still need to happen outside the repo.
 - The repo still contains a deferred mobile app, which can confuse scope and create maintenance noise during the web-first cycle.
 
 ## Low Priority
@@ -20,6 +19,5 @@
 
 ## Open Alignment Questions
 
-- Stay on Vite for the flagship web experience or migrate to Next.js before auth and portal logic deepen.
-- Decide when to rename internal package scope away from `doc-wallet`.
 - Decide whether the mobile scaffold should stay in-repo during the web-first pass or be explicitly parked.
+- Decide when the deploy environment should turn on the Scanbot and ABBYY connectors for the live product.

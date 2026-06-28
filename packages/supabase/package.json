@@ -1,11 +1,11 @@
 {
-  "name": "@doc-wallet/supabase",
+  "name": "@nolostdocs/supabase",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
   "dependencies": {
-    "@doc-wallet/config": "0.1.0",
+    "@nolostdocs/config": "0.1.0",
     "@supabase/supabase-js": "^2.49.8"
   }
 }

@@ -12,9 +12,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@doc-wallet/config": fileURLToPath(new URL("../../packages/config/src/index.ts", import.meta.url)),
-      "@doc-wallet/supabase": fileURLToPath(new URL("../../packages/supabase/src/index.ts", import.meta.url)),
-      "@doc-wallet/types": fileURLToPath(new URL("../../packages/types/src/index.ts", import.meta.url))
+      "@nolostdocs/config": fileURLToPath(new URL("../../packages/config/src/index.ts", import.meta.url)),
+      "@nolostdocs/supabase": fileURLToPath(new URL("../../packages/supabase/src/index.ts", import.meta.url)),
+      "@nolostdocs/types": fileURLToPath(new URL("../../packages/types/src/index.ts", import.meta.url))
     }
   }
 });

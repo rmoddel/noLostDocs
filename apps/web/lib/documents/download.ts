@@ -1,4 +1,4 @@
-import type { DocumentTemplate } from "@doc-wallet/types";
+import type { DocumentTemplate } from "@nolostdocs/types";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { buildAccessMessage, getDocumentAccessState, type ProtectedAction } from "./access";
 

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: rearchitecture
 status: active
-stopped_at: Phase 6 complete; Phase 7 package naming cleanup pending
-last_updated: "2026-06-25T03:05:00.000Z"
-last_activity: 2026-06-25 -- Cut over the verified Next app into apps/web and archived the Vite prototype as the reference app
+stopped_at: Milestone complete
+last_updated: "2026-06-25T11:30:00.000Z"
+last_activity: 2026-06-25 -- Completed the OCR-first scan flow and renamed active workspace packages to @nolostdocs/*
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 6
-  completed_plans: 6
-  percent: 75
+  completed_phases: 8
+  total_plans: 8
+  completed_plans: 8
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-18)
 
 **Core value:** No more lost docs. Everything the user needs in one app.
-**Current focus:** Phase 07 — package naming cleanup (pending)
+**Current focus:** Milestone complete
 
 ## Current Position
 
-Phase: 07 (package naming cleanup) — PENDING
-Plan: 0 of 0
-Status: Phase 06 cutover completed; package rename cleanup is the next remaining phase
-Last activity: 2026-06-25 -- Verified the live Next app after cutover and archived the Vite prototype
+Phase: 08 complete
+Plan: 8 of 8
+Status: Phases 07 and 08 completed; milestone ready for ship prep
+Last activity: 2026-06-25 -- Verified the OCR-first scan flow and internal package rename on the live web app path
 
-Progress: [███████▒░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -68,18 +68,17 @@ Recent decisions affecting current work:
 - The Next app now owns the protected document-action, device, scan/upload, and contact surfaces while keeping the backend unchanged.
 - Phase 5 verification was followed by a cutover pass that moved the verified Next app into `apps/web` and archived the Vite prototype as `apps/web-vite-reference`.
 - Mobile remains frozen until the web rearchitecture is stable.
-- Internal `@doc-wallet/*` package names stay untouched until the dedicated cleanup phase.
+- Internal workspace package names now use the `@nolostdocs/*` scope.
 
 ### Pending Todos
 
-- Remediate protected route exposure by moving auth gating server-side or equivalent and by removing protected URLs from the sitemap.
 - Re-run Phase 5 verification with real `NEXT_PUBLIC_SUPABASE_*` values in a safe local or preview environment.
-- Start Phase 7 package naming cleanup when ready.
+- Configure commercial Scanbot and ABBYY credentials in the deployment environment when enabling guided capture and OCR extraction.
 
 ### Blockers/Concerns
 
 - The active GSD phase artifacts from the legacy roadmap are archived and preserved for reference only.
-- Phase 6 is complete; the repo is now on the live Next app path and only package naming cleanup remains.
+- The milestone code is complete, but live launch still depends on real environment configuration and backend project setup outside the repo.
 
 ## Deferred Items
 
@@ -92,5 +91,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-25
-Stopped at: Rearchitecture Phase 6 complete; Phase 7 package naming cleanup is next
+Stopped at: Rearchitecture milestone complete
 Resume file: None

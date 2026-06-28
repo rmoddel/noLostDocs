@@ -1,4 +1,4 @@
-import { DEFAULT_SUPABASE_PUBLISHABLE_KEY, DEFAULT_SUPABASE_URL, isPlaceholderValue } from "@doc-wallet/config";
+import { DEFAULT_SUPABASE_PUBLISHABLE_KEY, DEFAULT_SUPABASE_URL, isPlaceholderValue } from "@nolostdocs/config";
 import { createClient } from "@supabase/supabase-js";
 
 export type SupabaseEnv = {
@@ -19,7 +19,7 @@ export function resolveSupabaseEnv(env: SupabaseEnv) {
   };
 }
 
-export function createDocWalletSupabaseClient(env: SupabaseEnv) {
+export function createNoLostDocsSupabaseClient(env: SupabaseEnv) {
   const { url, publishableKey, configured } = resolveSupabaseEnv(env);
 
   return {
