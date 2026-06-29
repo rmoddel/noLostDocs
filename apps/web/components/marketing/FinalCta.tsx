@@ -9,7 +9,7 @@ export function FinalCta() {
           <p className="eyebrow">Start with the live experience</p>
           <h2>Bring your essential records into one calmer system.</h2>
           <p className="section-copy">
-            The first release focuses on a trustworthy web experience, clear document categories, and the security language a sensitive product should use.
+            The first release focuses on a trustworthy, responsive web experience, clear document categories, and the security language a sensitive product should use.
           </p>
         </div>
         <div className="hero-actions">

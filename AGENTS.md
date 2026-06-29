@@ -3,7 +3,7 @@
 
 **NoLostDocs**
 
-NoLostDocs is a secure document vault for storing, organizing, and recovering sensitive personal and professional documents without panic, clutter, or guesswork. The immediate product objective is web-first: shape the brand, product language, trust model, portal experience, and cloud-backed document flows on the web before resuming dedicated mobile work.
+NoLostDocs is a secure document vault for storing, organizing, and recovering sensitive personal and professional documents without panic, clutter, or guesswork. The immediate product objective is a responsive web experience: shape the brand, product language, trust model, portal experience, and cloud-backed document flows on the web before resuming dedicated mobile work.
 
 **Core Value:** No more lost docs. Everything the user needs in one app.
 
@@ -12,7 +12,7 @@ NoLostDocs is a secure document vault for storing, organizing, and recovering se
 - **Security**: Never store raw sensitive files unencrypted — the app handles identity, medical, vehicle, and business records.
 - **Product honesty**: Do not imply legal equivalence to physical IDs or official originals — acceptance varies by institution.
 - **Architecture**: Cloud-backed web access must stay explicit; local-only behavior cannot be implied to exist on web.
-- **Platform**: Web-only for the current cycle — mobile work is paused until the website and portal direction are right.
+- **Platform**: Responsive web-only for the current cycle — mobile work is paused until the website and portal direction are right.
 - **Naming**: Use `NoLostDocs` in the product and avoid “wallet” language on the frontend.
 - **Stack**: Web prototype can move fast, but the planned portal direction stays Next.js + Supabase + TypeScript.
 - **Compliance posture**: Build toward HIPAA-grade patterns without marketing HIPAA compliance — legal and vendor review are deferred.

@@ -31,10 +31,9 @@ To make money:
 
 This repo is wired for a single backend project.
 
-Frontend browser/mobile values live in:
+Frontend web values live in:
 
 - [apps/web/.env.local.example](/Users/rmoddel/code/rmo/work/noLostDocs/apps/web/.env.local.example)
-- [apps/mobile/.env.example](/Users/rmoddel/code/rmo/work/noLostDocs/apps/mobile/.env.example)
 
 These are browser-safe placeholders only. Real values should be added locally after you connect your backend project. Do not put service-role credentials in frontend env files.
 
@@ -44,7 +43,6 @@ Copy frontend placeholders locally:
 
 ```bash
 cp apps/web/.env.local.example apps/web/.env.local
-cp apps/mobile/.env.example apps/mobile/.env
 ```
 
 ## Install
@@ -82,14 +80,14 @@ Server-side secrets such as the service-role key, payment secret key, and ABBYY 
 - Persistent visible/hidden workspace category preferences
 - Protected preview/download UI framed as authorized short-lived access
 - Login-required plan model across the product
-- `Free Basic` gating versus `Premium` unlock messaging on web and mobile
+- `Free Basic` gating versus `Premium` unlock messaging on the responsive web app
 - Backend-owned subscription sync and upload quota enforcement scaffolding
 
 ## Trust Boundary
 
 - Browser code uses the public backend URL plus publishable key only.
 - Service-role keys are server/CLI-only and belong in deployment or local admin workflows, not in frontend env files.
-- Web access is the cloud-backed surface; local-only behavior is intentionally not implied on the website.
+- Web access is the responsive cloud-backed surface; local-only behavior is intentionally not implied on the website.
 - NoLostDocs is a secure document vault and recovery tool, not a legal replacement for official originals.
 - Product language should stay recovery-capable and should not claim HIPAA compliance or zero-knowledge guarantees that the implementation does not prove.
 

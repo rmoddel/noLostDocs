@@ -30,7 +30,7 @@ export function HeroSection() {
           </div>
           <div className="hero-panel-item">
             <strong>Keep the web promise honest.</strong>
-            <p>Cloud-backed files stay explicit. Local-only behavior is not implied on the website.</p>
+            <p>Cloud-backed files stay explicit in a responsive web experience. Local-only behavior is not implied on the website.</p>
           </div>
           <div className="hero-panel-item">
             <strong>Recover without panic.</strong>

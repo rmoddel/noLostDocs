@@ -9,13 +9,14 @@ applications:
             - npm ci
         build:
           commands:
-            - npm run build:web
+            - npm run build -w @nolostdocs/web
       artifacts:
         baseDirectory: apps/web/.next
         files:
           - '**/*'
       cache:
         paths:
+          - .npm/**/*
           - node_modules/**/*
           - apps/web/.next/cache/**/*
           - apps/*/node_modules/**/*
