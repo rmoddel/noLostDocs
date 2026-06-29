@@ -61,10 +61,15 @@ export async function runProtectedDocumentAction({
     };
   }
 
+  if (!template.documentFileId) {
+    return {
+      message: `${template.title} does not have a protected file attached yet.`
+    };
+  }
+
   const { data, error } = await client.functions.invoke("create-signed-download", {
     body: {
-      documentId: template.id,
-      documentTitle: template.title
+      documentFileId: template.documentFileId
     }
   });
 
@@ -72,12 +77,19 @@ export async function runProtectedDocumentAction({
     return { message: error.message };
   }
 
+  const signedUrl = typeof data?.signedUrl === "string" ? data.signedUrl : null;
+
+  if (!signedUrl) {
+    return { message: "Signed download flow returned no URL." };
+  }
+
+  if (typeof window !== "undefined") {
+    window.open(signedUrl, "_blank", "noopener,noreferrer");
+  }
+
   await logProtectedAction(client, session, action, template);
 
-  const responseMessage =
-    typeof data?.message === "string"
-      ? data.message
-      : "Authorized download flow completed. Replace this with a real signed URL flow when connected.";
+  const expiresIn = typeof data?.expiresIn === "number" ? data.expiresIn : 60;
 
-  return { message: responseMessage };
+  return { message: `Authorized download ready. Link expires in ${expiresIn} seconds.` };
 }

@@ -14,14 +14,18 @@ export function NextActionsPanel({ documents }: NextActionsPanelProps) {
           <h3>Next up.</h3>
         </div>
       </div>
-      <ul className="note-list">
-        {documents.slice(0, 4).map((template) => (
-          <li key={template.id}>
-            <strong>{template.title}</strong>
-            <span>{template.note ?? template.helper}</span>
-          </li>
-        ))}
-      </ul>
+      {documents.length ? (
+        <ul className="note-list">
+          {documents.slice(0, 4).map((template) => (
+            <li key={template.id}>
+              <strong>{template.title}</strong>
+              <span>{template.note ?? template.helper}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="section-support">No urgent or missing document actions right now.</p>
+      )}
     </Card>
   );
 }

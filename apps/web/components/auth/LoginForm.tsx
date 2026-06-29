@@ -7,14 +7,15 @@ import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
 type LoginFormProps = {
+  initialMessage?: string | null;
   nextPath: string;
 };
 
-export function LoginForm({ nextPath }: LoginFormProps) {
+export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
   const router = useRouter();
   const { configured, ready, session, signInWithOtp } = useAuth();
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(initialMessage);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,10 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       router.replace(nextPath);
     }
   }, [nextPath, ready, router, session]);
+
+  useEffect(() => {
+    setMessage(initialMessage);
+  }, [initialMessage]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +43,9 @@ export function LoginForm({ nextPath }: LoginFormProps) {
     const redirectUrl =
       typeof window === "undefined"
         ? ""
-        : `${window.location.origin}${nextPath.startsWith("/") ? nextPath : "/dashboard"}`;
+        : `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+            nextPath.startsWith("/") ? nextPath : "/dashboard"
+          )}`;
     const { errorMessage } = await signInWithOtp(trimmedEmail, redirectUrl);
 
     setLoading(false);
@@ -48,7 +55,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       return;
     }
 
-    setMessage("Check your email for the sign-in link.");
+    setMessage("Check your email for the sign-in link to sign in or finish creating your account.");
   }
 
   return (

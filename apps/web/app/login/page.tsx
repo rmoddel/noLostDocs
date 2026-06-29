@@ -9,8 +9,18 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const nextValue = resolvedSearchParams.next;
+  const authErrorValue = resolvedSearchParams.authError;
   const nextPath = Array.isArray(nextValue) ? nextValue[0] : nextValue;
+  const authError = Array.isArray(authErrorValue) ? authErrorValue[0] : authErrorValue;
   const safeNextPath = typeof nextPath === "string" && nextPath.startsWith("/") ? nextPath : "/dashboard";
+  const initialMessage =
+    authError === "exchange_failed"
+      ? "The email sign-in link could not be completed. Request a new link and try again."
+      : authError === "not_configured"
+        ? "Supabase auth is not configured yet for this environment."
+        : authError === "missing_code"
+          ? "That sign-in link is incomplete. Request a new email link."
+          : null;
   const { client, configured } = await createServerSupabaseClient();
 
   if (configured && client) {
@@ -23,5 +33,5 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     }
   }
 
-  return <LoginForm nextPath={safeNextPath} />;
+  return <LoginForm initialMessage={initialMessage} nextPath={safeNextPath} />;
 }

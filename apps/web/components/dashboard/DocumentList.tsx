@@ -30,22 +30,26 @@ export function DocumentList({ documents, onSelect, selectedDocumentId, selected
         </span>
       </div>
 
-      <div className="document-action-list">
-        {documents.map((template) => (
-          <button
-            className={`document-action status-${template.status}${selectedDocumentId === template.id ? " selected" : ""}`}
-            key={template.id}
-            onClick={() => onSelect(template.id)}
-            type="button"
-          >
-            <div>
-              <strong>{template.title}</strong>
-              <p>{template.note ?? template.helper}</p>
-            </div>
-            <span className={`status-pill status-${template.status}`}>{statusTone[template.status]}</span>
-          </button>
-        ))}
-      </div>
+      {documents.length ? (
+        <div className="document-action-list">
+          {documents.map((template) => (
+            <button
+              className={`document-action status-${template.status}${selectedDocumentId === template.id ? " selected" : ""}`}
+              key={template.id}
+              onClick={() => onSelect(template.id)}
+              type="button"
+            >
+              <div>
+                <strong>{template.title}</strong>
+                <p>{template.note ?? template.helper}</p>
+              </div>
+              <span className={`status-pill status-${template.status}`}>{statusTone[template.status]}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="section-support">No documents have been added to this group yet.</p>
+      )}
     </Card>
   );
 }

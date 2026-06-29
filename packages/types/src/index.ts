@@ -30,13 +30,19 @@ export type DocumentCard = {
 };
 
 export type DocumentTemplate = {
+  documentFileId?: string;
+  documentId?: string;
   id: string;
   category: CategoryId;
   title: string;
   helper: string;
+  hasFile?: boolean;
+  mimeType?: string;
   status: DocumentStatus;
   note?: string;
   expiresAt?: string;
+  storageBucket?: string;
+  storagePath?: string;
 };
 
 export type DeviceRecord = {

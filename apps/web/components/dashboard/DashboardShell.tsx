@@ -1,6 +1,5 @@
 "use client";
 
-import { prototypeSnapshot } from "@nolostdocs/config";
 import type { DeviceRecord, DocumentTemplate } from "@nolostdocs/types";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -12,6 +11,7 @@ import { getPreferencePayload, readStoredHiddenGroups, writeStoredHiddenGroups }
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
+import { EmptyState } from "../ui/EmptyState";
 import { AccessTrailPanel } from "./AccessTrailPanel";
 import { CategoryGrid } from "./CategoryGrid";
 import { CategoryVisibilityPanel } from "./CategoryVisibilityPanel";
@@ -32,7 +32,18 @@ type ProtectedActionState = {
   message: string | null;
 };
 
-export function DashboardShell() {
+type DashboardShellProps = {
+  initialDocumentMessage: string | null;
+  initialDocuments: DocumentTemplate[];
+};
+
+const demoDevices: DeviceRecord[] = [
+  { id: "dev-1", name: "iPhone 15", platform: "ios", trusted: true, locked: false, lastSeen: "2 min ago" },
+  { id: "dev-2", name: "Pixel 9", platform: "android", trusted: true, locked: false, lastSeen: "12 min ago" },
+  { id: "dev-3", name: "Chrome on MacBook", platform: "web", trusted: true, locked: false, lastSeen: "now" }
+];
+
+export function DashboardShell({ initialDocumentMessage, initialDocuments }: DashboardShellProps) {
   const { session } = useAuth();
   const { client, configured } = createBrowserSupabaseClient();
   const [selectedGroupId, setSelectedGroupId] = useState<DashboardGroupId>("basic");
@@ -41,9 +52,11 @@ export function DashboardShell() {
   const [accountPlan, setAccountPlan] = useState<AccountPlan>("free");
   const [accountLoading, setAccountLoading] = useState(false);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
+  const [documentMessage, setDocumentMessage] = useState<string | null>(initialDocumentMessage);
+  const [documents] = useState<DocumentTemplate[]>(initialDocuments);
   const [preferencesLoading, setPreferencesLoading] = useState(false);
   const [preferenceMessage, setPreferenceMessage] = useState<string | null>(null);
-  const [devices, setDevices] = useState<DeviceRecord[]>(prototypeSnapshot.devices);
+  const [devices, setDevices] = useState<DeviceRecord[]>(demoDevices);
   const [devicesLoading, setDevicesLoading] = useState(false);
   const [deviceAction, setDeviceAction] = useState<DeviceActionState>({ loading: false, message: null });
   const [protectedAction, setProtectedAction] = useState<ProtectedActionState>({ loading: false, message: null });
@@ -62,7 +75,7 @@ export function DashboardShell() {
 
   useEffect(() => {
     if (!configured || !session) {
-      setDevices(prototypeSnapshot.devices);
+      setDevices(demoDevices);
       return;
     }
 
@@ -250,8 +263,8 @@ export function DashboardShell() {
     [selectedGroupId]
   );
   const selectedGroupDocs = useMemo(
-    () => prototypeSnapshot.templates.filter((template) => selectedGroup.categories.includes(template.category)),
-    [selectedGroup]
+    () => documents.filter((template) => selectedGroup.categories.includes(template.category)),
+    [documents, selectedGroup]
   );
   const selectedDocument = useMemo(
     () => selectedGroupDocs.find((template) => template.id === selectedDocumentId) ?? selectedGroupDocs[0] ?? null,
@@ -279,13 +292,13 @@ export function DashboardShell() {
     }
   }, [selectedDocumentId, selectedGroupDocs]);
 
-  const uploadedCount = prototypeSnapshot.templates.filter((template) => template.status === "uploaded").length;
-  const missingCount = prototypeSnapshot.templates.filter((template) => template.status === "missing").length;
-  const urgentCount = prototypeSnapshot.templates.filter(
+  const uploadedCount = documents.filter((template) => template.status === "uploaded").length;
+  const missingCount = documents.filter((template) => template.status === "missing").length;
+  const urgentCount = documents.filter(
     (template) => template.status === "expiring-soon" || template.status === "expired"
   ).length;
   const savedInSelectedGroup = selectedGroupDocs.filter((template) => template.status === "uploaded").length;
-  const nextActionDocs = prototypeSnapshot.templates.filter(
+  const nextActionDocs = documents.filter(
     (template) => template.status === "expiring-soon" || template.status === "missing"
   );
   const activeDeviceCount = devices.filter((device) => !device.locked).length;
@@ -366,15 +379,22 @@ export function DashboardShell() {
             uploadedCount={savedInSelectedGroup}
           />
 
-          <DocumentDetail
-            actionLoading={protectedAction.loading}
-            actionMessage={protectedAction.message}
-            document={selectedDocument as DocumentTemplate | null}
-            onDownload={(document) => void handleProtectedAction("download", document)}
-            onPreview={(document) => void handleProtectedAction("preview", document)}
-            onToggleAccessExplainer={() => setShowAccessExplainer((current) => !current)}
-            showAccessExplainer={showAccessExplainer}
-          />
+          {selectedDocument ? (
+            <DocumentDetail
+              actionLoading={protectedAction.loading}
+              actionMessage={protectedAction.message}
+              document={selectedDocument}
+              onDownload={(document) => void handleProtectedAction("download", document)}
+              onPreview={(document) => void handleProtectedAction("preview", document)}
+              onToggleAccessExplainer={() => setShowAccessExplainer((current) => !current)}
+              showAccessExplainer={showAccessExplainer}
+            />
+          ) : (
+            <EmptyState
+              body="Signed-in documents will appear here after you add them through the protected scan flow."
+              title="No documents in this group yet."
+            />
+          )}
         </section>
 
         <aside className="dashboard-side">
@@ -389,6 +409,8 @@ export function DashboardShell() {
           <NextActionsPanel documents={nextActionDocs} />
 
           <AccessTrailPanel />
+
+          {documentMessage ? <p className="inline-feedback">{documentMessage}</p> : null}
 
           <DevicePanel
             actionLoading={deviceAction.loading}
