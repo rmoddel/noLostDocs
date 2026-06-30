@@ -28,9 +28,9 @@ export function DashboardHero({
     <section className="dashboard-hero">
       <div className="hero-copy dashboard-copy">
         <p className="eyebrow">Dashboard</p>
-        <h1>Documents and account access.</h1>
+        <h1>Account records and access controls.</h1>
         <p className="hero-lede">
-          The signed-in workspace keeps session state, categories, and document status in one place.
+          The signed-in workspace keeps account state, record categories, and document status in one operating view.
         </p>
       </div>
 
@@ -53,8 +53,8 @@ export function DashboardHero({
         </div>
         <p className="section-support">
           {accountPlan === "premium"
-            ? "Premium unlocks every group in the dashboard."
-            : "Free Basic keeps the core cloud-backed document groups available."}
+            ? "Premium access unlocks the full document surface for this account."
+            : "Free Basic keeps the core cloud-backed document groups available to this account."}
         </p>
         {accountMessage ? <p className="inline-feedback">{accountMessage}</p> : null}
       </Card>

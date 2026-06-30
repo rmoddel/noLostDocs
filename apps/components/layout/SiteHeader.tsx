@@ -42,7 +42,7 @@ export function SiteHeader() {
           {ready && session ? (
             <>
               <Button href="/dashboard" size="sm" variant="secondary">
-                Open dashboard
+                Open workspace
               </Button>
               <Button
                 onClick={() => {
@@ -57,10 +57,10 @@ export function SiteHeader() {
           ) : (
             <>
               <Button href="/login" size="sm" variant="secondary">
-                Login
+                Client login
               </Button>
               <Button href="/dashboard" size="sm">
-                Get Started
+                Open workspace
               </Button>
             </>
           )}

@@ -22,10 +22,10 @@ export function SiteFooter() {
           width={480}
         />
         <p className="footer-copy">
-          Cloud-backed document organization for people who need a calmer way to store, recover, and review the records that matter.
+          NoLostDocs is a client-facing document platform for households and professionals who need a more reliable way to store, recover, and review critical records.
         </p>
         <p className="footer-meta">
-          Runtime assets now resolve from the live app only. Archive exports stay separate until the naming cleanup phase.
+          The web experience is built around explicit cloud-backed access, recovery-capable account controls, and practical security boundaries for sensitive records.
         </p>
         <div className="footer-links">
           {footerLinks.map((item) => (

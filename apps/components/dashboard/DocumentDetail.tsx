@@ -64,22 +64,21 @@ export function DocumentDetail({
 
       <div className="button-row">
         <Button disabled={actionLoading} onClick={() => onPreview(document)} size="sm">
-          Authorized preview
+          Open authorized preview
         </Button>
         <Button disabled={actionLoading} onClick={() => onDownload(document)} size="sm" variant="secondary">
-          Authorized download
+          Request authorized download
         </Button>
         <Button onClick={onToggleAccessExplainer} size="sm" variant="secondary">
-          Why protected?
+          Why this is protected
         </Button>
       </div>
 
       {showAccessExplainer ? (
         <div className="access-explainer">
-          <strong>Web access stays scoped.</strong>
+          <strong>Web access remains deliberately scoped.</strong>
           <p>
-            Metadata browsing is always lighter than file access. Protected actions stay short-lived, can require a fresh
-            check, and are intended to be auditable.
+            Metadata review is intentionally lighter than file access. Protected actions stay time-bounded, may require a fresh check, and are intended to remain reviewable.
           </p>
         </div>
       ) : null}

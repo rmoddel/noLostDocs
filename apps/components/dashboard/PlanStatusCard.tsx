@@ -30,15 +30,15 @@ export function PlanStatusCard({
       </div>
       <ul className="note-list">
         <li>
-          <strong>Login stays required for every account.</strong>
-          <span>Dashboard and scan routes are gated behind signed-in access.</span>
+          <strong>Signed-in access remains required.</strong>
+          <span>The dashboard and secure scan workflow stay behind account authentication.</span>
         </li>
         <li>
-          <strong>{accountPlan === "premium" ? "All groups unlocked." : "Only the Basic group is unlocked."}</strong>
+          <strong>{accountPlan === "premium" ? "All categories are available." : "Only the Basic category is available."}</strong>
           <span>
             {accountPlan === "premium"
-              ? `${visibleGroupCount} visible groups are active in this account view.`
-              : "Free Basic keeps the core group available until upgrade."}
+              ? `${visibleGroupCount} visible categories are active in this account view.`
+              : "Free Basic keeps the core category available until the account is upgraded."}
           </span>
         </li>
         <li>
@@ -47,12 +47,12 @@ export function PlanStatusCard({
               ? "Premium upload policy is active."
               : `${freePlanRemainingSlots} of ${FREE_PLAN_DOCUMENT_LIMIT} free cloud slots remain.`}
           </strong>
-          <span>Upload limits are enforced before a new file is saved.</span>
+          <span>Upload limits are enforced before a new record is saved to the account.</span>
         </li>
         <li>
-          <strong>{hiddenGroups.length ? `${hiddenGroups.length} groups are hidden.` : "No hidden groups."}</strong>
+          <strong>{hiddenGroups.length ? `${hiddenGroups.length} categories are hidden.` : "No hidden categories."}</strong>
           <span>
-            {lockedGroups.length ? `${lockedGroups.length} groups remain behind the premium boundary.` : "All groups are currently available."}
+            {lockedGroups.length ? `${lockedGroups.length} categories remain behind the premium boundary.` : "All available categories are currently visible to this account."}
           </span>
         </li>
       </ul>

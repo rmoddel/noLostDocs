@@ -22,41 +22,41 @@ export const launcherGroups: LauncherGroup[] = [
     id: "personal",
     title: "Personal",
     summary: "License, passport, Social Security card",
-    detail: "Identity documents organized for the moments when agencies, forms, or appointments move faster than your filing cabinet."
+    detail: "Identity records organized for applications, verifications, renewals, and the operational moments when timing matters."
   },
   {
     id: "driving",
     title: "Driving",
     summary: "Registration, insurance, inspection",
-    detail: "Vehicle paperwork kept visible, current, and easy to recover when the glove box is not enough."
+    detail: "Vehicle records kept current, visible, and easy to retrieve when roadside, compliance, or claims workflows move quickly."
   },
   {
     id: "medical",
     title: "Medical",
     summary: "Insurance cards, medications, records",
-    detail: "Coverage details and care records lined up for front desks, caregivers, and urgent follow-up."
+    detail: "Coverage details and care records prepared for front desks, caregivers, and follow-up conversations that cannot wait."
   },
   {
     id: "professional",
     title: "Professional",
     summary: "Licenses, certifications, compliance documents",
-    detail: "Work-critical records tracked in one place so renewals and proof requests do not become a scramble."
+    detail: "Business-critical records tracked in one place so renewals, audits, and proof requests are handled with less friction."
   },
   {
     id: "family",
     title: "Family",
     summary: "School forms, child records, emergency docs",
-    detail: "Household records arranged for travel, enrollment, and the paperwork that always seems to arrive at the worst time."
+    detail: "Household records arranged for enrollment, travel, and the recurring paperwork that rarely arrives on a convenient schedule."
   }
 ] as const;
 
 export const securityPrinciples = [
-  "Private storage",
-  "Signed-in access",
+  "Private storage boundaries",
+  "Signed-in account access",
   "Protected downloads",
-  "Device lock",
-  "Cloud backup controls",
-  "Audit trail where applicable"
+  "Device recovery controls",
+  "Cloud backup clarity",
+  "Reviewable access events"
 ] as const;
 
 export const dashboardGroups: DashboardGroup[] = [
@@ -64,28 +64,28 @@ export const dashboardGroups: DashboardGroup[] = [
     id: "basic",
     title: "Basic",
     description: "License, registration, insurance card, passport",
-    helper: "The universal essentials most people reach for first.",
+    helper: "The essential records most clients need available first.",
     categories: ["personal", "driving", "travel"]
   },
   {
     id: "medical",
     title: "Medical",
     description: "Insurance cards, medication lists, records",
-    helper: "Fast access when the front desk or caregiver is waiting.",
+    helper: "Fast access when a clinician, caregiver, or front desk is waiting.",
     categories: ["medical"]
   },
   {
     id: "professional",
     title: "Professional",
     description: "ABA, DR, PT, RN, certifications, business docs",
-    helper: "Licenses, compliance papers, and work-critical records.",
+    helper: "Licenses, compliance materials, and work-critical records.",
     categories: ["work", "business"]
   },
   {
     id: "family",
     title: "Family",
     description: "School forms, child records, emergency documents",
-    helper: "Shared household paperwork without the scavenger hunt.",
+    helper: "Shared household records without the last-minute search.",
     categories: ["family"]
   }
 ] as const;

@@ -103,7 +103,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
     if (upsertError) {
       setAccountPlan("free");
       setAccountLoading(false);
-      setAccountMessage("Using Free Basic plan until profile sync is available.");
+      setAccountMessage("Using Free Basic until profile synchronization is available.");
       return;
     }
 
@@ -116,7 +116,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
 
     if (profileError || subscriptionError) {
       setAccountPlan("free");
-      setAccountMessage("Using Free Basic plan until subscription state is available.");
+      setAccountMessage("Using Free Basic until subscription state is available.");
       return;
     }
 
@@ -139,7 +139,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
     setPreferencesLoading(false);
 
     if (error) {
-      setPreferenceMessage("Using local dashboard visibility until preferences are ready.");
+      setPreferenceMessage("Using local workspace preferences until account-level visibility settings are ready.");
       return;
     }
 
@@ -160,13 +160,13 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
         : [...hiddenGroupIds, groupId];
 
     if (!nextVisible && dashboardGroups.length - nextHidden.length === 0) {
-      setPreferenceMessage("Keep at least one category visible on the dashboard.");
+      setPreferenceMessage("Keep at least one category visible in the workspace.");
       return;
     }
 
     setHiddenGroupIds(nextHidden);
     writeStoredHiddenGroups(nextHidden);
-    setPreferenceMessage(nextVisible ? "Category restored to the dashboard." : "Category hidden from the dashboard.");
+    setPreferenceMessage(nextVisible ? "Category restored to the workspace." : "Category removed from the workspace view.");
 
     if (!configured || !session) {
       return;
@@ -181,7 +181,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
     setPreferencesLoading(false);
 
     if (error) {
-      setPreferenceMessage("Saved locally. Connect the dashboard preferences table to persist this account-wide.");
+      setPreferenceMessage("Saved locally. Connect the workspace preferences table to persist this account-wide.");
     }
   }
 
@@ -320,9 +320,9 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
           <div className="section-heading">
             <div>
               <p className="eyebrow">Categories</p>
-              <h2>Categories.</h2>
+              <h2>Record categories.</h2>
             </div>
-            <p className="section-support">Categories lead. Documents stay secondary.</p>
+            <p className="section-support">Categories lead the workflow. Individual documents stay one level deeper.</p>
           </div>
 
           <CategoryGrid groups={visibleGroups} onSelect={setSelectedGroupId} selectedGroupId={selectedGroup.id} />
@@ -340,13 +340,13 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
             <div className="section-heading compact">
               <div>
                 <p className="eyebrow">Scan</p>
-                <h3>Capture a new document.</h3>
+                <h3>Capture a new record.</h3>
               </div>
             </div>
             <p className="section-support">
-              Capture, rotation, validation, and signed upload are now wired into the protected scan route.
+              Capture, rotation, validation, and signed upload now route through the protected scan workflow.
             </p>
-            <Button href="/scan">Open scan route</Button>
+            <Button href="/scan">Open secure scan workflow</Button>
           </Card>
 
           {lockedGroups.length ? (
@@ -354,19 +354,19 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
               <div className="section-heading compact">
                 <div>
                   <p className="eyebrow">Premium boundary</p>
-                  <h3>{lockedGroups.length} groups stay reserved for premium.</h3>
+                  <h3>{lockedGroups.length} categories remain reserved for premium.</h3>
                 </div>
-                <span className="mini-pill">Upgrade path</span>
+                <span className="mini-pill">Account boundary</span>
               </div>
               <div className="visibility-pile muted">
                 {lockedGroups.map((group) => (
                   <div className="visibility-chip muted locked" key={group.id}>
-                    Unlock {group.title}
+                    Premium: {group.title}
                   </div>
                 ))}
               </div>
               <p className="section-support">
-                Free Basic exposes the core group only. The broader document surface remains visible as a boundary.
+                Free Basic exposes the core document surface only. The broader workspace remains visible so account scope is clear before upgrade.
               </p>
             </Card>
           ) : null}
@@ -391,8 +391,8 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
             />
           ) : (
             <EmptyState
-              body="Signed-in documents will appear here after you add them through the protected scan flow."
-              title="No documents in this group yet."
+              body="Signed-in records will appear here after they are added through the protected scan workflow."
+              title="No records are in this category yet."
             />
           )}
         </section>

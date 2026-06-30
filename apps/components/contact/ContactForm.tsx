@@ -13,7 +13,7 @@ export function ContactForm() {
   const { session } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("Support request");
+  const [subject, setSubject] = useState("Client support request");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -48,7 +48,7 @@ export function ContactForm() {
     setStatus(result.message);
 
     if (result.message.toLowerCase().includes("message sent")) {
-      setSubject("Support request");
+      setSubject("Client support request");
       setMessage("");
     }
   }
@@ -58,21 +58,21 @@ export function ContactForm() {
       <div className="contact-page-grid">
         <Card className="content-card contact-intro-card">
           <p className="eyebrow">Contact</p>
-          <h1>Send a message.</h1>
-          <p className="section-copy">Messages are saved for follow-up through the existing support function.</p>
-          <p className="section-support">{session?.user.email ? `Signed in as ${session.user.email}.` : "Send from any email address."}</p>
+          <h1>Reach the support team.</h1>
+          <p className="section-copy">Messages are recorded for follow-up through the current support workflow.</p>
+          <p className="section-support">{session?.user.email ? `Signed in as ${session.user.email}.` : "You may contact support from any email address."}</p>
           <ul className="note-list">
             <li>
-              <strong>Support</strong>
-              <span>Billing, access, and trust questions.</span>
+              <strong>Client support</strong>
+              <span>Billing, access, onboarding, and trust-model questions.</span>
             </li>
             <li>
-              <strong>Be specific</strong>
-              <span>Include the feature, device, or account state.</span>
+              <strong>Operational detail helps</strong>
+              <span>Include the route, device, browser, or account state when possible.</span>
             </li>
             <li>
-              <strong>Tracked</strong>
-              <span>The message is saved for follow-up.</span>
+              <strong>Recorded for follow-up</strong>
+              <span>Messages are saved so the conversation can be reviewed and continued.</span>
             </li>
           </ul>
         </Card>
@@ -81,7 +81,7 @@ export function ContactForm() {
           <div className="section-heading compact">
             <div>
               <p className="eyebrow">Message</p>
-              <h3>Send your message.</h3>
+              <h3>Send a support request.</h3>
             </div>
           </div>
 
@@ -107,11 +107,11 @@ export function ContactForm() {
             </label>
 
             <Button disabled={loading} type="submit">
-              {loading ? "Sending..." : "Send message"}
+              {loading ? "Sending..." : "Send request"}
             </Button>
           </form>
 
-          <p className="support-copy">Messages are saved with your account when signed in.</p>
+          <p className="support-copy">When you are signed in, the request is recorded alongside your account context.</p>
           {status ? <p className="inline-feedback">{status}</p> : null}
         </Card>
       </div>

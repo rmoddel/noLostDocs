@@ -23,24 +23,24 @@ export function CategoryVisibilityPanel({
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Category visibility</p>
-          <h3>{visibleGroups.length} visible groups</h3>
+          <h3>{visibleGroups.length} visible categories</h3>
         </div>
-        <span className="mini-pill">{saving ? "Saving..." : "Dashboard scope"}</span>
+        <span className="mini-pill">{saving ? "Saving..." : "Workspace scope"}</span>
       </div>
       <div className="visibility-pile">
         {visibleGroups.map((group) => (
           <button className="visibility-chip" key={group.id} onClick={() => onHide(group.id)} type="button">
-            Hide {group.title}
+            Remove {group.title}
           </button>
         ))}
       </div>
       {hiddenGroups.length ? (
         <>
-          <p className="section-support">Hidden groups stay recoverable from this dashboard.</p>
+          <p className="section-support">Hidden categories remain available to restore from within this workspace.</p>
           <div className="visibility-pile muted">
             {hiddenGroups.map((group) => (
               <button className="visibility-chip muted" key={group.id} onClick={() => onShow(group.id)} type="button">
-                Show {group.title}
+                Restore {group.title}
               </button>
             ))}
           </div>

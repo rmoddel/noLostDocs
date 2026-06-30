@@ -33,7 +33,7 @@ export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setMessage("Enter the email address you want to use.");
+      setMessage("Enter the email address associated with your account.");
       return;
     }
 
@@ -55,16 +55,16 @@ export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
       return;
     }
 
-    setMessage("Check your email for the sign-in link to sign in or finish creating your account.");
+    setMessage("Check your email for the secure sign-in link to access or finish setting up your account.");
   }
 
   return (
     <section className="page-section">
       <Card className="content-card compact-card">
         <p className="eyebrow">Login</p>
-        <h1>Use your email to continue.</h1>
+        <h1>Secure account access.</h1>
         <p className="section-copy">
-          Use the sign-in link to open your protected workspace. Signed-out users who open secure routes are returned here first.
+          Use an email sign-in link to access the protected workspace. Signed-out users who request secure routes are returned here first.
         </p>
         <form className="auth-form" onSubmit={(event) => void handleSubmit(event)}>
           <label className="field">
@@ -78,11 +78,13 @@ export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
             />
           </label>
           <Button disabled={loading} type="submit">
-            {loading ? "Sending..." : "Continue with email"}
+            {loading ? "Sending..." : "Continue with secure email link"}
           </Button>
         </form>
         <p className="support-copy">
-          {configured ? "Login is ready to send sign-in links." : "Add your public backend values locally to activate login."}
+          {configured
+            ? "Email sign-in is ready for this environment."
+            : "Add the public backend values for this environment to activate account login."}
         </p>
         {message ? <p className="inline-feedback">{message}</p> : null}
       </Card>

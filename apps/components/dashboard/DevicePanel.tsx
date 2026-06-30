@@ -28,19 +28,19 @@ export function DevicePanel({
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Devices</p>
-          <h3>{activeDeviceCount} active devices</h3>
+          <h3>{activeDeviceCount} active sessions</h3>
         </div>
         <span className="mini-pill">Protected access</span>
       </div>
       <div className="button-row">
         <Button onClick={onRegisterBrowser} size="sm" variant="secondary">
-          Register browser
+          Register this browser
         </Button>
         <Button onClick={onRefreshDevices} size="sm" variant="secondary">
-          Refresh
+          Refresh list
         </Button>
       </div>
-      {devicesLoading ? <p className="inline-feedback">Loading device state...</p> : null}
+      {devicesLoading ? <p className="inline-feedback">Loading device and session state...</p> : null}
       <div className="device-list">
         {devices.map((device) => (
           <div className="device-card" key={device.id}>
@@ -58,7 +58,7 @@ export function DevicePanel({
                 size="sm"
                 variant="secondary"
               >
-                {device.locked ? "Unlock" : "Lock"}
+                {device.locked ? "Restore access" : "Suspend access"}
               </Button>
             </div>
           </div>

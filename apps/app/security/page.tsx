@@ -6,9 +6,9 @@ export default function SecurityPage() {
     <section className="page-section">
       <Card className="content-card">
         <p className="eyebrow">Security</p>
-        <h1>Built for records you do not want floating around.</h1>
+        <h1>Built for records that require a more disciplined standard.</h1>
         <p className="section-copy">
-          NoLostDocs is shaping a web-first trust model around private storage, signed-in access, protected downloads, and explicit recovery controls.
+          NoLostDocs is built around a web-first trust model with private storage boundaries, signed-in account access, protected downloads, and explicit recovery controls.
         </p>
       </Card>
       <SecuritySection />

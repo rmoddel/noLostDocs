@@ -6,8 +6,8 @@ export function DisclaimerSection() {
       <Card className="disclaimer-card">
         <p className="eyebrow">Important</p>
         <p className="disclaimer-copy">
-          NoLostDocs helps you keep secure copies organized. Acceptance of digital copies depends on the situation,
-          provider, agency, or law.
+          NoLostDocs is designed to organize and recover secure copies responsibly. Whether a digital copy is accepted
+          still depends on the institution, the transaction, and the governing rules in that setting.
         </p>
       </Card>
     </section>

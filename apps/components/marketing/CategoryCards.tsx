@@ -6,9 +6,9 @@ export function CategoryCards() {
   return (
     <section className="section-block">
       <SectionHeader
-        description="NoLostDocs starts with the document categories people actually search for in stressful moments."
+        description="NoLostDocs starts with the record groupings clients actually need when decisions, deadlines, or requests arrive without warning."
         eyebrow="Categories"
-        title="Real records. Real-life groupings."
+        title="Structured around how serious recordkeeping actually works."
       />
       <div className="category-grid">
         {launcherGroups.map((group) => (

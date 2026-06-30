@@ -108,7 +108,7 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
 
   async function handleSave() {
     if (!session || !file) {
-      setMessage("Choose a document image first.");
+      setMessage("Choose a document image before continuing.");
       return;
     }
 
@@ -136,12 +136,12 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
         session
       });
 
-      setMessage("Scan saved.");
+      setMessage("Document saved to the account.");
       setFile(null);
       setRotation(0);
       router.push("/dashboard");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Scan save failed.");
+      setMessage(error instanceof Error ? error.message : "Document save failed.");
     } finally {
       setSaving(false);
     }
@@ -158,16 +158,16 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
       <div className="scan-shell">
         <Card className="content-card scan-intro-card">
           <p className="eyebrow">Scan</p>
-          <h1>{isPublicMode ? "Test the scanner." : "Capture it cleanly."}</h1>
+          <h1>{isPublicMode ? "Evaluate the scanner." : "Capture with more control."}</h1>
           <p className="section-copy">
             {isPublicMode
-              ? "Use this public scanner view to test capture, framing, preview, and quality review. Nothing here requires login or saves to your account."
-              : "Use your camera or an image file today. This scan flow is tuned for Scanbot-guided capture and ABBYY-first OCR review."}
+              ? "Use this public scanner view to evaluate capture, framing, preview, and quality review. Nothing here requires login or writes to an account."
+              : "Use the camera or an image file to move a document into the protected workflow. This flow is prepared for stronger capture and OCR layers as the platform matures."}
           </p>
           <ScanDocsLauncher onScanReady={handleFileChange} />
           <div className="button-row">
             <Button href={isPublicMode ? "/" : "/dashboard"} variant="secondary">
-              {isPublicMode ? "Back to home" : "Back to dashboard"}
+              {isPublicMode ? "Back to home" : "Back to workspace"}
             </Button>
           </div>
         </Card>
@@ -205,7 +205,7 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
           />
 
           <ScanActions
-            actionLabel={isPublicMode ? "Clear test scan" : "Save scan"}
+            actionLabel={isPublicMode ? "Clear test capture" : "Save document"}
             canAct={isPublicMode ? Boolean(file) : Boolean(file) && !qualityPending && Boolean(qualityReport?.canSave)}
             loading={saving || qualityPending}
             onAction={() => (isPublicMode ? handleClear() : void handleSave())}
@@ -213,8 +213,8 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
 
           <p className="support-copy">
             {isPublicMode
-              ? "Public scanner mode is local-only. It lets you test the scanner UX without auth, uploads, or database writes."
-              : "Uploads stay plan-aware through the signed upload flow, and saved scans now record the selected capture and OCR stack in document metadata."}
+              ? "Public scanner mode is local-only. It lets teams evaluate the scanner experience without authentication, uploads, or database writes."
+              : "Uploads remain plan-aware through the signed upload flow, and saved records capture the active scan and OCR metadata for later processing."}
           </p>
           {message ? <p className="inline-feedback">{message}</p> : null}
         </Card>

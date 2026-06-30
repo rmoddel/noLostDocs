@@ -3,9 +3,9 @@ import type { DashboardGroup } from "@/constants/launcherGroups";
 import { Card } from "../ui/Card";
 
 const statusTone: Record<DocumentTemplate["status"], string> = {
-  uploaded: "Saved",
-  "expiring-soon": "Soon",
-  missing: "Missing",
+  uploaded: "Filed",
+  "expiring-soon": "Review due",
+  missing: "Outstanding",
   expired: "Expired"
 };
 
@@ -26,7 +26,7 @@ export function DocumentList({ documents, onSelect, selectedDocumentId, selected
           <h3>{selectedGroup.title}</h3>
         </div>
         <span className="panel-note">
-          {uploadedCount}/{documents.length} saved
+          {uploadedCount}/{documents.length} filed
         </span>
       </div>
 
@@ -48,7 +48,7 @@ export function DocumentList({ documents, onSelect, selectedDocumentId, selected
           ))}
         </div>
       ) : (
-        <p className="section-support">No documents have been added to this group yet.</p>
+        <p className="section-support">No records have been added to this category yet.</p>
       )}
     </Card>
   );

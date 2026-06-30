@@ -2,18 +2,18 @@ import { Card } from "../ui/Card";
 import { SectionHeader } from "../ui/SectionHeader";
 
 const mockupRows = [
-  { label: "Registration", state: "Saved", tone: "ok" },
-  { label: "Insurance card", state: "Review soon", tone: "warn" },
-  { label: "RN license", state: "Missing", tone: "muted" }
+  { label: "Registration", state: "Filed", tone: "ok" },
+  { label: "Insurance card", state: "Review due", tone: "warn" },
+  { label: "RN license", state: "Outstanding", tone: "muted" }
 ] as const;
 
 export function ProductMockup() {
   return (
     <section className="section-block">
       <SectionHeader
-        description="The experience should feel clear before it feels complex. Categories lead, files stay protected, and account state stays visible."
+        description="The experience should feel controlled before it feels dense. Categories lead, files remain protected, and account state stays visible."
         eyebrow="Vault preview"
-        title="A calmer document workspace."
+        title="A workspace designed for accountable document handling."
       />
       <div className="mockup-grid">
         <Card className="mockup-card">
@@ -28,14 +28,14 @@ export function ProductMockup() {
             <div className="mockup-main">
               <div className="mockup-toolbar">
                 <span className="mockup-label">Plan status</span>
-                <strong>Free Basic</strong>
+                <strong>Client account</strong>
               </div>
               <div className="mockup-list">
                 {mockupRows.map((row) => (
                   <div className="mockup-row" key={row.label}>
                     <div>
                       <strong>{row.label}</strong>
-                      <p>Protected metadata view</p>
+                      <p>Protected record summary</p>
                     </div>
                     <span className={`mockup-pill mockup-pill-${row.tone}`}>{row.state}</span>
                   </div>
@@ -45,12 +45,12 @@ export function ProductMockup() {
           </div>
         </Card>
         <div className="mockup-copy">
-          <p className="eyebrow">What the workspace needs to communicate</p>
+          <p className="eyebrow">What a mature workspace should communicate</p>
           <ul className="feature-list">
-            <li>Which categories are available now</li>
-            <li>Which records need attention</li>
-            <li>When file access becomes a protected step</li>
-            <li>Where recovery and device controls live</li>
+            <li>Which record sets are available to this account</li>
+            <li>Which documents need action or review</li>
+            <li>When file access becomes a protected event</li>
+            <li>Where device recovery and account controls live</li>
           </ul>
         </div>
       </div>
