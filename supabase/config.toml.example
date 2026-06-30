@@ -22,8 +22,13 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "http://localhost:5173"
-additional_redirect_urls = ["http://localhost:5173"]
+site_url = "https://nolostdocs.rmoddel.com"
+additional_redirect_urls = [
+  "http://localhost:3001/auth/callback",
+  "http://127.0.0.1:3001/auth/callback",
+  "https://nolostdocs.rmoddel.com/auth/callback",
+  "https://**.amplifyapp.com/auth/callback"
+]
 jwt_expiry = 3600
 
 [functions]

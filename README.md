@@ -68,6 +68,7 @@ Production target: your configured hosting platform.
 
 Required frontend environment variables for the web app:
 
+- `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SCANBOT_LICENSE_KEY` when enabling guided Scanbot capture

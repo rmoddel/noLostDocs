@@ -18,8 +18,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       ? "The email sign-in link could not be completed. Request a new link and try again."
       : authError === "not_configured"
         ? "Supabase auth is not configured yet for this environment."
-        : authError === "missing_code"
+        : authError === "missing_code" || authError === "missing_token_hash"
           ? "That sign-in link is incomplete. Request a new email link."
+          : authError === "verify_failed"
+            ? "The email sign-in link could not be verified. Request a new link and try again."
           : null;
   const { client, configured } = await createServerSupabaseClient();
 

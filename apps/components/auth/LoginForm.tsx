@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { buildAuthCallbackUrl } from "@/lib/auth/getAuthRedirectUrl";
 import { useAuth } from "./AuthProvider";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
@@ -40,12 +41,7 @@ export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
     setLoading(true);
     setMessage(null);
 
-    const redirectUrl =
-      typeof window === "undefined"
-        ? ""
-        : `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-            nextPath.startsWith("/") ? nextPath : "/dashboard"
-          )}`;
+    const redirectUrl = typeof window === "undefined" ? "" : buildAuthCallbackUrl(nextPath);
     const { errorMessage } = await signInWithOtp(trimmedEmail, redirectUrl);
 
     setLoading(false);
