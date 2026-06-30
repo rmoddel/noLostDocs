@@ -6,7 +6,6 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { dashboardGroups, type DashboardGroupId } from "@/constants/launcherGroups";
 import { runProtectedDocumentAction } from "@/lib/documents/download";
 import { allowedGroupIdsForPlan, resolveAccountPlan, type AccountPlan } from "@/lib/plans/resolvePlan";
-import { readStoredHiddenGroups } from "@/lib/preferences/dashboardPreferences";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { EmptyState } from "../ui/EmptyState";
 import { CategoryGrid } from "./CategoryGrid";
@@ -15,6 +14,8 @@ import { DocumentDetail } from "./DocumentDetail";
 import { DocumentList } from "./DocumentList";
 import { NextActionsPanel } from "./NextActionsPanel";
 import { PlanStatusCard } from "./PlanStatusCard";
+import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
+import { ScanWorkspace } from "../scan/ScanWorkspace";
 
 type ProtectedActionState = {
   loading: boolean;
@@ -24,14 +25,14 @@ type ProtectedActionState = {
 type DashboardShellProps = {
   initialDocumentMessage: string | null;
   initialDocuments: DocumentTemplate[];
+  scanProviderStatus: ScanProviderStatus;
 };
 
-export function DashboardShell({ initialDocumentMessage, initialDocuments }: DashboardShellProps) {
+export function DashboardShell({ initialDocumentMessage, initialDocuments, scanProviderStatus }: DashboardShellProps) {
   const { session } = useAuth();
   const { client, configured } = createBrowserSupabaseClient();
   const [selectedGroupId, setSelectedGroupId] = useState<DashboardGroupId>("basic");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
-  const [hiddenGroupIds, setHiddenGroupIds] = useState<DashboardGroupId[]>(() => readStoredHiddenGroups());
   const [accountPlan, setAccountPlan] = useState<AccountPlan>("free");
   const [accountLoading, setAccountLoading] = useState(false);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
@@ -42,11 +43,9 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
   useEffect(() => {
     if (!configured || !session) {
       setAccountPlan("free");
-      setHiddenGroupIds(readStoredHiddenGroups());
       return;
     }
 
-    setHiddenGroupIds(readStoredHiddenGroups());
     void loadAccountPlan();
   }, [configured, session]);
 
@@ -107,8 +106,8 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
 
   const allowedGroupIds = useMemo(() => allowedGroupIdsForPlan(accountPlan), [accountPlan]);
   const visibleGroups = useMemo(
-    () => dashboardGroups.filter((group) => allowedGroupIds.includes(group.id) && !hiddenGroupIds.includes(group.id)),
-    [allowedGroupIds, hiddenGroupIds]
+    () => dashboardGroups.filter((group) => allowedGroupIds.includes(group.id)),
+    [allowedGroupIds]
   );
   const selectedGroup = useMemo(
     () => dashboardGroups.find((group) => group.id === selectedGroupId) ?? dashboardGroups[0],
@@ -128,10 +127,10 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
       return;
     }
 
-    if (hiddenGroupIds.includes(selectedGroupId) || !allowedGroupIds.includes(selectedGroupId)) {
+    if (!allowedGroupIds.includes(selectedGroupId)) {
       setSelectedGroupId(visibleGroups[0].id);
     }
-  }, [allowedGroupIds, hiddenGroupIds, selectedGroupId, visibleGroups]);
+  }, [allowedGroupIds, selectedGroupId, visibleGroups]);
 
   useEffect(() => {
     if (!selectedGroupDocs.length) {
@@ -164,7 +163,9 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
         uploadedCount={uploadedCount}
       />
 
-      <section className="dashboard-layout">
+      <ScanWorkspace embedded providerStatus={scanProviderStatus} />
+
+      <section className="dashboard-layout" id="records">
         <section className="dashboard-main">
           <div className="section-heading">
             <div>

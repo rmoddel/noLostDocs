@@ -18,11 +18,12 @@ import { ScanPreview } from "./ScanPreview";
 import { ScanReviewPanel } from "./ScanReviewPanel";
 
 type ScanWorkspaceProps = {
+  embedded?: boolean;
   mode?: "protected" | "public";
   providerStatus: ScanProviderStatus;
 };
 
-export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorkspaceProps) {
+export function ScanWorkspace({ embedded = false, mode = "protected", providerStatus }: ScanWorkspaceProps) {
   const router = useRouter();
   const { client, configured } = createBrowserSupabaseClient();
   const { session } = useAuth();
@@ -99,6 +100,7 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
     [selectedGroupId]
   );
   const isPublicMode = mode === "public";
+  const showBackButton = !embedded;
 
   function handleFileChange(nextFile: File | null) {
     setMessage(nextFile ? validateScanFile(nextFile) : null);
@@ -154,9 +156,9 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
   }
 
   return (
-    <section className="page-section scan-page">
+    <section className={embedded ? "dashboard-scan" : "page-section scan-page"} id="scan">
       <div className="scan-shell">
-        <Card className="content-card scan-intro-card">
+        <Card className={["content-card", "scan-intro-card", embedded ? "embedded" : ""].filter(Boolean).join(" ")}>
           <p className="eyebrow">Scan</p>
           <h1>{isPublicMode ? "Evaluate the scanner." : "Capture cleanly. Review once."}</h1>
           <p className="hero-lede">
@@ -165,11 +167,13 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
               : "Use the camera or an image file to move a document into the protected workflow."}
           </p>
           <ScanDocsLauncher onScanReady={handleFileChange} />
-          <div className="button-row">
-            <Button href={isPublicMode ? "/" : "/dashboard"} variant="secondary">
-              {isPublicMode ? "Back to home" : "Back to workspace"}
-            </Button>
-          </div>
+          {showBackButton ? (
+            <div className="button-row">
+              <Button href={isPublicMode ? "/" : "/dashboard"} variant="secondary">
+                {isPublicMode ? "Back to home" : "Back to dashboard"}
+              </Button>
+            </div>
+          ) : null}
         </Card>
 
         <Card className="side-card scan-card">

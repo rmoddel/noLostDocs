@@ -32,10 +32,10 @@ export function DashboardHero({
         <h1>Records, access, and status in one view.</h1>
         <p className="hero-lede">The signed-in workspace keeps account state, categories, and document status together.</p>
         <div className="hero-actions">
-          <Button href="/scan" variant="ghost">
-            Resume scan
+          <Button href="/dashboard#scan">Jump to scan</Button>
+          <Button href="/dashboard#records" variant="ghost">
+            View records
           </Button>
-          <Button href="/scan">Open secure scanner</Button>
         </div>
       </div>
 

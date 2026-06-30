@@ -784,6 +784,11 @@ li {
   align-items: flex-start;
 }
 
+.dashboard-scan {
+  display: grid;
+  gap: 16px;
+}
+
 .field span {
   display: block;
   margin-bottom: 8px;
@@ -829,6 +834,11 @@ li {
 .scan-intro-card {
   position: sticky;
   top: 96px;
+}
+
+.scan-intro-card.embedded {
+  position: static;
+  top: auto;
 }
 
 .summary-metrics {
