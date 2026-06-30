@@ -1,6 +1,6 @@
 version: 1
 applications:
-  - appRoot: apps/web
+  - appRoot: apps
     frontend:
       buildPath: /
       phases:
@@ -11,13 +11,12 @@ applications:
           commands:
             - npm run build -w @nolostdocs/web
       artifacts:
-        baseDirectory: apps/web/.next
+        baseDirectory: apps/.next
         files:
           - '**/*'
       cache:
         paths:
           - .npm/**/*
           - node_modules/**/*
-          - apps/web/.next/cache/**/*
-          - apps/*/node_modules/**/*
+          - apps/.next/cache/**/*
           - packages/*/node_modules/**/*

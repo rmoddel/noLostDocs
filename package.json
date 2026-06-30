@@ -7,14 +7,13 @@
     "react-dom": "19.0.0"
   },
   "workspaces": [
-    "apps/*",
+    "apps",
     "packages/*"
   ],
   "scripts": {
     "dev": "npm run dev:web",
     "dev:web": "npm run dev -w @nolostdocs/web",
     "dev:web-next": "npm run dev -w @nolostdocs/web",
-    "dev:mobile": "npm run dev -w @nolostdocs/mobile",
     "build:web": "npm run build -w @nolostdocs/web",
     "build:web-next": "npm run build -w @nolostdocs/web",
     "lint": "npm run lint -ws --if-present",

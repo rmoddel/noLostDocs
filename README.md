@@ -16,7 +16,7 @@ To get this live:
 
 1. Set the production domain for the app host.
 2. Populate the live web environment with the public backend values and the server-only secrets.
-3. Build and deploy the web app from `apps/web`.
+3. Build and deploy the web app from `apps`.
 4. Verify the public homepage, login, dashboard, scan, sitemap, and metadata routes.
 5. Keep the archived prototype untouched until the live app is proven in production.
 
@@ -33,7 +33,7 @@ This repo is wired for a single backend project.
 
 Frontend web values live in:
 
-- [apps/web/.env.local.example](/Users/rmoddel/code/rmo/work/noLostDocs/apps/web/.env.local.example)
+- [apps/.env.local.example](/Users/rmoddel/code/rmo/work/noLostDocs/apps/.env.local.example)
 
 These are browser-safe placeholders only. Real values should be added locally after you connect your backend project. Do not put service-role credentials in frontend env files.
 
@@ -42,7 +42,7 @@ Server-side local secrets should live in a root `.env.local` for operator and ba
 Copy frontend placeholders locally:
 
 ```bash
-cp apps/web/.env.local.example apps/web/.env.local
+cp apps/.env.local.example apps/.env.local
 ```
 
 ## Install
@@ -64,7 +64,7 @@ Production target: your configured hosting platform.
 
 - Root build config lives in [amplify.yml](/Users/rmoddel/code/rmo/work/noLostDocs/amplify.yml)
 - Build command: `npm run build:web`
-- Output directory: the platform build output for `apps/web`
+- Output directory: the platform build output for `apps`
 
 Required frontend environment variables for the web app:
 
@@ -93,8 +93,8 @@ Server-side secrets such as the service-role key, payment secret key, and ABBYY 
 
 ## Current Status
 
-- The live web app is deployed from `apps/web`
-- The archived Vite reference app remains available in `apps/web-vite-reference`
+- The live web app is deployed from `apps`
+- Archived legacy app variants were moved out of the active app path
 - The selected Phase 7 stack is `Scanbot SDK` for guided capture and `ABBYY FineReader` for accuracy-oriented OCR
 - Active internal workspace packages now use the `@nolostdocs/*` scope
 

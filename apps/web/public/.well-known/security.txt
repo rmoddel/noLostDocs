@@ -1,3 +1,0 @@
-Contact: mailto:rmoddel@gmail.com
-Preferred-Languages: en
-Canonical: https://nolostdocs.rmoddel.com/.well-known/security.txt

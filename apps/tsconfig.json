@@ -1,0 +1,40 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nolostdocs/types": [
+        "../packages/types/src/index.ts"
+      ],
+      "@nolostdocs/config": [
+        "../packages/config/src/index.ts"
+      ],
+      "@nolostdocs/supabase": [
+        "../packages/supabase/src/index.ts"
+      ],
+      "@/*": [
+        "./*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "isolatedModules": true,
+    "jsx": "preserve"
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "web",
+    "trash"
+  ]
+}

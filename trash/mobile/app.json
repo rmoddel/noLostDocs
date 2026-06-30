@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "NoLostDocs",
+    "slug": "nolostdocs",
+    "scheme": "nolostdocs",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#f4efe6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.placeholder.nolostdocs"
+    },
+    "android": {
+      "package": "com.placeholder.nolostdocs"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
