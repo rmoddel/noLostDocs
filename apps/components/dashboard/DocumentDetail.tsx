@@ -1,6 +1,5 @@
 import type { DocumentTemplate } from "@nolostdocs/types";
 import {
-  buildAccessMessage,
   documentAccessTone,
   documentStatusTone,
   formatDocumentExpiration,
@@ -16,8 +15,6 @@ type DocumentDetailProps = {
   document: DocumentTemplate | null;
   onDownload: (document: DocumentTemplate) => void;
   onPreview: (document: DocumentTemplate) => void;
-  onToggleAccessExplainer: () => void;
-  showAccessExplainer: boolean;
 };
 
 export function DocumentDetail({
@@ -25,9 +22,7 @@ export function DocumentDetail({
   actionMessage,
   document,
   onDownload,
-  onPreview,
-  onToggleAccessExplainer,
-  showAccessExplainer
+  onPreview
 }: DocumentDetailProps) {
   if (!document) {
     return null;
@@ -69,22 +64,9 @@ export function DocumentDetail({
         <Button disabled={actionLoading} onClick={() => onDownload(document)} size="sm" variant="secondary">
           Request authorized download
         </Button>
-        <Button onClick={onToggleAccessExplainer} size="sm" variant="secondary">
-          Why this is protected
-        </Button>
       </div>
 
-      {showAccessExplainer ? (
-        <div className="access-explainer">
-          <strong>Web access remains deliberately scoped.</strong>
-          <p>
-            Metadata review is intentionally lighter than file access. Protected actions stay time-bounded, may require a fresh check, and are intended to remain reviewable.
-          </p>
-        </div>
-      ) : null}
-
       {actionMessage ? <p className="inline-feedback">{actionMessage}</p> : null}
-      {!actionMessage ? <p className="section-support">{buildAccessMessage("preview", document)}</p> : null}
     </Card>
   );
 }

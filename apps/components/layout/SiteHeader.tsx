@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { assetPaths } from "@/constants/assets";
 import { Button } from "../ui/Button";
@@ -16,7 +16,9 @@ const navItems = [
 
 export function SiteHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const { ready, session, signOut } = useAuth();
+  const showDashboardButton = ready && session && pathname !== "/dashboard";
 
   return (
     <header className="site-header">
@@ -41,9 +43,11 @@ export function SiteHeader() {
         <div className="site-header-actions">
           {ready && session ? (
             <>
-              <Button href="/dashboard" size="sm" variant="secondary">
-                Open workspace
-              </Button>
+              {showDashboardButton ? (
+                <Button href="/dashboard" size="sm" variant="secondary">
+                  Dashboard
+                </Button>
+              ) : null}
               <Button
                 onClick={() => {
                   void signOut();
