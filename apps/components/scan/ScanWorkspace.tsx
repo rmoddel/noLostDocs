@@ -12,6 +12,7 @@ import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { ScanActions } from "./ScanActions";
 import { ScanCapture } from "./ScanCapture";
+import { ScanDocsLauncher } from "./ScanDocsLauncher";
 import { ScanPipelineCard } from "./ScanPipelineCard";
 import { ScanPreview } from "./ScanPreview";
 import { ScanReviewPanel } from "./ScanReviewPanel";
@@ -163,6 +164,7 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
               ? "Use this public scanner view to test capture, framing, preview, and quality review. Nothing here requires login or saves to your account."
               : "Use your camera or an image file today. This scan flow is tuned for Scanbot-guided capture and ABBYY-first OCR review."}
           </p>
+          <ScanDocsLauncher onScanReady={handleFileChange} />
           <div className="button-row">
             <Button href={isPublicMode ? "/" : "/dashboard"} variant="secondary">
               {isPublicMode ? "Back to home" : "Back to dashboard"}
