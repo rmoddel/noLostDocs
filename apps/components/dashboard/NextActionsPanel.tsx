@@ -24,7 +24,7 @@ export function NextActionsPanel({ documents }: NextActionsPanelProps) {
           ))}
         </ul>
       ) : (
-        <p className="section-support">There are no urgent or outstanding record actions at the moment.</p>
+        <p className="section-support">There are no urgent or outstanding record actions right now.</p>
       )}
     </Card>
   );

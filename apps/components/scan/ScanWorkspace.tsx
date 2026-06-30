@@ -158,11 +158,11 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
       <div className="scan-shell">
         <Card className="content-card scan-intro-card">
           <p className="eyebrow">Scan</p>
-          <h1>{isPublicMode ? "Evaluate the scanner." : "Capture with more control."}</h1>
-          <p className="section-copy">
+          <h1>{isPublicMode ? "Evaluate the scanner." : "Capture cleanly. Review once."}</h1>
+          <p className="hero-lede">
             {isPublicMode
-              ? "Use this public scanner view to evaluate capture, framing, preview, and quality review. Nothing here requires login or writes to an account."
-              : "Use the camera or an image file to move a document into the protected workflow. This flow is prepared for stronger capture and OCR layers as the platform matures."}
+              ? "Public mode lets you test capture, framing, preview, and upload fallback without login."
+              : "Use the camera or an image file to move a document into the protected workflow."}
           </p>
           <ScanDocsLauncher onScanReady={handleFileChange} />
           <div className="button-row">
@@ -213,8 +213,8 @@ export function ScanWorkspace({ mode = "protected", providerStatus }: ScanWorksp
 
           <p className="support-copy">
             {isPublicMode
-              ? "Public scanner mode is local-only. It lets teams evaluate the scanner experience without authentication, uploads, or database writes."
-              : "Uploads remain plan-aware through the signed upload flow, and saved records capture the active scan and OCR metadata for later processing."}
+              ? "Public scanner mode stays local-only. It is for evaluating capture and review, not account writes."
+              : "Uploads remain plan-aware through the signed flow, and saved records capture the active scan and OCR metadata."}
           </p>
           {message ? <p className="inline-feedback">{message}</p> : null}
         </Card>

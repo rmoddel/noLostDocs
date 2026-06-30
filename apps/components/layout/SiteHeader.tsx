@@ -55,14 +55,9 @@ export function SiteHeader() {
               </Button>
             </>
           ) : (
-            <>
-              <Button href="/login" size="sm" variant="secondary">
-                Client login
-              </Button>
-              <Button href="/dashboard" size="sm">
-                Open workspace
-              </Button>
-            </>
+            <Button href="/login" size="sm">
+              Login
+            </Button>
           )}
         </div>
       </div>

@@ -320,9 +320,9 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
           <div className="section-heading">
             <div>
               <p className="eyebrow">Categories</p>
-              <h2>Record categories.</h2>
+              <h2>Categories with clear scope.</h2>
             </div>
-            <p className="section-support">Categories lead the workflow. Individual documents stay one level deeper.</p>
+            <p className="section-support">Categories set the frame. Documents stay one level deeper.</p>
           </div>
 
           <CategoryGrid groups={visibleGroups} onSelect={setSelectedGroupId} selectedGroupId={selectedGroup.id} />
@@ -344,9 +344,9 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
               </div>
             </div>
             <p className="section-support">
-              Capture, rotation, validation, and signed upload now route through the protected scan workflow.
+              Camera-first capture, review, rotation, and upload stay in the protected scan flow.
             </p>
-            <Button href="/scan">Open secure scan workflow</Button>
+            <Button href="/scan">Open secure scanner</Button>
           </Card>
 
           {lockedGroups.length ? (
@@ -366,7 +366,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
                 ))}
               </div>
               <p className="section-support">
-                Free Basic exposes the core document surface only. The broader workspace remains visible so account scope is clear before upgrade.
+                Free Basic exposes the core document surface only. The broader workspace remains visible so account scope stays clear.
               </p>
             </Card>
           ) : null}

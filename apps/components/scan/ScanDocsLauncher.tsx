@@ -104,7 +104,7 @@ export function ScanDocsLauncher({
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: false,
           video: {
-            facingMode: { ideal: "environment" }
+            facingMode: "environment"
           }
         });
 

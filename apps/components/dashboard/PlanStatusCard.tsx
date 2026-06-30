@@ -25,13 +25,13 @@ export function PlanStatusCard({
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Plan status</p>
-          <h3>{accountPlan === "premium" ? "Premium access is active." : "Free Basic is active."}</h3>
+          <h3>{accountPlan === "premium" ? "Premium access active." : "Free Basic active."}</h3>
         </div>
       </div>
       <ul className="note-list">
         <li>
           <strong>Signed-in access remains required.</strong>
-          <span>The dashboard and secure scan workflow stay behind account authentication.</span>
+          <span>The dashboard and secure scan flow stay behind account authentication.</span>
         </li>
         <li>
           <strong>{accountPlan === "premium" ? "All categories are available." : "Only the Basic category is available."}</strong>
@@ -47,7 +47,7 @@ export function PlanStatusCard({
               ? "Premium upload policy is active."
               : `${freePlanRemainingSlots} of ${FREE_PLAN_DOCUMENT_LIMIT} free cloud slots remain.`}
           </strong>
-          <span>Upload limits are enforced before a new record is saved to the account.</span>
+          <span>Upload limits are enforced before a new record is saved.</span>
         </li>
         <li>
           <strong>{hiddenGroups.length ? `${hiddenGroups.length} categories are hidden.` : "No hidden categories."}</strong>

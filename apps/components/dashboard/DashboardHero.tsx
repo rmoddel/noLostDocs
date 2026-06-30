@@ -1,4 +1,5 @@
 import type { AccountPlan } from "@/lib/plans/resolvePlan";
+import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
 type DashboardHeroProps = {
@@ -28,10 +29,14 @@ export function DashboardHero({
     <section className="dashboard-hero">
       <div className="hero-copy dashboard-copy">
         <p className="eyebrow">Dashboard</p>
-        <h1>Account records and access controls.</h1>
-        <p className="hero-lede">
-          The signed-in workspace keeps account state, record categories, and document status in one operating view.
-        </p>
+        <h1>Records, access, and status in one view.</h1>
+        <p className="hero-lede">The signed-in workspace keeps account state, categories, and document status together.</p>
+        <div className="hero-actions">
+          <Button href="/scan" variant="ghost">
+            Resume scan
+          </Button>
+          <Button href="/scan">Open secure scanner</Button>
+        </div>
       </div>
 
       <Card className="dashboard-summary-card">
@@ -40,7 +45,7 @@ export function DashboardHero({
         <div className="summary-metrics">
           <div className="summary-metric">
             <strong>{uploadedCount}</strong>
-            <span>saved</span>
+            <span>filed</span>
           </div>
           <div className="summary-metric">
             <strong>{missingCount}</strong>
@@ -48,13 +53,13 @@ export function DashboardHero({
           </div>
           <div className="summary-metric">
             <strong>{urgentCount}</strong>
-            <span>urgent</span>
+            <span>needs review</span>
           </div>
         </div>
         <p className="section-support">
           {accountPlan === "premium"
-            ? "Premium access unlocks the full document surface for this account."
-            : "Free Basic keeps the core cloud-backed document groups available to this account."}
+            ? "Premium access keeps every category and protected action available."
+            : "Free Basic keeps the core cloud-backed document groups available."}
         </p>
         {accountMessage ? <p className="inline-feedback">{accountMessage}</p> : null}
       </Card>
