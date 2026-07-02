@@ -11,15 +11,15 @@ export function ProductMockup() {
   return (
     <section className="section-block">
       <SectionHeader
-        description="The experience should feel controlled before it feels dense. Categories lead, files remain protected, and account state stays visible."
-        eyebrow="Vault preview"
-        title="A workspace designed for accountable document handling."
+        description="The experience should feel controlled before it feels dense. Categories lead, records remain protected, and account state stays visible."
+        eyebrow="Records preview"
+        title="A workspace designed for accountable record handling."
       />
       <div className="mockup-grid">
         <Card className="mockup-card">
           <div className="mockup-shell">
             <div className="mockup-sidebar">
-              <span className="mockup-label">Groups</span>
+              <span className="mockup-label">Records</span>
               <strong>Basic</strong>
               <span>Personal</span>
               <span>Driving</span>
@@ -27,8 +27,8 @@ export function ProductMockup() {
             </div>
             <div className="mockup-main">
               <div className="mockup-toolbar">
-                <span className="mockup-label">Plan status</span>
-                <strong>Client account</strong>
+                <span className="mockup-label">Account status</span>
+                <strong>Signed-in records</strong>
               </div>
               <div className="mockup-list">
                 {mockupRows.map((row) => (

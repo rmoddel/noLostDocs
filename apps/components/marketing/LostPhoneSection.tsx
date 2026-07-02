@@ -7,7 +7,7 @@ export function LostPhoneSection() {
       <div className="split-section">
         <div>
           <SectionHeader
-            description="Cloud-backed documents can be recovered through the web experience. Local-only documents remain on the originating device and are not represented otherwise."
+            description="Cloud-backed records can be recovered through the web experience. Local-only records remain on the originating device and are not represented otherwise."
             eyebrow="Lost your phone?"
             title="Pause access quickly, then recover through the account when you are ready."
           />

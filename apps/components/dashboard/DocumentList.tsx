@@ -77,7 +77,7 @@ export function DocumentList({ category, documents, onSelect, selectedDocumentId
               </svg>
             </span>
             <strong>{placeholderByCategory[category.id]}</strong>
-            <span className="vault-document-status">Upload slot</span>
+            <span className="vault-document-status">Add file</span>
           </button>
         ))}
       </div>

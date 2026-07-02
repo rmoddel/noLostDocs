@@ -6,7 +6,7 @@ export function SecuritySection() {
   return (
     <section className="section-block">
       <SectionHeader
-        description="The product promise is operational: keep sensitive files behind the account boundary, keep access scoped, and make recovery controls understandable."
+        description="The product promise is operational: keep sensitive records behind the account boundary, keep access scoped, and make recovery controls understandable."
         eyebrow="Security"
         title="Concrete controls instead of inflated language."
       />

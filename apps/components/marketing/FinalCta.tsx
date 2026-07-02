@@ -9,7 +9,7 @@ export function FinalCta() {
           <p className="eyebrow">Start with the live platform</p>
           <h2>Bring essential records into a more disciplined operating system.</h2>
           <p className="section-copy">
-            The current release focuses on a responsive web experience, disciplined document organization, and the security language a sensitive platform should be able to defend.
+            The current release focuses on a responsive web experience, disciplined record organization, and the security language a sensitive platform should be able to defend.
           </p>
         </div>
         <div className="hero-actions">

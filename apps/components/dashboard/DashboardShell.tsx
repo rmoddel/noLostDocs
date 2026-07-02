@@ -137,8 +137,8 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
         {!selectedCategory ? (
           <>
             <header className="vault-header">
-              <p className="vault-kicker">Your vault</p>
-              <h1>Documents</h1>
+              <p className="vault-kicker">Your records</p>
+              <h1>Records</h1>
             </header>
 
             <CategoryGrid

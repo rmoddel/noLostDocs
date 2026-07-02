@@ -17,9 +17,9 @@ export function HeroSection() {
           </Button>
         </div>
         <div className="hero-facts">
-          <span>Cloud-backed recovery</span>
+          <span>Cloud-backed records</span>
           <span>Account-based controls</span>
-          <span>Operational document structure</span>
+          <span>Operational structure</span>
         </div>
       </div>
       <Card className="hero-panel">
@@ -30,11 +30,11 @@ export function HeroSection() {
           </div>
           <div className="hero-panel-item">
             <strong>Clear boundaries, not vague promises.</strong>
-            <p>Cloud-backed files remain explicit in the web experience. Local-only behavior is not implied, and protected access remains scoped.</p>
+            <p>Cloud-backed records remain explicit in the web experience. Local-only behavior is not implied, and protected access remains scoped.</p>
           </div>
           <div className="hero-panel-item">
             <strong>Recovery is part of the product, not an afterthought.</strong>
-            <p>Device controls, signed-in access, and document recovery operate inside the same trust model.</p>
+            <p>Device controls, signed-in access, and record recovery operate inside the same trust model.</p>
           </div>
         </div>
       </Card>
