@@ -36,7 +36,7 @@ export function CategoryVisibilityPanel({
       </div>
       {hiddenGroups.length ? (
         <>
-          <p className="section-support">Hidden categories remain available to restore from within this workspace.</p>
+          <p className="section-support">Hidden categories can be restored from this workspace.</p>
           <div className="visibility-pile muted">
             {hiddenGroups.map((group) => (
               <button className="visibility-chip muted" key={group.id} onClick={() => onShow(group.id)} type="button">

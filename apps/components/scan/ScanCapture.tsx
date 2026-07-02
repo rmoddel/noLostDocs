@@ -29,7 +29,7 @@ export function ScanCapture({
       {metadataEnabled ? (
         <>
           <label className="field">
-            <span>Category group</span>
+            <span>Record category</span>
             <select onChange={(event) => onGroupChange(event.target.value as DashboardGroupId)} value={selectedGroupId}>
               {groups.map((group) => (
                 <option key={group.id} value={group.id}>
@@ -40,7 +40,7 @@ export function ScanCapture({
           </label>
 
           <label className="field">
-            <span>File name</span>
+            <span>Document title</span>
             <div className="scan-type-picks" aria-label="Suggested file types">
               {documentTypeFeatured.map((suggestion) => (
                 <button
@@ -68,11 +68,11 @@ export function ScanCapture({
             <input
               list="file-name-suggestions"
               onChange={(event) => onTitleChange(event.target.value)}
-              placeholder="Type any file name"
+              placeholder="Enter a document title"
               type="text"
               value={title}
             />
-            <span className="field-note">Pick a standard type, then rename it however you want.</span>
+            <span className="field-note">Choose a standard type, then adjust the title as needed.</span>
             <datalist id="file-name-suggestions">
               {documentTypeSuggestions.map((suggestion) => (
                 <option key={suggestion} value={suggestion} />
@@ -90,9 +90,9 @@ export function ScanCapture({
           onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
           type="file"
         />
-        <strong>{fileName ?? "Tap to take a photo or choose a file"}</strong>
+        <strong>{fileName ?? "Take a photo or choose a file"}</strong>
         <span>Keep the document flat and fully inside the frame.</span>
-        <span>Fallback: secure browser file input</span>
+        <span>Fallback: browser file upload</span>
       </label>
     </>
   );

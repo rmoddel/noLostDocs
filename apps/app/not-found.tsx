@@ -6,9 +6,9 @@ export default function NotFound() {
     <section className="page-section">
       <Card className="content-card compact-card">
         <p className="eyebrow">Not found</p>
-        <h1>That page is not part of the active surface.</h1>
+        <h1>That page is not available.</h1>
         <p className="section-copy">
-          The route surface is intentionally narrow. Return to the homepage or the workspace entry points to continue.
+          Return to the homepage or workspace to continue.
         </p>
         <div className="hero-actions">
           <Button href="/">Back home</Button>

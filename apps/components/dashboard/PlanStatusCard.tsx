@@ -20,7 +20,7 @@ export function PlanStatusCard({
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Plan status</p>
-          <h3>{accountPlan === "premium" ? "Premium access active." : "Free Basic active."}</h3>
+          <h3>{accountPlan === "premium" ? "Premium access active." : "Free Basic access active."}</h3>
         </div>
       </div>
       <ul className="note-list">
@@ -30,7 +30,7 @@ export function PlanStatusCard({
         </li>
         <li>
           <strong>{visibleGroupCount} categories visible.</strong>
-          <span>{accountPlan === "premium" ? "Premium access keeps the full workspace open." : "Free Basic keeps the core category available."}</span>
+          <span>{accountPlan === "premium" ? "Premium access keeps the full workspace open." : "Free Basic keeps the core categories available."}</span>
         </li>
         <li>
           <strong>

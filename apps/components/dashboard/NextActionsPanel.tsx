@@ -11,7 +11,7 @@ export function NextActionsPanel({ documents }: NextActionsPanelProps) {
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Next actions</p>
-          <h3>Priority items.</h3>
+          <h3>Priority records.</h3>
         </div>
       </div>
       {documents.length ? (
@@ -24,7 +24,7 @@ export function NextActionsPanel({ documents }: NextActionsPanelProps) {
           ))}
         </ul>
       ) : (
-        <p className="section-support">There are no urgent or outstanding record actions right now.</p>
+        <p className="section-support">There are no urgent record actions right now.</p>
       )}
     </Card>
   );

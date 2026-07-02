@@ -34,13 +34,13 @@ export function DevicePanel({
       </div>
       <div className="button-row">
         <Button onClick={onRegisterBrowser} size="sm" variant="secondary">
-          Register this browser
+          Add this browser
         </Button>
         <Button onClick={onRefreshDevices} size="sm" variant="secondary">
-          Refresh list
+          Refresh
         </Button>
       </div>
-      {devicesLoading ? <p className="inline-feedback">Loading device and session state...</p> : null}
+      {devicesLoading ? <p className="inline-feedback">Loading devices and sessions...</p> : null}
       <div className="device-list">
         {devices.map((device) => (
           <div className="device-card" key={device.id}>

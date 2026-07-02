@@ -9,7 +9,7 @@ export default async function DashboardPage() {
   if (isLocalDashboardPreviewEnabled()) {
     return (
       <DashboardShell
-        initialDocumentMessage="Local preview mode is on. Sign-in is bypassed on localhost."
+        initialDocumentMessage="Local preview is enabled. Sign-in is bypassed on localhost."
         initialDocuments={prototypeSnapshot.templates}
       />
     );

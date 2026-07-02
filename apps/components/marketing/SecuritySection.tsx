@@ -6,9 +6,9 @@ export function SecuritySection() {
   return (
     <section className="section-block">
       <SectionHeader
-        description="The product promise is operational: keep sensitive records behind the account boundary, keep access scoped, and make recovery controls understandable."
+        description="The product promise is operational: keep sensitive records behind the account boundary, keep access scoped, and make recovery controls easy to understand."
         eyebrow="Security"
-        title="Concrete controls instead of inflated language."
+        title="Concrete controls instead of inflated claims."
       />
       <div className="security-grid">
         {securityPrinciples.map((principle, index) => (

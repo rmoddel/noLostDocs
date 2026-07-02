@@ -9,7 +9,7 @@ const footerLinks = [
   { href: "/security", label: "Security" },
   { href: "/privacy", label: "Privacy" },
   { href: "/contact", label: "Contact" },
-  { href: "/login", label: "Login" }
+  { href: "/login", label: "Sign in" }
 ];
 
 export function SiteFooter() {
@@ -24,10 +24,10 @@ export function SiteFooter() {
           width={480}
         />
         <p className="footer-copy">
-          NoLostDocs is a client-facing records platform for households and professionals who need a more reliable way to store, recover, and review critical files.
+          NoLostDocs is a records platform for households and professionals who need a reliable way to store, recover, and review critical files.
         </p>
         <p className="footer-meta">
-          The web experience is built around explicit cloud-backed access, recovery-capable account controls, and practical security boundaries for sensitive records.
+          The web experience is cloud-backed, account-controlled, and built for sensitive records.
         </p>
         <div className="footer-links">
           {footerLinks.map((item) => (

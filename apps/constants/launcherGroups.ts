@@ -22,31 +22,31 @@ export const launcherGroups: LauncherGroup[] = [
     id: "personal",
     title: "Personal",
     summary: "License, passport, Social Security card",
-    detail: "Identity records organized for applications, verifications, renewals, and the operational moments when timing matters."
+    detail: "Identity records organized for applications, verifications, renewals, and the moments when timing matters."
   },
   {
     id: "driving",
     title: "Driving",
     summary: "Registration, insurance, inspection",
-    detail: "Vehicle records kept current, visible, and easy to retrieve when roadside, compliance, or claims workflows move quickly."
+    detail: "Vehicle records kept current and easy to retrieve when roadside stops, compliance checks, or claims requests arrive."
   },
   {
     id: "medical",
     title: "Medical",
     summary: "Insurance cards, medications, records",
-    detail: "Coverage details and care records prepared for front desks, caregivers, and follow-up conversations that cannot wait."
+    detail: "Coverage details and care records ready for front desks, caregivers, and follow-up care."
   },
   {
     id: "professional",
     title: "Professional",
     summary: "Licenses, certifications, compliance documents",
-    detail: "Business-critical records tracked in one place so renewals, audits, and proof requests are handled with less friction."
+    detail: "Business-critical records tracked in one place so renewals, audits, and proof requests are easier to handle."
   },
   {
     id: "family",
     title: "Family",
     summary: "School forms, child records, emergency docs",
-    detail: "Household records arranged for enrollment, travel, and the recurring paperwork that rarely arrives on a convenient schedule."
+    detail: "Household records arranged for enrollment, travel, and the recurring paperwork that rarely arrives on schedule."
   }
 ] as const;
 
@@ -82,14 +82,14 @@ export const dashboardGroups: DashboardGroup[] = [
     id: "basic",
     title: "Basic",
     description: "License, registration, insurance card, passport",
-    helper: "The essential records most clients need available first.",
+    helper: "The records most people need available first.",
     categories: ["personal", "driving", "travel"]
   },
   {
     id: "medical",
     title: "Medical",
     description: "Insurance cards, medication lists, records",
-    helper: "Fast access when a clinician, caregiver, or front desk is waiting.",
+    helper: "Fast access when a clinician, caregiver, or front desk needs it.",
     categories: ["medical"]
   },
   {

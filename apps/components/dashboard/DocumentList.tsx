@@ -21,7 +21,7 @@ type DocumentListProps = {
 const statusTone: Record<DocumentTemplate["status"], string> = {
   uploaded: "Stored",
   "expiring-soon": "Review soon",
-  missing: "Add file",
+  missing: "Add record",
   expired: "Expired"
 };
 
@@ -99,7 +99,7 @@ export function DocumentList({
                   autoFocus
                   className="vault-document-rename-input"
                   onChange={(event) => setDraftTitle(event.target.value)}
-                  placeholder="Rename file"
+                  placeholder="Enter a new title"
                   value={draftTitle}
                 />
                 <div className="vault-document-card-actions">
@@ -114,7 +114,7 @@ export function DocumentList({
             ) : (
               <div className="vault-document-card-actions">
                 <button className="vault-document-action" onClick={() => beginRename(document)} type="button">
-                  Rename / relabel
+                  Rename
                 </button>
                 <button className="vault-document-action danger" onClick={() => onDeleteDocument(document.id)} type="button">
                   Delete
@@ -131,8 +131,8 @@ export function DocumentList({
               <path d="M6 12h12" />
             </svg>
           </span>
-          <strong>Add another file</strong>
-          <span className="vault-document-status">Use a suggested type or name it yourself</span>
+          <strong>Add another record</strong>
+          <span className="vault-document-status">Use a suggested type or enter your own title.</span>
         </button>
       </div>
     </div>

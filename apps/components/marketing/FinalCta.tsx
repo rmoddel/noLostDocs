@@ -6,16 +6,16 @@ export function FinalCta() {
     <section className="section-block">
       <Card className="final-cta">
         <div>
-          <p className="eyebrow">Start with the live platform</p>
-          <h2>Bring essential records into a more disciplined operating system.</h2>
+          <p className="eyebrow">Start with the web app</p>
+          <h2>Bring essential records into one accountable system.</h2>
           <p className="section-copy">
-            The current release focuses on a responsive web experience, disciplined record organization, and the security language a sensitive platform should be able to defend.
+            The current release focuses on responsive web access, disciplined record organization, and a security posture suited to sensitive records.
           </p>
         </div>
         <div className="hero-actions">
-          <Button href="/login">Open your account</Button>
+          <Button href="/login">Sign in</Button>
           <Button href="/contact" variant="secondary">
-            Speak with support
+            Contact support
           </Button>
         </div>
       </Card>

@@ -10,7 +10,7 @@ export function MobileNav() {
   const { ready, session } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const authLink = ready && session ? { href: "/dashboard", label: "Records" } : { href: "/login", label: "Login" };
+  const authLink = ready && session ? { href: "/dashboard", label: "Records" } : { href: "/login", label: "Sign in" };
 
   const items = useMemo(
     () => [

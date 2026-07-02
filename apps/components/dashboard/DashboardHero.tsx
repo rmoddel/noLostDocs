@@ -29,7 +29,7 @@ export function DashboardHero({
     <section className="dashboard-hero">
       <div className="hero-copy dashboard-copy">
         <p className="eyebrow">Dashboard</p>
-        <h1>Records, access, and status in one view.</h1>
+        <h1>Records, access, and status in one place.</h1>
         <p className="hero-lede">The signed-in workspace keeps account state, categories, and document status together.</p>
         <div className="hero-actions">
           <Button href="/dashboard#scan">Jump to scan</Button>
@@ -45,7 +45,7 @@ export function DashboardHero({
         <div className="summary-metrics">
           <div className="summary-metric">
             <strong>{uploadedCount}</strong>
-            <span>filed</span>
+            <span>stored</span>
           </div>
           <div className="summary-metric">
             <strong>{missingCount}</strong>
@@ -59,7 +59,7 @@ export function DashboardHero({
         <p className="section-support">
           {accountPlan === "premium"
             ? "Premium access keeps every category and protected action available."
-            : "Free Basic keeps the core cloud-backed document groups available."}
+            : "Free Basic keeps the core cloud-backed groups available."}
         </p>
         {accountMessage ? <p className="inline-feedback">{accountMessage}</p> : null}
       </Card>

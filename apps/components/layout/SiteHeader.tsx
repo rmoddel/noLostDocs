@@ -60,7 +60,7 @@ export function SiteHeader() {
             </>
           ) : (
             <Button href="/login" size="sm">
-              Login
+              Sign in
             </Button>
           )}
         </div>

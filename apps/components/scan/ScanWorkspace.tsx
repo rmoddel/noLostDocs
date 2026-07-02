@@ -70,7 +70,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
       await saveScan({
         client,
         configured,
-        documentTitle: scanTitle.trim() || "New record",
+        documentTitle: scanTitle.trim() || "Untitled record",
         file,
         groupId: selectedGroup.id,
         groupTitle: selectedGroup.title,
@@ -84,7 +84,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
         session
       });
 
-      setMessage("Document saved to the account.");
+      setMessage("Record saved to your account.");
       setFile(null);
       setRotation(0);
       router.push("/dashboard");
@@ -105,11 +105,11 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
     <section className={embedded ? "dashboard-scan" : "page-section scan-page"} id="scan">
       <div className="scan-shell">
         <Card className={["content-card", "scan-intro-card", embedded ? "embedded" : ""].filter(Boolean).join(" ")}>
-          <p className="eyebrow">Add file</p>
-          <h1>{isPublicMode ? "Evaluate the scanner." : "Capture cleanly. Review once."}</h1>
+          <p className="eyebrow">Add record</p>
+          <h1>{isPublicMode ? "Scan a document." : "Capture cleanly. Review before saving."}</h1>
           <p className="hero-lede">
             {isPublicMode
-              ? "Public mode lets you test capture, framing, preview, and upload fallback without login."
+              ? "Public mode lets you review capture, framing, preview, and file upload without signing in."
               : "Use the camera or an image file to move a document into the protected workflow."}
           </p>
           <ScanDocsLauncher onScanReady={handleFileChange} />
@@ -156,7 +156,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
           />
 
           <ScanActions
-            actionLabel={isPublicMode ? "Clear test capture" : "Save document"}
+            actionLabel={isPublicMode ? "Clear capture" : "Save record"}
             canAct={Boolean(file)}
             loading={saving}
             onAction={() => (isPublicMode ? handleClear() : void handleSave())}
@@ -164,8 +164,8 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
 
           <p className="support-copy">
             {isPublicMode
-              ? "Public scanner mode stays local-only. It is for evaluating capture and review, not account writes."
-              : "Uploads remain plan-aware through the signed flow, and saved records capture the active scan and OCR metadata."}
+              ? "Public scanner mode keeps capture and review available without account writes."
+              : "Uploads stay tied to the signed workflow and capture the active scan and OCR metadata."}
           </p>
           {message ? <p className="inline-feedback">{message}</p> : null}
         </Card>

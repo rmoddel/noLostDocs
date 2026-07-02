@@ -154,7 +154,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
   function handleAddDraft(title: string) {
     const category = selectedCategoryId ?? "custom";
     const trimmedTitle = title.trim();
-    const nextTitle = trimmedTitle || "Untitled file";
+    const nextTitle = trimmedTitle || "Untitled record";
     const id = crypto.randomUUID();
 
     setDocuments((current) => [
@@ -162,7 +162,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
         id,
         category,
         title: nextTitle,
-        helper: "Add file to finish this record.",
+        helper: "Add a file to complete this record.",
         status: "missing"
       },
       ...current

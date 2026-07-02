@@ -11,16 +11,16 @@ export function AccessTrailPanel() {
       </div>
       <ul className="note-list">
         <li>
-          <strong>Metadata remains browseable.</strong>
-          <span>Category review and status visibility should never imply unrestricted file access on the web.</span>
+          <strong>Metadata stays browseable.</strong>
+          <span>Category review and status visibility should not imply unrestricted file access on the web.</span>
         </li>
         <li>
-          <strong>Protected actions stay time-bounded.</strong>
-          <span>Preview and download should re-check access rather than behave like permanent public links.</span>
+          <strong>Protected actions stay time-bound.</strong>
+          <span>Preview and download re-check access instead of behaving like permanent public links.</span>
         </li>
         <li>
-          <strong>Sensitive events should be reviewable.</strong>
-          <span>The audit path remains the code-owned place to centralize higher-risk access activity.</span>
+          <strong>Sensitive events stay reviewable.</strong>
+          <span>The audit path is the source of truth for higher-risk access activity.</span>
         </li>
       </ul>
     </Card>

@@ -34,7 +34,7 @@ export function DocumentDetail({
     <Card className="side-card detail-card">
       <div className="section-heading compact">
         <div>
-          <p className="eyebrow">Document detail</p>
+          <p className="eyebrow">Record details</p>
           <h3>{document.title}</h3>
         </div>
         <span className={`status-pill access-${accessState}`}>{documentAccessTone[accessState]}</span>
@@ -59,10 +59,10 @@ export function DocumentDetail({
 
       <div className="button-row">
         <Button disabled={actionLoading} onClick={() => onPreview(document)} size="sm">
-          Open authorized preview
+          Open protected preview
         </Button>
         <Button disabled={actionLoading} onClick={() => onDownload(document)} size="sm" variant="secondary">
-          Request authorized download
+          Request protected download
         </Button>
       </div>
 

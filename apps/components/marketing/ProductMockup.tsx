@@ -11,9 +11,9 @@ export function ProductMockup() {
   return (
     <section className="section-block">
       <SectionHeader
-        description="The experience should feel controlled before it feels dense. Categories lead, records remain protected, and account state stays visible."
+        description="The experience should feel clear before it feels dense. Categories lead, records remain protected, and account state stays visible."
         eyebrow="Records preview"
-        title="A workspace designed for accountable record handling."
+        title="A workspace designed for accountable records."
       />
       <div className="mockup-grid">
         <Card className="mockup-card">
@@ -45,7 +45,7 @@ export function ProductMockup() {
           </div>
         </Card>
         <div className="mockup-copy">
-          <p className="eyebrow">What a mature workspace should communicate</p>
+          <p className="eyebrow">What the workspace should communicate</p>
           <ul className="feature-list">
             <li>Which record sets are available to this account</li>
             <li>Which documents need action or review</li>

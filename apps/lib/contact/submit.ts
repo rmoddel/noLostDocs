@@ -13,7 +13,7 @@ type SubmitContactArgs = {
 
 export function validateContactForm(values: { email: string; message: string; name: string; subject: string }) {
   if (!values.name.trim() || !values.email.trim() || !values.subject.trim() || !values.message.trim()) {
-    return "Fill in your name, email, subject, and message.";
+    return "Complete your name, email, subject, and message.";
   }
 
   return null;
@@ -35,7 +35,7 @@ export async function submitContactRequest({
   }
 
   if (!configured) {
-    return { message: "Messages can't be sent yet." };
+    return { message: "Messages cannot be sent yet." };
   }
 
   const { data, error } = await client.functions.invoke("contact-submit", {
@@ -54,6 +54,6 @@ export async function submitContactRequest({
   }
 
   return {
-    message: typeof data?.message === "string" ? data.message : "Message sent. We'll review it and reply by email."
+    message: typeof data?.message === "string" ? data.message : "Message sent. We'll review it and respond by email."
   };
 }

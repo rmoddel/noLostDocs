@@ -11,29 +11,29 @@ export function HeroSection() {
         <h1>{brand.shortHeadline}</h1>
         <p className="hero-lede">{brand.description}</p>
         <div className="hero-actions">
-          <Button href="/login">Open your account</Button>
+          <Button href="/login">Sign in</Button>
           <Button href="/security" variant="secondary">
-            Review the trust model
+            Review security
           </Button>
         </div>
         <div className="hero-facts">
           <span>Cloud-backed records</span>
-          <span>Account-based controls</span>
-          <span>Operational structure</span>
+          <span>Account controls</span>
+          <span>Recovery controls</span>
         </div>
       </div>
       <Card className="hero-panel">
         <div className="hero-panel-stack">
           <div className="hero-panel-item">
-            <strong>Built for high-friction moments.</strong>
-            <p>Find the right record quickly, then move into details and protected actions without reorienting yourself.</p>
+            <strong>Built for urgent moments.</strong>
+            <p>Find the right record quickly, then move into details and protected actions without losing context.</p>
           </div>
           <div className="hero-panel-item">
             <strong>Clear boundaries, not vague promises.</strong>
-            <p>Cloud-backed records remain explicit in the web experience. Local-only behavior is not implied, and protected access remains scoped.</p>
+            <p>Cloud-backed records stay explicit in the web experience. Local-only behavior is not implied, and protected access stays scoped.</p>
           </div>
           <div className="hero-panel-item">
-            <strong>Recovery is part of the product, not an afterthought.</strong>
+            <strong>Recovery is part of the workflow.</strong>
             <p>Device controls, signed-in access, and record recovery operate inside the same trust model.</p>
           </div>
         </div>

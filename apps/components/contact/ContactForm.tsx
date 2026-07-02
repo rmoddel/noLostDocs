@@ -58,20 +58,20 @@ export function ContactForm() {
       <div className="contact-page-grid">
         <Card className="content-card contact-intro-card">
           <p className="eyebrow">Contact</p>
-          <h1>Reach the support team.</h1>
-          <p className="section-copy">Messages are recorded for follow-up through the current support workflow.</p>
-          <p className="section-support">{session?.user.email ? `Signed in as ${session.user.email}.` : "You may contact support from any email address."}</p>
+          <h1>Contact support.</h1>
+          <p className="section-copy">Messages are saved for follow-up.</p>
+          <p className="section-support">{session?.user.email ? `Signed in as ${session.user.email}.` : "You can contact support from any email address."}</p>
           <ul className="note-list">
             <li>
-              <strong>Client support</strong>
-              <span>Billing, access, onboarding, and trust-model questions.</span>
+              <strong>Support requests</strong>
+              <span>Billing, access, onboarding, and trust model questions.</span>
             </li>
             <li>
-              <strong>Operational detail helps</strong>
-              <span>Include the route, device, browser, or account state when possible.</span>
+              <strong>Details help</strong>
+              <span>Include the route, device, browser, or account state when relevant.</span>
             </li>
             <li>
-              <strong>Recorded for follow-up</strong>
+              <strong>Saved for follow-up</strong>
               <span>Messages are saved so the conversation can be reviewed and continued.</span>
             </li>
           </ul>
@@ -111,7 +111,7 @@ export function ContactForm() {
             </Button>
           </form>
 
-          <p className="support-copy">When you are signed in, the request is recorded alongside your account context.</p>
+          <p className="support-copy">When signed in, the request is saved with your account context.</p>
           {status ? <p className="inline-feedback">{status}</p> : null}
         </Card>
       </div>

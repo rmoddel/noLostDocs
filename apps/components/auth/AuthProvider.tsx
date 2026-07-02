@@ -59,7 +59,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       session,
       async signInWithOtp(email: string, redirectTo: string) {
         if (!configured) {
-          return { errorMessage: "Login is not connected yet." };
+          return { errorMessage: "Sign-in is not enabled yet." };
         }
 
         const { error } = await client.auth.signInWithOtp({

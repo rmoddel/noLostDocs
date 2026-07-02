@@ -7,10 +7,10 @@ type ScanActionsProps = {
   onAction: () => void;
 };
 
-export function ScanActions({ actionLabel = "Save scan", canAct, loading, onAction }: ScanActionsProps) {
+export function ScanActions({ actionLabel = "Save record", canAct, loading, onAction }: ScanActionsProps) {
   return (
     <Button disabled={!canAct || loading} onClick={onAction}>
-      {loading ? "Working..." : actionLabel}
+      {loading ? "Saving..." : actionLabel}
     </Button>
   );
 }

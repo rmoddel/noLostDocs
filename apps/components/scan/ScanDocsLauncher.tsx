@@ -30,14 +30,14 @@ function buildCameraErrorState(error: unknown): CameraState {
 
 function buildStatusLabel(cameraState: CameraState, capturedFile: File | null) {
   if (capturedFile) {
-    return "Review scan";
+    return "Review document";
   }
 
   if (cameraState === "ready") {
-    return "Ready to scan";
+    return "Ready to capture";
   }
 
-  return "Position document inside the frame";
+  return "Position the document in the frame";
 }
 
 export function ScanDocsLauncher({
@@ -260,14 +260,14 @@ export function ScanDocsLauncher({
               <path d="M9 9h6M9 12h6M9 15h3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
             </svg>
           </span>
-          <span>Add file</span>
+          <span>Add document</span>
         </Button>
         {helperText ? <p className="scan-launcher-helper">{helperText}</p> : null}
         {acceptedFile ? (
           <div className="scan-launcher-result">
-            {acceptedPreviewUrl ? <img alt="Latest accepted scan" className="scan-launcher-thumb" src={acceptedPreviewUrl} /> : null}
+            {acceptedPreviewUrl ? <img alt="Selected document preview" className="scan-launcher-thumb" src={acceptedPreviewUrl} /> : null}
             <p className="scan-launcher-summary">
-              Last selected: <strong>{acceptedFile.name}</strong>
+              Selected: <strong>{acceptedFile.name}</strong>
             </p>
           </div>
         ) : null}
@@ -279,7 +279,7 @@ export function ScanDocsLauncher({
             <div className="scan-modal-topbar">
               <div>
                 <p className="scan-modal-label" id="scan-modal-title">
-                  Scan Docs
+                  Document scanner
                 </p>
                 <span className="scan-modal-status">{statusLabel}</span>
               </div>
@@ -317,7 +317,7 @@ export function ScanDocsLauncher({
                     </svg>
                   </div>
                   <strong>{capturedFile?.name}</strong>
-                  <p>{capturedFile?.type === "application/pdf" ? "PDF upload ready to use." : "File selected and ready."}</p>
+                  <p>{capturedFile?.type === "application/pdf" ? "PDF ready to use." : "File selected and ready."}</p>
                 </div>
               ) : null}
 
@@ -337,7 +337,7 @@ export function ScanDocsLauncher({
 
             <div className="scan-modal-actions">
               <label className="scan-upload-fallback" htmlFor={fileInputId}>
-                <span>Upload fallback</span>
+                <span>Upload file</span>
                 <input
                   accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
                   id={fileInputId}
