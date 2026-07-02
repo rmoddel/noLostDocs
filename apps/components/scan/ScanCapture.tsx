@@ -1,5 +1,4 @@
 import type { DashboardGroup, DashboardGroupId } from "@/constants/launcherGroups";
-import { scanPipeline } from "@/lib/scan/pipeline";
 
 type ScanCaptureProps = {
   fileName: string | null;
@@ -53,20 +52,9 @@ export function ScanCapture({
           type="file"
         />
         <strong>{fileName ?? "Tap to take a photo or choose a file"}</strong>
-        <span>{scanPipeline.capture.guidance[0]}</span>
-        <span>
-          {scanPipeline.capture.fallbackLabel}: {scanPipeline.capture.fallbackValue}
-        </span>
+        <span>Keep the document flat and fully inside the frame.</span>
+        <span>Fallback: secure browser file input</span>
       </label>
-
-      <div className="scan-guidance-panel">
-        <p className="scan-pipeline-label">Capture guidance</p>
-        <ul className="note-list">
-          {scanPipeline.capture.guidance.map((tip) => (
-            <li key={tip}>{tip}</li>
-          ))}
-        </ul>
-      </div>
     </>
   );
 }

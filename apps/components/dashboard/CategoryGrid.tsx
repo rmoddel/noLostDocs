@@ -1,24 +1,39 @@
-import type { DashboardGroup, DashboardGroupId } from "@/constants/launcherGroups";
+import type { CategoryId, VaultCategory } from "@nolostdocs/types";
+import type { CSSProperties, ReactNode } from "react";
 
-type CategoryGridProps = {
-  groups: DashboardGroup[];
-  onSelect: (groupId: DashboardGroupId) => void;
-  selectedGroupId: DashboardGroupId;
+type CategorySummary = VaultCategory & {
+  uploadedCount: number;
+  totalCount: number;
 };
 
-export function CategoryGrid({ groups, onSelect, selectedGroupId }: CategoryGridProps) {
+type CategoryGridProps = {
+  categories: CategorySummary[];
+  onSelect: (categoryId: CategoryId) => void;
+  renderIcon: (categoryId: CategoryId) => ReactNode;
+  selectedCategoryId: CategoryId | null;
+};
+
+export function CategoryGrid({ categories, onSelect, renderIcon, selectedCategoryId }: CategoryGridProps) {
   return (
-    <div className="launcher-grid">
-      {groups.map((group) => (
+    <div className="vault-category-list">
+      {categories.map((category) => (
         <button
-          className={`launcher-card app-card${selectedGroupId === group.id ? " active" : ""}`}
-          key={group.id}
-          onClick={() => onSelect(group.id)}
+          className={`vault-category-card${selectedCategoryId === category.id ? " active" : ""}`}
+          key={category.id}
+          onClick={() => onSelect(category.id)}
+          style={{ "--vault-accent": category.accent } as CSSProperties}
           type="button"
         >
-          <strong>{group.title}</strong>
-          <p>{group.description}</p>
-          <small>{group.helper}</small>
+          <span className="vault-card-icon" aria-hidden="true">
+            {renderIcon(category.id)}
+          </span>
+          <span className="vault-card-copy">
+            <strong>{category.title}</strong>
+            <span>{category.subtitle}</span>
+          </span>
+          <span className="vault-card-count">
+            {category.uploadedCount} of {category.totalCount} uploaded
+          </span>
         </button>
       ))}
     </div>

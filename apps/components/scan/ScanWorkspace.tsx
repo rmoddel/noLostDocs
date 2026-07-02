@@ -6,16 +6,13 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { dashboardGroups, type DashboardGroupId } from "@/constants/launcherGroups";
 import { saveScan, validateScanFile } from "@/lib/documents/upload";
 import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
-import { analyzeScanQuality, type ScanQualityReport } from "@/lib/scan/quality";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { ScanActions } from "./ScanActions";
 import { ScanCapture } from "./ScanCapture";
 import { ScanDocsLauncher } from "./ScanDocsLauncher";
-import { ScanPipelineCard } from "./ScanPipelineCard";
 import { ScanPreview } from "./ScanPreview";
-import { ScanReviewPanel } from "./ScanReviewPanel";
 
 type ScanWorkspaceProps = {
   embedded?: boolean;
@@ -34,8 +31,6 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
   const [scanTitle, setScanTitle] = useState("New scan");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [qualityPending, setQualityPending] = useState(false);
-  const [qualityReport, setQualityReport] = useState<ScanQualityReport | null>(null);
 
   useEffect(() => {
     if (!file) {
@@ -48,52 +43,6 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
 
     return () => URL.revokeObjectURL(url);
   }, [file]);
-
-  useEffect(() => {
-    if (!file) {
-      setQualityPending(false);
-      setQualityReport(null);
-      return;
-    }
-
-    let active = true;
-    setQualityPending(true);
-
-    void analyzeScanQuality(file, rotation)
-      .then((report) => {
-        if (active) {
-          setQualityReport(report);
-        }
-      })
-      .catch((error) => {
-        if (active) {
-          setQualityReport({
-            canSave: false,
-            flags: ["inspection-failed"],
-            headline: error instanceof Error ? error.message : "Unable to inspect the selected image.",
-            ocrSummary: "Quality inspection failed, so OCR readiness could not be confirmed.",
-            signals: [
-              {
-                detail: "Choose a different image or retry this capture.",
-                id: "framing",
-                label: "Inspection failed",
-                tone: "blocked"
-              }
-            ],
-            tone: "blocked"
-          });
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setQualityPending(false);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [file, rotation]);
 
   const selectedGroup = useMemo(
     () => dashboardGroups.find((group) => group.id === selectedGroupId) ?? dashboardGroups[0],
@@ -130,10 +79,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
           captureProvider: providerStatus.captureProvider,
           captureReady: providerStatus.captureReady,
           ocrProvider: providerStatus.ocrProvider,
-          ocrReady: providerStatus.ocrReady,
-          qualityFlags: qualityReport?.flags ?? [],
-          qualityHeadline: qualityReport?.headline ?? "Quality review unavailable.",
-          qualityTone: qualityReport?.tone ?? "warning"
+          ocrReady: providerStatus.ocrReady
         },
         session
       });
@@ -196,9 +142,10 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
             title={scanTitle}
           />
 
-          <ScanPipelineCard providerStatus={providerStatus} />
-
-          <ScanReviewPanel providerStatus={providerStatus} qualityPending={qualityPending} qualityReport={qualityReport} />
+          <div className="scan-status-strip">
+            <span className="mini-pill">{providerStatus.captureLabel}</span>
+            <span className="mini-pill">{providerStatus.ocrLabel}</span>
+          </div>
 
           <ScanPreview
             disabled={saving}
@@ -210,8 +157,8 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
 
           <ScanActions
             actionLabel={isPublicMode ? "Clear test capture" : "Save document"}
-            canAct={isPublicMode ? Boolean(file) : Boolean(file) && !qualityPending && Boolean(qualityReport?.canSave)}
-            loading={saving || qualityPending}
+            canAct={Boolean(file)}
+            loading={saving}
             onAction={() => (isPublicMode ? handleClear() : void handleSave())}
           />
 

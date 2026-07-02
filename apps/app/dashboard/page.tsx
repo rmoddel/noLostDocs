@@ -1,7 +1,6 @@
 import { requireUser } from "@/lib/auth/requireUser";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { loadDashboardDocuments } from "@/lib/documents/dashboard";
-import { getScanProviderStatus } from "@/lib/scan/providerStatus";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -14,7 +13,6 @@ export default async function DashboardPage() {
     <DashboardShell
       initialDocumentMessage={initialDashboardData.errorMessage}
       initialDocuments={initialDashboardData.documents}
-      scanProviderStatus={getScanProviderStatus()}
     />
   );
 }

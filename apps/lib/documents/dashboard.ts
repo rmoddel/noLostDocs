@@ -136,9 +136,13 @@ export async function loadDashboardDocuments(client: SupabaseClient, userId: str
   ]);
 
   if (documentsError || filesError) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Failed to load dashboard documents", documentsError ?? filesError);
+    }
+
     return {
       documents: [],
-      errorMessage: documentsError?.message ?? filesError?.message ?? "Unable to load dashboard documents."
+      errorMessage: "Document records are not connected yet."
     };
   }
 

@@ -20,6 +20,10 @@ export function SiteHeader() {
   const { ready, session, signOut } = useAuth();
   const showDashboardButton = ready && session && pathname !== "/dashboard";
 
+  if (pathname === "/dashboard") {
+    return null;
+  }
+
   return (
     <header className="site-header">
       <div className="site-header-inner">

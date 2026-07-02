@@ -1,218 +1,179 @@
 "use client";
 
-import type { DocumentTemplate } from "@nolostdocs/types";
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { dashboardGroups, type DashboardGroupId } from "@/constants/launcherGroups";
-import { runProtectedDocumentAction } from "@/lib/documents/download";
-import { allowedGroupIdsForPlan, resolveAccountPlan, type AccountPlan } from "@/lib/plans/resolvePlan";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { EmptyState } from "../ui/EmptyState";
+import type { CategoryId, DocumentTemplate, VaultCategory } from "@nolostdocs/types";
+import { useMemo, useState } from "react";
+import { prototypeSnapshot } from "@nolostdocs/config";
 import { CategoryGrid } from "./CategoryGrid";
-import { DashboardHero } from "./DashboardHero";
-import { DocumentDetail } from "./DocumentDetail";
 import { DocumentList } from "./DocumentList";
-import { NextActionsPanel } from "./NextActionsPanel";
-import { PlanStatusCard } from "./PlanStatusCard";
-import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
-import { ScanWorkspace } from "../scan/ScanWorkspace";
-
-type ProtectedActionState = {
-  loading: boolean;
-  message: string | null;
-};
 
 type DashboardShellProps = {
   initialDocumentMessage: string | null;
   initialDocuments: DocumentTemplate[];
-  scanProviderStatus: ScanProviderStatus;
 };
 
-export function DashboardShell({ initialDocumentMessage, initialDocuments, scanProviderStatus }: DashboardShellProps) {
-  const { session } = useAuth();
-  const { client, configured } = createBrowserSupabaseClient();
-  const [selectedGroupId, setSelectedGroupId] = useState<DashboardGroupId>("basic");
+type CategorySummary = VaultCategory & {
+  uploadedCount: number;
+  totalCount: number;
+};
+
+const categoryOrder: CategoryId[] = ["family", "medical", "travel", "business", "personal", "driving", "work", "custom"];
+
+function buildCategoryIcon(categoryId: CategoryId) {
+  switch (categoryId) {
+    case "family":
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="M7 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+          <path d="M15 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+          <path d="M3.5 19c.4-3 2.6-5 5.5-5s5.1 2 5.5 5" />
+          <path d="M13.5 18.5c.3-2 1.8-3.5 3.7-3.5 1.7 0 3 1 3.8 2.8" />
+        </svg>
+      );
+    case "medical":
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="M12 20.2 5.8 14C3.6 11.8 3.6 8.3 5.8 6.1c2-2 5.1-2.2 7.4-.7 2.3-1.5 5.4-1.3 7.4.7 2.2 2.2 2.2 5.7 0 7.9L12 20.2Z" />
+          <path d="M12 8.3v7.4" />
+          <path d="M8.3 12h7.4" />
+        </svg>
+      );
+    case "travel":
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="m2.5 13 8.2-2.1 4.4-6.6 1.8.8-2.4 7 4.3 1.6 2.6-2 .6 1.3-2 3.1-7.5-.3-3.2 5.1-1.8-.7 1.6-5.1-5.1-2.2L2.5 13Z" />
+        </svg>
+      );
+    case "business":
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="M4.5 8.5h15v9.2a1.8 1.8 0 0 1-1.8 1.8H6.3a1.8 1.8 0 0 1-1.8-1.8V8.5Z" />
+          <path d="M9 8.5V7a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 7v1.5" />
+          <path d="M4.5 12.5h15" />
+        </svg>
+      );
+    case "personal":
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="M4.5 6.5h15v11h-15v-11Z" />
+          <path d="M8.5 10.2h3.6" />
+          <path d="M8.5 14.2h6.5" />
+          <path d="M14.7 10.2h1.2" />
+        </svg>
+      );
+    case "driving":
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="M6 14.5h12l1.2 3.5H4.8L6 14.5Z" />
+          <path d="M7.6 14.5 9 9.2h6l1.4 5.3" />
+          <path d="M7.3 18.8h.2" />
+          <path d="M16.5 18.8h.2" />
+        </svg>
+      );
+    case "work":
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="M6.5 8.5h11a1.8 1.8 0 0 1 1.8 1.8v6.2a1.8 1.8 0 0 1-1.8 1.8h-11a1.8 1.8 0 0 1-1.8-1.8v-6.2a1.8 1.8 0 0 1 1.8-1.8Z" />
+          <path d="M9.5 8.5V7.2A1.7 1.7 0 0 1 11.2 5.5h1.6a1.7 1.7 0 0 1 1.7 1.7v1.3" />
+          <path d="M4.7 13.2h14.6" />
+        </svg>
+      );
+    default:
+      return (
+        <svg fill="none" viewBox="0 0 24 24">
+          <path d="M5 5.5h14v13H5z" />
+          <path d="M8 9h8" />
+          <path d="M8 12h8" />
+        </svg>
+      );
+  }
+}
+
+export function DashboardShell({ initialDocumentMessage, initialDocuments }: DashboardShellProps) {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
-  const [accountPlan, setAccountPlan] = useState<AccountPlan>("free");
-  const [accountLoading, setAccountLoading] = useState(false);
-  const [accountMessage, setAccountMessage] = useState<string | null>(null);
-  const [documentMessage, setDocumentMessage] = useState<string | null>(initialDocumentMessage);
+  const [documentMessage] = useState<string | null>(initialDocumentMessage);
   const [documents] = useState<DocumentTemplate[]>(initialDocuments);
-  const [protectedAction, setProtectedAction] = useState<ProtectedActionState>({ loading: false, message: null });
 
-  useEffect(() => {
-    if (!configured || !session) {
-      setAccountPlan("free");
-      return;
-    }
+  const categorySummaries = useMemo<CategorySummary[]>(
+    () =>
+      categoryOrder
+        .map((categoryId) => prototypeSnapshot.categories.find((category) => category.id === categoryId))
+        .filter((category): category is VaultCategory => Boolean(category))
+        .map((category) => {
+          const categoryDocuments = documents.filter((document) => document.category === category.id);
 
-    void loadAccountPlan();
-  }, [configured, session]);
+          return {
+            ...category,
+            totalCount: Math.max(categoryDocuments.length + 1, 5),
+            uploadedCount: categoryDocuments.length
+          };
+        }),
+    [documents]
+  );
 
-  async function loadAccountPlan() {
-    if (!session) {
-      return;
-    }
+  const selectedCategory = useMemo(
+    () => categorySummaries.find((category) => category.id === selectedCategoryId) ?? null,
+    [categorySummaries, selectedCategoryId]
+  );
 
-    setAccountLoading(true);
-    setAccountMessage(null);
+  const selectedCategoryDocuments = useMemo(
+    () => documents.filter((document) => document.category === selectedCategoryId),
+    [documents, selectedCategoryId]
+  );
 
-    const { error: upsertError } = await client.from("profiles").upsert(
-      {
-        id: session.user.id,
-        email: session.user.email ?? null,
-        plan: "free",
-        cloud_enabled: false
-      },
-      { onConflict: "id" }
-    );
-
-    if (upsertError) {
-      setAccountPlan("free");
-      setAccountLoading(false);
-      setAccountMessage("Using Free Basic until profile synchronization is available.");
-      return;
-    }
-
-    const [{ data: profile, error: profileError }, { data: subscriptions, error: subscriptionError }] = await Promise.all([
-      client.from("profiles").select("plan, cloud_enabled").eq("id", session.user.id).maybeSingle(),
-      client.from("subscriptions").select("plan, status").eq("user_id", session.user.id)
-    ]);
-
-    setAccountLoading(false);
-
-    if (profileError || subscriptionError) {
-      setAccountPlan("free");
-      setAccountMessage("Using Free Basic until subscription state is available.");
-      return;
-    }
-
-    setAccountPlan(resolveAccountPlan(profile, subscriptions ?? []));
+  function handleSelectCategory(categoryId: CategoryId) {
+    setSelectedCategoryId(categoryId);
+    setSelectedDocumentId(null);
   }
 
-  async function handleProtectedAction(action: "preview" | "download", template: DocumentTemplate) {
-    setProtectedAction({ loading: true, message: null });
-
-    const result = await runProtectedDocumentAction({
-      action,
-      client,
-      configured,
-      session,
-      template
-    });
-
-    setProtectedAction({ loading: false, message: result.message });
+  function handleBackToOverview() {
+    setSelectedCategoryId(null);
+    setSelectedDocumentId(null);
   }
-
-  const allowedGroupIds = useMemo(() => allowedGroupIdsForPlan(accountPlan), [accountPlan]);
-  const visibleGroups = useMemo(
-    () => dashboardGroups.filter((group) => allowedGroupIds.includes(group.id)),
-    [allowedGroupIds]
-  );
-  const selectedGroup = useMemo(
-    () => dashboardGroups.find((group) => group.id === selectedGroupId) ?? dashboardGroups[0],
-    [selectedGroupId]
-  );
-  const selectedGroupDocs = useMemo(
-    () => documents.filter((template) => selectedGroup.categories.includes(template.category)),
-    [documents, selectedGroup]
-  );
-  const selectedDocument = useMemo(
-    () => selectedGroupDocs.find((template) => template.id === selectedDocumentId) ?? selectedGroupDocs[0] ?? null,
-    [selectedDocumentId, selectedGroupDocs]
-  );
-
-  useEffect(() => {
-    if (!visibleGroups.length) {
-      return;
-    }
-
-    if (!allowedGroupIds.includes(selectedGroupId)) {
-      setSelectedGroupId(visibleGroups[0].id);
-    }
-  }, [allowedGroupIds, selectedGroupId, visibleGroups]);
-
-  useEffect(() => {
-    if (!selectedGroupDocs.length) {
-      setSelectedDocumentId(null);
-      return;
-    }
-
-    if (!selectedDocumentId || !selectedGroupDocs.some((template) => template.id === selectedDocumentId)) {
-      setSelectedDocumentId(selectedGroupDocs[0].id);
-    }
-  }, [selectedDocumentId, selectedGroupDocs]);
-
-  const uploadedCount = documents.filter((template) => template.status === "uploaded").length;
-  const missingCount = documents.filter((template) => template.status === "missing").length;
-  const urgentCount = documents.filter(
-    (template) => template.status === "expiring-soon" || template.status === "expired"
-  ).length;
-  const savedInSelectedGroup = selectedGroupDocs.filter((template) => template.status === "uploaded").length;
-  const nextActionDocs = documents.filter((template) => template.status === "expiring-soon" || template.status === "missing");
 
   return (
-    <>
-      <DashboardHero
-        accountLoading={accountLoading}
-        accountMessage={accountMessage}
-        accountPlan={accountPlan}
-        email={session?.user.email ?? null}
-        missingCount={missingCount}
-        urgentCount={urgentCount}
-        uploadedCount={uploadedCount}
-      />
+    <section className="vault-shell">
+      <div className="vault-frame">
+        {!selectedCategory ? (
+          <>
+            <header className="vault-header">
+              <p className="vault-kicker">Your vault</p>
+              <h1>Documents</h1>
+            </header>
 
-      <ScanWorkspace embedded providerStatus={scanProviderStatus} />
-
-      <section className="dashboard-layout" id="records">
-        <section className="dashboard-main">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Categories</p>
-              <h2>Categories with clear scope.</h2>
-            </div>
-            <p className="section-support">Choose a category, then review the related records below.</p>
-          </div>
-
-          <CategoryGrid groups={visibleGroups} onSelect={setSelectedGroupId} selectedGroupId={selectedGroup.id} />
-
-          <DocumentList
-            documents={selectedGroupDocs}
-            onSelect={setSelectedDocumentId}
-            selectedDocumentId={selectedDocumentId}
-            selectedGroup={selectedGroup}
-            uploadedCount={savedInSelectedGroup}
-          />
-
-          {selectedDocument ? (
-            <DocumentDetail
-              actionLoading={protectedAction.loading}
-              actionMessage={protectedAction.message}
-              document={selectedDocument}
-              onDownload={(document) => void handleProtectedAction("download", document)}
-              onPreview={(document) => void handleProtectedAction("preview", document)}
+            <CategoryGrid
+              categories={categorySummaries}
+              onSelect={handleSelectCategory}
+              selectedCategoryId={selectedCategoryId}
+              renderIcon={buildCategoryIcon}
             />
-          ) : (
-            <EmptyState
-              body="Signed-in records will appear here after they are added through the protected scan workflow."
-              title="No records are in this category yet."
+          </>
+        ) : (
+          <>
+            <header className="vault-detail-header">
+              <button className="vault-back-button" onClick={handleBackToOverview} type="button" aria-label="Back to categories">
+                <svg fill="none" viewBox="0 0 24 24">
+                  <path d="M15.5 5.5 9 12l6.5 6.5" />
+                </svg>
+              </button>
+
+              <div className="vault-detail-copy">
+                <p className="vault-kicker">{selectedCategory.uploadedCount} of {selectedCategory.totalCount} uploaded</p>
+                <h1>{selectedCategory.title}</h1>
+              </div>
+            </header>
+
+            <DocumentList
+              category={selectedCategory}
+              documents={selectedCategoryDocuments}
+              onSelect={setSelectedDocumentId}
+              selectedDocumentId={selectedDocumentId}
             />
-          )}
-        </section>
+          </>
+        )}
 
-        <aside className="dashboard-side">
-          <PlanStatusCard
-            accountPlan={accountPlan}
-            uploadedCount={uploadedCount}
-            visibleGroupCount={visibleGroups.length}
-          />
-
-          <NextActionsPanel documents={nextActionDocs} />
-
-          {documentMessage ? <p className="inline-feedback">{documentMessage}</p> : null}
-        </aside>
-      </section>
-    </>
+        {documentMessage ? <p className="vault-message">{documentMessage}</p> : null}
+      </div>
+    </section>
   );
 }
