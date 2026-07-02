@@ -20,10 +20,6 @@ export function SiteHeader() {
   const { ready, session, signOut } = useAuth();
   const showDashboardButton = ready && session && pathname !== "/dashboard";
 
-  if (pathname === "/dashboard") {
-    return null;
-  }
-
   return (
     <header className="site-header">
       <div className="site-header-inner">
@@ -63,13 +59,13 @@ export function SiteHeader() {
               </Button>
             </>
           ) : (
-            <Button href="/login" size="sm">
-              Login
-            </Button>
+              <Button href="/login" size="sm">
+                Login
+              </Button>
           )}
         </div>
+        <MobileNav />
       </div>
-      <MobileNav />
     </header>
   );
 }

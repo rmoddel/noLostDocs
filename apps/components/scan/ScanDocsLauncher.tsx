@@ -260,7 +260,7 @@ export function ScanDocsLauncher({
               <path d="M9 9h6M9 12h6M9 15h3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
             </svg>
           </span>
-          <span>Scan Docs</span>
+          <span>Add file</span>
         </Button>
         {helperText ? <p className="scan-launcher-helper">{helperText}</p> : null}
         {acceptedFile ? (

@@ -1,4 +1,5 @@
 import type { DashboardGroup, DashboardGroupId } from "@/constants/launcherGroups";
+import { documentTypeFeatured, documentTypeSuggestions } from "@/constants/documentTypeTaxonomy";
 
 type ScanCaptureProps = {
   fileName: string | null;
@@ -21,6 +22,8 @@ export function ScanCapture({
   selectedGroupId,
   title
 }: ScanCaptureProps) {
+  const selectedSuggestedType = documentTypeFeatured.includes(title) ? title : "";
+
   return (
     <>
       {metadataEnabled ? (
@@ -37,8 +40,44 @@ export function ScanCapture({
           </label>
 
           <label className="field">
-            <span>Scan name</span>
-            <input onChange={(event) => onTitleChange(event.target.value)} type="text" value={title} />
+            <span>File name</span>
+            <div className="scan-type-picks" aria-label="Suggested file types">
+              {documentTypeFeatured.map((suggestion) => (
+                <button
+                  className="scan-type-pill"
+                  key={suggestion}
+                  onClick={() => onTitleChange(suggestion)}
+                  type="button"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+            <select
+              aria-label="Suggested file type"
+              onChange={(event) => onTitleChange(event.target.value)}
+              value={selectedSuggestedType}
+            >
+              <option value="">Choose a suggested type</option>
+              {documentTypeFeatured.map((suggestion) => (
+                <option key={suggestion} value={suggestion}>
+                  {suggestion}
+                </option>
+              ))}
+            </select>
+            <input
+              list="file-name-suggestions"
+              onChange={(event) => onTitleChange(event.target.value)}
+              placeholder="Type any file name"
+              type="text"
+              value={title}
+            />
+            <span className="field-note">Pick a standard type, then rename it however you want.</span>
+            <datalist id="file-name-suggestions">
+              {documentTypeSuggestions.map((suggestion) => (
+                <option key={suggestion} value={suggestion} />
+              ))}
+            </datalist>
           </label>
         </>
       ) : null}

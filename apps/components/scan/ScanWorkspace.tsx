@@ -28,7 +28,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
-  const [scanTitle, setScanTitle] = useState("New scan");
+  const [scanTitle, setScanTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -70,7 +70,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
       await saveScan({
         client,
         configured,
-        documentTitle: scanTitle.trim() || "New scan",
+        documentTitle: scanTitle.trim() || "New record",
         file,
         groupId: selectedGroup.id,
         groupTitle: selectedGroup.title,
@@ -105,7 +105,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
     <section className={embedded ? "dashboard-scan" : "page-section scan-page"} id="scan">
       <div className="scan-shell">
         <Card className={["content-card", "scan-intro-card", embedded ? "embedded" : ""].filter(Boolean).join(" ")}>
-          <p className="eyebrow">Scan</p>
+          <p className="eyebrow">Add file</p>
           <h1>{isPublicMode ? "Evaluate the scanner." : "Capture cleanly. Review once."}</h1>
           <p className="hero-lede">
             {isPublicMode

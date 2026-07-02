@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "featured": [
+    "Driver's license",
+    "Passport",
+    "Passport card",
+    "Birth certificate",
+    "Social Security card",
+    "Insurance card",
+    "Vehicle registration",
+    "Lease agreement",
+    "Bank statement",
+    "Pay stub",
+    "Tax return",
+    "W-2",
+    "Contract",
+    "Invoice"
+  ],
+  "categories": [
+    {
+      "id": "identity",
+      "label": "Identity",
+      "items": [
+        "Driver's license",
+        "State ID",
+        "Passport",
+        "Passport card",
+        "Birth certificate",
+        "Social Security card",
+        "Naturalization certificate",
+        "Permanent resident card"
+      ]
+    },
+    {
+      "id": "travel",
+      "label": "Travel",
+      "items": [
+        "Passport renewal",
+        "Visa",
+        "ESTA approval",
+        "Itinerary",
+        "Boarding pass",
+        "Travel insurance",
+        "International vaccination record",
+        "TSA PreCheck / Global Entry"
+      ]
+    },
+    {
+      "id": "medical",
+      "label": "Medical",
+      "items": [
+        "Insurance card",
+        "Immunization record",
+        "Medication list",
+        "Allergy list",
+        "Visit summary",
+        "Lab results",
+        "Prescription",
+        "Referral letter"
+      ]
+    },
+    {
+      "id": "insurance",
+      "label": "Insurance",
+      "items": [
+        "Auto insurance card",
+        "Homeowners policy",
+        "Renters policy",
+        "Life insurance policy",
+        "Disability policy",
+        "Policy declaration",
+        "Claim file",
+        "Benefits summary"
+      ]
+    },
+    {
+      "id": "vehicle",
+      "label": "Vehicle",
+      "items": [
+        "Vehicle registration",
+        "Vehicle title",
+        "Inspection report",
+        "Maintenance record",
+        "Warranty",
+        "Loan payoff letter",
+        "Mileage log",
+        "Repair receipt"
+      ]
+    },
+    {
+      "id": "housing",
+      "label": "Housing",
+      "items": [
+        "Lease agreement",
+        "Mortgage statement",
+        "Deed",
+        "Closing disclosure",
+        "Rental receipt",
+        "HOA notice",
+        "Property tax bill",
+        "Home inventory"
+      ]
+    },
+    {
+      "id": "finance",
+      "label": "Finance",
+      "items": [
+        "Bank statement",
+        "Credit card statement",
+        "Investment statement",
+        "Loan statement",
+        "Pay stub",
+        "Direct deposit form",
+        "Account opening letter",
+        "Budget worksheet"
+      ]
+    },
+    {
+      "id": "tax",
+      "label": "Tax",
+      "items": [
+        "Tax return",
+        "Tax transcript",
+        "W-2",
+        "1099-NEC",
+        "1099-MISC",
+        "1099-INT",
+        "1098",
+        "IRS notice"
+      ]
+    },
+    {
+      "id": "employment",
+      "label": "Employment",
+      "items": [
+        "Offer letter",
+        "Employment agreement",
+        "W-4",
+        "Benefits enrollment",
+        "Performance review",
+        "Training certificate",
+        "Termination letter",
+        "Noncompete agreement"
+      ]
+    },
+    {
+      "id": "business",
+      "label": "Business",
+      "items": [
+        "EIN letter",
+        "Articles of incorporation",
+        "Operating agreement",
+        "Contract",
+        "Invoice",
+        "Receipt",
+        "Business license",
+        "Vendor agreement"
+      ]
+    },
+    {
+      "id": "legal",
+      "label": "Legal",
+      "items": [
+        "Power of attorney",
+        "Will",
+        "Trust",
+        "Custody agreement",
+        "Court order",
+        "Settlement agreement",
+        "Notarized affidavit",
+        "Divorce decree"
+      ]
+    },
+    {
+      "id": "family",
+      "label": "Family",
+      "items": [
+        "Marriage certificate",
+        "Adoption record",
+        "School form",
+        "Child immunization record",
+        "Emergency contact sheet",
+        "Care plan",
+        "Guardianship order",
+        "Birth certificate copy"
+      ]
+    },
+    {
+      "id": "education",
+      "label": "Education",
+      "items": [
+        "Transcript",
+        "Diploma",
+        "Enrollment verification",
+        "Financial aid award letter",
+        "Certificate",
+        "Class schedule",
+        "Student loan statement",
+        "Recommendation letter"
+      ]
+    },
+    {
+      "id": "property",
+      "label": "Property",
+      "items": [
+        "Warranty",
+        "Appliance manual",
+        "Appraisal",
+        "Survey",
+        "Title insurance",
+        "Repair receipt",
+        "Home inventory",
+        "Maintenance log"
+      ]
+    },
+    {
+      "id": "membership",
+      "label": "Membership",
+      "items": [
+        "Membership card",
+        "Loyalty card",
+        "Association dues notice",
+        "Club card",
+        "Subscription receipt",
+        "Renewal notice",
+        "Member agreement",
+        "Volunteer badge"
+      ]
+    },
+    {
+      "id": "utilities",
+      "label": "Utilities",
+      "items": [
+        "Electric bill",
+        "Gas bill",
+        "Water bill",
+        "Internet bill",
+        "Phone bill",
+        "Trash bill",
+        "Utility account notice",
+        "Service agreement"
+      ]
+    },
+    {
+      "id": "emergency",
+      "label": "Emergency",
+      "items": [
+        "Emergency contacts",
+        "Medical directives",
+        "Allergy sheet",
+        "Evacuation plan",
+        "Backup keys note",
+        "Emergency cash note",
+        "Family safety plan",
+        "Power outage checklist"
+      ]
+    }
+  ]
+}
