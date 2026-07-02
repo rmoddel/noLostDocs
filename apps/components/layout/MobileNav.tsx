@@ -36,9 +36,17 @@ export function MobileNav() {
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        <span />
-        <span />
-        <span />
+        <span className="mobile-nav-toggle-icon" aria-hidden="true">
+          <svg className="mobile-nav-toggle-menu" fill="none" viewBox="0 0 24 24">
+            <path d="M5 7.5h14" />
+            <path d="M5 12h14" />
+            <path d="M5 16.5h14" />
+          </svg>
+          <svg className="mobile-nav-toggle-close" fill="none" viewBox="0 0 24 24">
+            <path d="M6 6 18 18" />
+            <path d="M18 6 6 18" />
+          </svg>
+        </span>
       </button>
 
       <div className="mobile-nav-panel">

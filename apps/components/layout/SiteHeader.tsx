@@ -59,9 +59,9 @@ export function SiteHeader() {
               </Button>
             </>
           ) : (
-              <Button href="/login" size="sm">
-                Login
-              </Button>
+            <Button href="/login" size="sm">
+              Login
+            </Button>
           )}
         </div>
         <MobileNav />

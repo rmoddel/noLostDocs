@@ -51,12 +51,30 @@ export const launcherGroups: LauncherGroup[] = [
 ] as const;
 
 export const securityPrinciples = [
-  "Private storage boundaries",
-  "Signed-in account access",
-  "Protected downloads",
-  "Device recovery controls",
-  "Cloud backup clarity",
-  "Reviewable access events"
+  {
+    title: "Private storage boundaries",
+    detail: "Records stay partitioned by account and category so sensitive files do not blur together."
+  },
+  {
+    title: "Signed-in account access",
+    detail: "Browsing, uploads, and protected actions stay behind authenticated web sessions."
+  },
+  {
+    title: "Protected downloads",
+    detail: "Downloads remain deliberate, visible events instead of an invisible file dump."
+  },
+  {
+    title: "Device recovery controls",
+    detail: "Lost devices can be suspended quickly, then re-authorized only when you decide."
+  },
+  {
+    title: "Cloud backup clarity",
+    detail: "The web experience stays explicit about cloud-backed records and what lives where."
+  },
+  {
+    title: "Reviewable access events",
+    detail: "Users can inspect meaningful actions so access history is understandable, not hidden."
+  }
 ] as const;
 
 export const dashboardGroups: DashboardGroup[] = [

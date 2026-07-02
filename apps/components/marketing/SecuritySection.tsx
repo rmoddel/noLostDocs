@@ -11,9 +11,11 @@ export function SecuritySection() {
         title="Concrete controls instead of inflated language."
       />
       <div className="security-grid">
-        {securityPrinciples.map((principle) => (
-          <Card className="security-card" key={principle}>
-            <p className="security-title">{principle}</p>
+        {securityPrinciples.map((principle, index) => (
+          <Card className="security-card" key={principle.title}>
+            <span className="security-index">{String(index + 1).padStart(2, "0")}</span>
+            <p className="security-title">{principle.title}</p>
+            <p className="security-detail">{principle.detail}</p>
           </Card>
         ))}
       </div>

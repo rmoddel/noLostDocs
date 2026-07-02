@@ -18,6 +18,25 @@ type CategorySummary = VaultCategory & {
 
 const categoryOrder: CategoryId[] = ["family", "medical", "travel", "business", "personal", "driving", "work", "custom"];
 
+function normalizeTitle(title: string) {
+  return title.trim().toLowerCase();
+}
+
+function dedupeDocumentsByTitle(documents: DocumentTemplate[]) {
+  const seen = new Set<string>();
+
+  return documents.filter((document) => {
+    const normalizedTitle = normalizeTitle(document.title);
+
+    if (!normalizedTitle || seen.has(normalizedTitle)) {
+      return false;
+    }
+
+    seen.add(normalizedTitle);
+    return true;
+  });
+}
+
 function buildCategoryIcon(categoryId: CategoryId) {
   switch (categoryId) {
     case "family":
@@ -92,7 +111,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [documentMessage] = useState<string | null>(initialDocumentMessage);
-  const [documents] = useState<DocumentTemplate[]>(initialDocuments);
+  const [documents, setDocuments] = useState<DocumentTemplate[]>(initialDocuments);
 
   const categorySummaries = useMemo<CategorySummary[]>(
     () =>
@@ -100,12 +119,13 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
         .map((categoryId) => prototypeSnapshot.categories.find((category) => category.id === categoryId))
         .filter((category): category is VaultCategory => Boolean(category))
         .map((category) => {
-          const categoryDocuments = documents.filter((document) => document.category === category.id);
+          const categoryDocuments = dedupeDocumentsByTitle(documents.filter((document) => document.category === category.id));
+          const uploadedCount = categoryDocuments.filter((document) => document.status === "uploaded").length;
 
           return {
             ...category,
-            totalCount: Math.max(categoryDocuments.length + 1, 5),
-            uploadedCount: categoryDocuments.length
+            totalCount: categoryDocuments.length,
+            uploadedCount
           };
         }),
     [documents]
@@ -117,7 +137,7 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
   );
 
   const selectedCategoryDocuments = useMemo(
-    () => documents.filter((document) => document.category === selectedCategoryId),
+    () => dedupeDocumentsByTitle(documents.filter((document) => document.category === selectedCategoryId)),
     [documents, selectedCategoryId]
   );
 
@@ -129,6 +149,44 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
   function handleBackToOverview() {
     setSelectedCategoryId(null);
     setSelectedDocumentId(null);
+  }
+
+  function handleAddDraft(title: string) {
+    const category = selectedCategoryId ?? "custom";
+    const trimmedTitle = title.trim();
+    const nextTitle = trimmedTitle || "Untitled file";
+    const id = crypto.randomUUID();
+
+    setDocuments((current) => [
+      {
+        id,
+        category,
+        title: nextTitle,
+        helper: "Add file to finish this record.",
+        status: "missing"
+      },
+      ...current
+    ]);
+    setSelectedDocumentId(id);
+  }
+
+  function handleDeleteDocument(documentId: string) {
+    setDocuments((current) => current.filter((document) => document.id !== documentId));
+    setSelectedDocumentId((current) => (current === documentId ? null : current));
+  }
+
+  function handleRenameDocument(documentId: string, title: string) {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      return;
+    }
+
+    setDocuments((current) =>
+      current.map((document) =>
+        document.id === documentId ? { ...document, title: trimmedTitle } : document
+      )
+    );
   }
 
   return (
@@ -166,6 +224,9 @@ export function DashboardShell({ initialDocumentMessage, initialDocuments }: Das
             <DocumentList
               category={selectedCategory}
               documents={selectedCategoryDocuments}
+              onAddDraft={handleAddDraft}
+              onDeleteDocument={handleDeleteDocument}
+              onRenameDocument={handleRenameDocument}
               onSelect={setSelectedDocumentId}
               selectedDocumentId={selectedDocumentId}
             />
