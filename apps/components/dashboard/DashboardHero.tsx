@@ -28,9 +28,9 @@ export function DashboardHero({
   return (
     <section className="dashboard-hero">
       <div className="hero-copy dashboard-copy">
-        <p className="eyebrow">Dashboard</p>
+        <p className="eyebrow">Records</p>
         <h1>Records, access, and status in one place.</h1>
-        <p className="hero-lede">The signed-in workspace keeps account state, categories, and document status together.</p>
+        <p className="hero-lede">The signed-in records view keeps account state, categories, and document status together.</p>
         <div className="hero-actions">
           <Button href="/dashboard#scan">Jump to scan</Button>
           <Button href="/dashboard#records" variant="ghost">

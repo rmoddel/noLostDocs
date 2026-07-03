@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { documentTypeFeatured } from "@/constants/documentTypeTaxonomy";
 import { dashboardGroups, type DashboardGroupId } from "@/constants/launcherGroups";
 import { saveScan, validateScanFile } from "@/lib/documents/upload";
 import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
@@ -20,6 +21,20 @@ type ScanWorkspaceProps = {
   providerStatus: ScanProviderStatus;
 };
 
+function getDefaultScanTitle(groupId: DashboardGroupId) {
+  switch (groupId) {
+    case "medical":
+      return "Insurance card";
+    case "professional":
+      return "Contract";
+    case "family":
+      return "Birth certificate";
+    case "basic":
+    default:
+      return "Driver's license";
+  }
+}
+
 export function ScanWorkspace({ embedded = false, mode = "protected", providerStatus }: ScanWorkspaceProps) {
   const router = useRouter();
   const { client, configured } = createBrowserSupabaseClient();
@@ -28,7 +43,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
-  const [scanTitle, setScanTitle] = useState("");
+  const [scanTitle, setScanTitle] = useState(getDefaultScanTitle("basic"));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -48,8 +63,20 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
     () => dashboardGroups.find((group) => group.id === selectedGroupId) ?? dashboardGroups[0],
     [selectedGroupId]
   );
+  const defaultScanTitle = useMemo(() => getDefaultScanTitle(selectedGroupId), [selectedGroupId]);
   const isPublicMode = mode === "public";
   const showBackButton = !embedded;
+
+  useEffect(() => {
+    setScanTitle((current) => {
+      const trimmed = current.trim();
+      if (!trimmed || documentTypeFeatured.includes(trimmed)) {
+        return defaultScanTitle;
+      }
+
+      return current;
+    });
+  }, [defaultScanTitle, selectedGroupId]);
 
   function handleFileChange(nextFile: File | null) {
     setMessage(nextFile ? validateScanFile(nextFile) : null);
@@ -116,7 +143,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
           {showBackButton ? (
             <div className="button-row">
               <Button href={isPublicMode ? "/" : "/dashboard"} variant="secondary">
-                {isPublicMode ? "Back to home" : "Back to dashboard"}
+                {isPublicMode ? "Back to home" : "Back to records"}
               </Button>
             </div>
           ) : null}

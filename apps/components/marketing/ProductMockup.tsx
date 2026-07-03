@@ -7,13 +7,19 @@ const mockupRows = [
   { label: "RN license", state: "Outstanding", tone: "muted" }
 ] as const;
 
+const mockupPreview = {
+  name: "Passport",
+  status: "Current selection",
+  note: "Ready to capture"
+} as const;
+
 export function ProductMockup() {
   return (
     <section className="section-block">
       <SectionHeader
-        description="The experience should feel clear before it feels dense. Categories lead, records remain protected, and account state stays visible."
+        description="Records stay easy to scan, capture stays deliberate, and account state remains visible."
         eyebrow="Records preview"
-        title="A workspace designed for accountable records."
+        title="A records view built for accountable use."
       />
       <div className="mockup-grid">
         <Card className="mockup-card">
@@ -30,6 +36,16 @@ export function ProductMockup() {
                 <span className="mockup-label">Account status</span>
                 <strong>Signed-in records</strong>
               </div>
+              <div className="mockup-controls">
+                <div className="mockup-control">
+                  <span className="mockup-label">Document type</span>
+                  <strong>Passport</strong>
+                </div>
+                <div className="mockup-control">
+                  <span className="mockup-label">Quick entry</span>
+                  <strong>Passport</strong>
+                </div>
+              </div>
               <div className="mockup-list">
                 {mockupRows.map((row) => (
                   <div className="mockup-row" key={row.label}>
@@ -41,11 +57,19 @@ export function ProductMockup() {
                   </div>
                 ))}
               </div>
+              <div className="mockup-preview">
+                <div>
+                  <span className="mockup-label">Selected document</span>
+                  <strong>{mockupPreview.name}</strong>
+                  <p>{mockupPreview.status}</p>
+                </div>
+                <span className="mockup-pill mockup-pill-ok">{mockupPreview.note}</span>
+              </div>
             </div>
           </div>
         </Card>
         <div className="mockup-copy">
-          <p className="eyebrow">What the workspace should communicate</p>
+          <p className="eyebrow">What the records view should communicate</p>
           <ul className="feature-list">
             <li>Which record sets are available to this account</li>
             <li>Which documents need action or review</li>

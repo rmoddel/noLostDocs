@@ -26,9 +26,9 @@ export function AuthGate({ children, redirectTo }: AuthGateProps) {
       <section className="page-section">
         <Card className="content-card compact-card">
           <p className="eyebrow">Checking access</p>
-          <h1>Loading your secure workspace.</h1>
+          <h1>Loading your records.</h1>
           <p className="section-copy">
-            Protected routes verify session state before opening the secure workspace.
+            Protected routes verify session state before opening the records view.
           </p>
         </Card>
       </section>

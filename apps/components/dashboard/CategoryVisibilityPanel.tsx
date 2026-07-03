@@ -25,7 +25,7 @@ export function CategoryVisibilityPanel({
           <p className="eyebrow">Category visibility</p>
           <h3>{visibleGroups.length} visible categories</h3>
         </div>
-        <span className="mini-pill">{saving ? "Saving..." : "Workspace scope"}</span>
+        <span className="mini-pill">{saving ? "Saving..." : "Records scope"}</span>
       </div>
       <div className="visibility-pile">
         {visibleGroups.map((group) => (
@@ -36,7 +36,7 @@ export function CategoryVisibilityPanel({
       </div>
       {hiddenGroups.length ? (
         <>
-          <p className="section-support">Hidden categories can be restored from this workspace.</p>
+          <p className="section-support">Hidden categories can be restored from this records view.</p>
           <div className="visibility-pile muted">
             {hiddenGroups.map((group) => (
               <button className="visibility-chip muted" key={group.id} onClick={() => onShow(group.id)} type="button">

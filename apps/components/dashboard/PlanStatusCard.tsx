@@ -26,11 +26,11 @@ export function PlanStatusCard({
       <ul className="note-list">
         <li>
           <strong>Signed-in access remains required.</strong>
-          <span>The dashboard and secure scan flow stay behind account authentication.</span>
+          <span>The records view and secure scan flow stay behind account authentication.</span>
         </li>
         <li>
           <strong>{visibleGroupCount} categories visible.</strong>
-          <span>{accountPlan === "premium" ? "Premium access keeps the full workspace open." : "Free Basic keeps the core categories available."}</span>
+          <span>{accountPlan === "premium" ? "Premium access keeps the full records view open." : "Free Basic keeps the core records available."}</span>
         </li>
         <li>
           <strong>

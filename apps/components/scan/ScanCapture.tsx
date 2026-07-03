@@ -22,7 +22,7 @@ export function ScanCapture({
   selectedGroupId,
   title
 }: ScanCaptureProps) {
-  const selectedSuggestedType = documentTypeFeatured.includes(title) ? title : "";
+  const selectedSuggestedType = documentTypeSuggestions.includes(title) ? title : "";
 
   return (
     <>
@@ -59,7 +59,7 @@ export function ScanCapture({
               value={selectedSuggestedType}
             >
               <option value="">Choose a suggested type</option>
-              {documentTypeFeatured.map((suggestion) => (
+              {documentTypeSuggestions.map((suggestion) => (
                 <option key={suggestion} value={suggestion}>
                   {suggestion}
                 </option>

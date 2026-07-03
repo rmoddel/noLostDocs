@@ -60,7 +60,7 @@ export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
         <p className="eyebrow">Sign in</p>
         <h1>Sign in to NoLostDocs.</h1>
         <p className="section-copy">
-          Use an email sign-in link to access the protected workspace. Signed-out users who request protected routes are returned here first.
+          Use an email sign-in link to access the protected records view. Signed-out users who request protected routes are returned here first.
         </p>
         <form className="auth-form" onSubmit={(event) => void handleSubmit(event)}>
           <label className="field">

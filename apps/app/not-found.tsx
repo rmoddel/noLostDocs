@@ -8,12 +8,12 @@ export default function NotFound() {
         <p className="eyebrow">Not found</p>
         <h1>That page is not available.</h1>
         <p className="section-copy">
-          Return to the homepage or workspace to continue.
+          Return to the homepage or records view to continue.
         </p>
         <div className="hero-actions">
           <Button href="/">Back home</Button>
           <Button href="/dashboard" variant="secondary">
-            Open workspace
+            Open records
           </Button>
         </div>
       </Card>

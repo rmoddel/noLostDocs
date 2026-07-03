@@ -45,7 +45,7 @@ export function SiteHeader() {
             <>
               {showDashboardButton ? (
                 <Button href="/dashboard" size="sm" variant="secondary">
-                  Dashboard
+                  Records
                 </Button>
               ) : null}
               <Button
