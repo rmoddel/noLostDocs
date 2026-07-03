@@ -1,22 +1,26 @@
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
-const ALLOWED_SCAN_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
+const ALLOWED_SCAN_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"]);
 export const MAX_SCAN_FILE_BYTES = 10 * 1024 * 1024;
 
 export function validateScanFile(file: File | null) {
   if (!file) {
-    return "Choose a document image first.";
+    return "Choose a document image or PDF first.";
   }
 
   if (!ALLOWED_SCAN_TYPES.has(file.type)) {
-    return "Use a JPG, PNG, WebP, or HEIC image.";
+    return "Use a JPG, PNG, WebP, HEIC, or PDF file.";
   }
 
   if (file.size > MAX_SCAN_FILE_BYTES) {
-    return "Use an image smaller than 10 MB.";
+    return "Use a file smaller than 10 MB.";
   }
 
   return null;
+}
+
+function isImageFile(file: File) {
+  return file.type.startsWith("image/");
 }
 
 export function buildDisplayFileName(baseName: string) {
@@ -24,6 +28,10 @@ export function buildDisplayFileName(baseName: string) {
 }
 
 export async function rotateImageFile(file: File, rotation: number) {
+  if (!isImageFile(file)) {
+    return file;
+  }
+
   const angle = ((rotation % 360) + 360) % 360;
   const blobUrl = URL.createObjectURL(file);
 
@@ -91,6 +99,7 @@ function getFileExtension(fileName: string, mimeType: string) {
   if (mimeType.includes("png")) return "png";
   if (mimeType.includes("webp")) return "webp";
   if (mimeType.includes("heic")) return "heic";
+  if (mimeType.includes("pdf")) return "pdf";
   return "jpg";
 }
 
@@ -106,7 +115,7 @@ export async function saveScan({
   session
 }: SaveScanArgs) {
   if (!configured) {
-    throw new Error("Scan saving is not ready yet.");
+    throw new Error("Save is unavailable right now.");
   }
 
   const validationError = validateScanFile(file);
@@ -114,7 +123,7 @@ export async function saveScan({
     throw new Error(validationError);
   }
 
-  const rotatedFile = rotation ? await rotateImageFile(file, rotation) : file;
+  const rotatedFile = rotation && file.type.startsWith("image/") ? await rotateImageFile(file, rotation) : file;
   const safeTitle = buildDisplayFileName(documentTitle);
 
   const uploadResponse = await client.functions.invoke("create-signed-upload", {

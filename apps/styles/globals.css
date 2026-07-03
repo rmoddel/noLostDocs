@@ -952,6 +952,12 @@ li {
   padding: 24px;
 }
 
+.dashboard-section-card {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
 .contact-intro-card,
 .scan-intro-card {
   position: sticky;
@@ -1001,6 +1007,10 @@ li {
 .dashboard-side {
   align-content: start;
   gap: 20px;
+}
+
+.dashboard-page {
+  gap: 24px;
 }
 
 .launcher-grid {
@@ -1214,6 +1224,45 @@ li {
   aspect-ratio: 4 / 3;
   object-fit: contain;
   background: linear-gradient(180deg, rgba(255, 250, 244, 0.94), rgba(247, 231, 214, 0.82));
+}
+
+.scan-preview-file,
+.detail-file-panel {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 280px;
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0.94), rgba(243, 234, 224, 0.74));
+}
+
+.scan-preview-file strong,
+.detail-file-panel strong {
+  color: var(--nld-primary);
+}
+
+.detail-preview {
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(180deg, rgba(255, 250, 245, 0.9), rgba(243, 234, 224, 0.72));
+  box-shadow:
+    var(--nld-shadow-soft),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.detail-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0.94), rgba(247, 231, 214, 0.82));
+}
+
+.scan-preview-file .scan-camera-file-icon,
+.detail-file-panel .scan-camera-file-icon {
+  color: var(--nld-primary);
 }
 
 .document-action-list {

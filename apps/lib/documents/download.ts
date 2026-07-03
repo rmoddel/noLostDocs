@@ -47,17 +47,9 @@ export async function runProtectedDocumentAction({
     return { message: baseMessage };
   }
 
-  if (action === "preview") {
-    if (configured && session) {
-      await logProtectedAction(client, session, action, template);
-    }
-
-    return { message: baseMessage };
-  }
-
   if (!configured || !session) {
     return {
-      message: `${baseMessage} The download flow isn't connected yet.`
+      message: `${baseMessage} Protected file retrieval is not available right now.`
     };
   }
 
@@ -80,7 +72,7 @@ export async function runProtectedDocumentAction({
   const signedUrl = typeof data?.signedUrl === "string" ? data.signedUrl : null;
 
   if (!signedUrl) {
-    return { message: "Signed download flow returned no URL." };
+    return { message: "No signed file link was returned." };
   }
 
   if (typeof window !== "undefined") {
@@ -91,5 +83,10 @@ export async function runProtectedDocumentAction({
 
   const expiresIn = typeof data?.expiresIn === "number" ? data.expiresIn : 60;
 
-  return { message: `Authorized download ready. Link expires in ${expiresIn} seconds.` };
+  return {
+    message:
+      action === "preview"
+        ? `Protected preview is ready. Link expires in ${expiresIn} seconds.`
+        : `Protected download is ready. Link expires in ${expiresIn} seconds.`
+  };
 }

@@ -16,8 +16,8 @@ export default function PrivacyPage() {
         <h2>What this page covers</h2>
         <p className="section-copy">
           This notice applies to the NoLostDocs website, signed-in account areas, document scanning and upload flows,
-          support contact forms, and any future companion surface released under the NoLostDocs name unless a more
-          specific notice says otherwise.
+          support contact forms, and any other web surface released under the NoLostDocs name unless a more specific
+          notice says otherwise.
         </p>
         <p className="section-copy">
           The product is designed to help people organize and recover important personal or professional records. It is

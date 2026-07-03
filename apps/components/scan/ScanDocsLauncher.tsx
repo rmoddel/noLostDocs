@@ -41,7 +41,7 @@ function buildStatusLabel(cameraState: CameraState, capturedFile: File | null) {
 }
 
 export function ScanDocsLauncher({
-  helperText = "Use your camera or upload a file",
+  helperText = "Use your camera or upload a document",
   onScanReady
 }: ScanDocsLauncherProps) {
   const fileInputId = useId();
@@ -90,7 +90,7 @@ export function ScanDocsLauncher({
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraState("unsupported");
-      setErrorMessage("This browser does not support camera capture. Upload a file instead.");
+        setErrorMessage("This browser does not support camera capture. Upload a document instead.");
       return;
     }
 
@@ -124,9 +124,9 @@ export function ScanDocsLauncher({
       } catch (error) {
         setCameraState(buildCameraErrorState(error));
         setErrorMessage(
-          error instanceof Error
+            error instanceof Error
             ? error.message
-            : "Camera access could not be started. Upload a file instead."
+            : "Camera access could not be started. Upload a document instead."
         );
       }
     }
@@ -177,7 +177,7 @@ export function ScanDocsLauncher({
     const height = video.videoHeight;
 
     if (!width || !height) {
-      setErrorMessage("The camera is not ready yet. Give it a moment and try again.");
+      setErrorMessage("The camera is not ready. Give it a moment and try again.");
       return;
     }
 
@@ -251,7 +251,6 @@ export function ScanDocsLauncher({
 
   return (
     <>
-      {/* Future: replace capture engine with Scanbot SDK or OpenCV.js for auto edge detection, perspective correction, quality analyzer, and auto-capture. */}
       <div className="scan-launcher">
         <Button className="scan-docs-button" onClick={handleOpen}>
           <span className="scan-docs-button-icon" aria-hidden="true">
@@ -260,7 +259,7 @@ export function ScanDocsLauncher({
               <path d="M9 9h6M9 12h6M9 15h3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
             </svg>
           </span>
-          <span>Add document</span>
+          <span>Add record</span>
         </Button>
         {helperText ? <p className="scan-launcher-helper">{helperText}</p> : null}
         {acceptedFile ? (
@@ -317,7 +316,7 @@ export function ScanDocsLauncher({
                     </svg>
                   </div>
                   <strong>{capturedFile?.name}</strong>
-                  <p>{capturedFile?.type === "application/pdf" ? "PDF ready to use." : "File selected and ready."}</p>
+                  <p>{capturedFile?.type === "application/pdf" ? "PDF ready for retrieval." : "File selected and ready."}</p>
                 </div>
               ) : null}
 

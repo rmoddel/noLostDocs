@@ -99,7 +99,7 @@ export function DocumentList({
                   autoFocus
                   className="vault-document-rename-input"
                   onChange={(event) => setDraftTitle(event.target.value)}
-                  placeholder="Enter a new title"
+                  placeholder="Record title"
                   value={draftTitle}
                 />
                 <div className="vault-document-card-actions">

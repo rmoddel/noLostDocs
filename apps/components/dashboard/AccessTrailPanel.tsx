@@ -12,7 +12,7 @@ export function AccessTrailPanel() {
       <ul className="note-list">
         <li>
           <strong>Metadata stays browseable.</strong>
-          <span>Category review and status visibility should not imply unrestricted file access on the web.</span>
+          <span>Category review and status visibility do not imply unrestricted file access on the web.</span>
         </li>
         <li>
           <strong>Protected actions stay time-bound.</strong>

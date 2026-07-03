@@ -84,7 +84,7 @@ export function ScanCapture({
 
       <label className="scan-dropzone" htmlFor="scan-file">
         <input
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
           capture="environment"
           id="scan-file"
           onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}

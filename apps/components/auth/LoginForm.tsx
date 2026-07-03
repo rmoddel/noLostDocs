@@ -60,7 +60,7 @@ export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
         <p className="eyebrow">Sign in</p>
         <h1>Sign in to NoLostDocs.</h1>
         <p className="section-copy">
-          Use an email sign-in link to access the protected records view. Signed-out users who request protected routes are returned here first.
+          Use an email sign-in link to open the protected records view. Signed-out users who request protected routes are sent here first.
         </p>
         <form className="auth-form" onSubmit={(event) => void handleSubmit(event)}>
           <label className="field">
@@ -79,8 +79,8 @@ export function LoginForm({ initialMessage = null, nextPath }: LoginFormProps) {
         </form>
         <p className="support-copy">
           {configured
-            ? "Email sign-in is available."
-            : "Sign-in is not enabled yet."}
+            ? "Email sign-in is ready."
+            : "Sign-in is not available right now."}
         </p>
         {message ? <p className="inline-feedback">{message}</p> : null}
       </Card>

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { documentTypeFeatured } from "@/constants/documentTypeTaxonomy";
 import { dashboardGroups, type DashboardGroupId } from "@/constants/launcherGroups";
 import { saveScan, validateScanFile } from "@/lib/documents/upload";
 import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
@@ -53,6 +52,11 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
       return;
     }
 
+    if (!file.type.startsWith("image/")) {
+      setPreviewUrl(null);
+      return;
+    }
+
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
 
@@ -70,7 +74,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
   useEffect(() => {
     setScanTitle((current) => {
       const trimmed = current.trim();
-      if (!trimmed || documentTypeFeatured.includes(trimmed)) {
+      if (!trimmed) {
         return defaultScanTitle;
       }
 
@@ -86,7 +90,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
 
   async function handleSave() {
     if (!session || !file) {
-      setMessage("Choose a document image before continuing.");
+      setMessage("Choose a document before continuing.");
       return;
     }
 
@@ -137,7 +141,7 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
           <p className="hero-lede">
             {isPublicMode
               ? "Public mode lets you review capture, framing, preview, and file upload without signing in."
-              : "Use the camera or an image file to move a document into the protected workflow."}
+              : "Use the camera or an upload to move a document into the protected workflow."}
           </p>
           <ScanDocsLauncher onScanReady={handleFileChange} />
           {showBackButton ? (
@@ -176,6 +180,8 @@ export function ScanWorkspace({ embedded = false, mode = "protected", providerSt
 
           <ScanPreview
             disabled={saving}
+            fileName={file?.name ?? null}
+            fileType={file?.type ?? null}
             onRetake={() => setFile(null)}
             onRotate={() => setRotation((current) => current + 90)}
             previewUrl={previewUrl}

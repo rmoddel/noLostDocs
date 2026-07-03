@@ -45,18 +45,18 @@ export function buildAccessMessage(action: ProtectedAction, template: DocumentTe
   const accessState = getDocumentAccessState(template);
 
   if (accessState === "restricted") {
-    return `${template.title} is missing, so ${noun} access is restricted until the record is completed.`;
+    return `${template.title} is missing. Complete the record before requesting ${noun} access.`;
   }
 
   if (accessState === "reauth-required") {
-    return `${template.title} needs a fresh authorization check before ${noun} access because it is close to expiring.`;
+    return `${template.title} needs a fresh authorization check before ${noun} access.`;
   }
 
   if (accessState === "session-expired") {
-    return `${template.title} requires a renewed session or updated file before ${noun} access can continue.`;
+    return `${template.title} needs a renewed session before ${noun} access.`;
   }
 
   return action === "preview"
-    ? `${template.title} passed the authorization check. A short-lived preview would open here.`
-    : `${template.title} passed the authorization check. A short-lived download would be issued here.`;
+    ? `${template.title} is ready for a protected preview.`
+    : `${template.title} is ready for a protected download.`;
 }
