@@ -18,7 +18,9 @@ function buildPreviewData() {
   const profiles = [
     { id: "me", display_name: "Me", profile_type: "person" as const, sort_order: 0 },
     { id: "spouse", display_name: "Spouse", profile_type: "person" as const, sort_order: 1 },
-    { id: "child-1", display_name: "Child 1", profile_type: "person" as const, sort_order: 2 }
+    { id: "child-1", display_name: "Child 1", profile_type: "person" as const, sort_order: 2 },
+    { id: "family", display_name: "Family", profile_type: "family" as const, sort_order: 3 },
+    { id: "business", display_name: "Business", profile_type: "business" as const, sort_order: 4 }
   ];
 
   const typeMap = new Map([
@@ -74,6 +76,16 @@ function buildPreviewData() {
               : "Personal & Family",
     content_type: "application/pdf",
     created_at: new Date(Date.now() - index * 60000).toISOString(),
+    category_slug:
+      template.category === "medical"
+        ? "health"
+        : template.category === "driving"
+          ? "home-car"
+          : template.category === "work" || template.category === "business"
+            ? "work-business"
+            : template.category === "travel"
+              ? "travel-emergency"
+              : "personal-family",
     document_date: null,
     document_file_id: null,
     document_type_id: documentTypes[index]?.id ?? null,

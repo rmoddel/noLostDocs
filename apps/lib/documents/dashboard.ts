@@ -29,6 +29,7 @@ export type DashboardDocumentTypeRecord = {
 export type DashboardDocumentRecord = {
   category_id: string | null;
   category_name: string | null;
+  category_slug: string | null;
   content_type: string | null;
   created_at: string;
   document_date: string | null;
@@ -134,6 +135,7 @@ function mapDocument(row: DocumentRow, file: FileRow | null, profiles: Map<strin
   return {
     category_id: row.category_id,
     category_name: category?.name ?? null,
+    category_slug: category?.slug ?? null,
     content_type: file?.content_type ?? file?.mime_type ?? null,
     created_at: row.created_at,
     document_date: row.document_date,

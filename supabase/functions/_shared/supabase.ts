@@ -3,7 +3,13 @@ import type { User } from "npm:@supabase/supabase-js@2";
 import { requireEnv } from "./env.ts";
 
 export function createAdminClient() {
-  return createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
+  const serviceRoleKey = Deno.env.get("SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!serviceRoleKey) {
+    throw new Error("Missing environment variable: SERVICE_ROLE_KEY");
+  }
+
+  return createClient(requireEnv("SUPABASE_URL"), serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false

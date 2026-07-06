@@ -41,6 +41,9 @@ alter table public.document_types
   add column if not exists is_custom boolean not null default false,
   add column if not exists updated_at timestamptz not null default now();
 
+alter table public.document_types
+  add constraint document_types_slug_scope_unique unique (category_id, user_id, slug);
+
 alter table public.documents
   add column if not exists owner_profile_id uuid references public.document_profiles(id) on delete set null,
   add column if not exists document_date date,
@@ -52,10 +55,7 @@ alter table public.document_files
   add column if not exists content_type text,
   add column if not exists file_role text not null default 'original' check (file_role in ('original', 'preview', 'processed'));
 
-insert into public.document_types (category_id, user_id, name, slug, is_system, is_custom)
-select c.id, null, v.name, v.slug, true, false
-from public.document_categories c
-join (
+with type_seed(category_slug, name, slug) as (
   values
     ('personal-family', 'Driver''s License / ID', 'drivers-license-id'),
     ('personal-family', 'Passport', 'passport-personal'),
@@ -114,17 +114,17 @@ join (
     ('travel-emergency', 'Allergy Information', 'allergy-information'),
     ('travel-emergency', 'Emergency Medical Summary', 'emergency-medical-summary'),
     ('travel-emergency', 'Urgent Backup Document', 'urgent-backup-document')
-  as v(category_slug, name, slug)
-on c.slug = v.category_slug
+)
+insert into public.document_types (category_id, user_id, name, slug, is_system, is_custom)
+select c.id, null, s.name, s.slug, true, false
+from type_seed s
+join public.document_categories c on c.slug = s.category_slug
 on conflict (category_id, user_id, slug) do nothing;
 
 insert into public.document_types (category_id, user_id, name, slug, is_system, is_custom)
 select id, null, 'General Document', 'general-' || slug, true, false
 from public.document_categories
 on conflict (category_id, user_id, slug) do nothing;
-
-alter table public.document_types
-  add constraint document_types_slug_scope_unique unique (category_id, user_id, slug);
 
 create index if not exists document_profiles_user_sort_idx on public.document_profiles (user_id, sort_order, created_at);
 create index if not exists document_categories_sort_idx on public.document_categories (sort_order, name);

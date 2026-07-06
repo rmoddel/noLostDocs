@@ -6,8 +6,6 @@ import {
   getDocumentAccessState,
   getDocumentCompleteness
 } from "@/lib/documents/access";
-import { Button } from "../ui/Button";
-import { Card } from "../ui/Card";
 
 type DocumentDetailProps = {
   actionLoading: boolean;
@@ -33,26 +31,26 @@ export function DocumentDetail({
   const accessState = getDocumentAccessState(document);
 
   return (
-    <Card className="side-card detail-card">
-      <div className="section-heading compact">
+    <section className="dashboard-panel dashboard-selected-card">
+      <div className="dashboard-section-header compact">
         <div>
-          <p className="eyebrow">Record details</p>
-          <h3>{document.title}</h3>
-          <p className="section-support">
+          <div className="dashboard-section-kicker">Record details</div>
+          <h2 className="dashboard-section-title">{document.title}</h2>
+          <p className="dashboard-section-support">
             {document.ownerProfileName ?? "Me"}
             {document.categoryName ? ` · ${document.categoryName}` : ""}
             {document.documentTypeName ? ` · ${document.documentTypeName}` : ""}
           </p>
         </div>
-        <span className={`status-pill access-${accessState}`}>{documentAccessTone[accessState]}</span>
+        <span className={`dashboard-pill ${accessState}`}>{documentAccessTone[accessState]}</span>
       </div>
 
-      <div className="detail-preview">
+      <div className="dashboard-detail-preview">
         {previewUrl && document.mimeType?.startsWith("image/") ? (
           <img alt={`${document.title} preview`} src={previewUrl} />
         ) : (
-          <div className="detail-file-panel">
-            <div className="scan-camera-file-icon" aria-hidden="true">
+          <div className="dashboard-detail-file-panel">
+            <div className="dashboard-detail-file-icon" aria-hidden="true">
               <svg fill="none" viewBox="0 0 24 24">
                 <path
                   d="M9 3h6l4 4v11a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z"
@@ -68,33 +66,33 @@ export function DocumentDetail({
         )}
       </div>
 
-      <div className="detail-grid">
-        <div className="detail-stat">
+      <div className="dashboard-detail-grid">
+        <div className="dashboard-detail-stat">
           <span>Status</span>
           <strong>{documentStatusTone[document.status]}</strong>
         </div>
-        <div className="detail-stat">
+        <div className="dashboard-detail-stat">
           <span>Expiration</span>
           <strong>{formatDocumentExpiration(document)}</strong>
         </div>
-        <div className="detail-stat">
+        <div className="dashboard-detail-stat">
           <span>Completeness</span>
           <strong>{getDocumentCompleteness(document)}</strong>
         </div>
       </div>
 
-      <p className="section-support">{document.note ?? document.helper}</p>
+      <p className="dashboard-section-support">{document.note ?? document.helper}</p>
 
-      <div className="button-row">
-        <Button disabled={actionLoading} onClick={() => onPreview(document)} size="sm">
+      <div className="dashboard-action-row">
+        <button className="dashboard-action-button" disabled={actionLoading} onClick={() => onPreview(document)} type="button">
           Open preview
-        </Button>
-        <Button disabled={actionLoading} onClick={() => onDownload(document)} size="sm" variant="secondary">
+        </button>
+        <button className="dashboard-action-button secondary" disabled={actionLoading} onClick={() => onDownload(document)} type="button">
           Get download
-        </Button>
+        </button>
       </div>
 
-      {actionMessage ? <p className="inline-feedback">{actionMessage}</p> : null}
-    </Card>
+      {actionMessage ? <p className="dashboard-inline-feedback">{actionMessage}</p> : null}
+    </section>
   );
 }

@@ -13,7 +13,8 @@ This directory is the code-authoritative home for NoLostDocs backend infrastruct
 - `migrations/` - database schema, policies, triggers, helper SQL
 - `functions/` - Supabase Edge Functions
 - `seed.sql` - optional bootstrap data for development
-- `config.toml.example` - placeholder local config
+- `config.toml` - local Supabase CLI config for this project
+- `config.toml.example` - placeholder template if you need to recreate local config
 
 ## Current Function Ownership
 
@@ -25,9 +26,23 @@ This directory is the code-authoritative home for NoLostDocs backend infrastruct
 
 - Supabase project URL
 - Supabase publishable key for browser/mobile clients
-- Supabase service role key for local CLI/deploy workflows only
+- Supabase service role key for local CLI/deploy workflows only, stored as `SERVICE_ROLE_KEY` for Edge Functions
 - Database password / access for migration execution
 - Stripe and other webhook secrets as needed
+
+## Edge Function Env
+
+- Use `SUPABASE_URL` in local `--env-file` values for `supabase functions serve`
+- Use `SERVICE_ROLE_KEY` for the service-role secret in both local env files and `supabase secrets set`
+- Do not try to store `SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` with `supabase secrets set`; the CLI rejects names that start with `SUPABASE_`
+
+## Migration Push
+
+- If the linked project already has bootstrap migrations applied, prefer:
+  ```bash
+  supabase db push --include-all
+  ```
+- That avoids the "remote migration versions not found in local migrations directory" error when history is already partially present on the server.
 
 ## Trust Boundary
 
