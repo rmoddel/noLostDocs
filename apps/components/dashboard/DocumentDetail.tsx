@@ -38,6 +38,11 @@ export function DocumentDetail({
         <div>
           <p className="eyebrow">Record details</p>
           <h3>{document.title}</h3>
+          <p className="section-support">
+            {document.ownerProfileName ?? "Me"}
+            {document.categoryName ? ` · ${document.categoryName}` : ""}
+            {document.documentTypeName ? ` · ${document.documentTypeName}` : ""}
+          </p>
         </div>
         <span className={`status-pill access-${accessState}`}>{documentAccessTone[accessState]}</span>
       </div>

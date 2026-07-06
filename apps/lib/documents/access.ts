@@ -4,10 +4,13 @@ export type ProtectedAction = "preview" | "download";
 export type DocumentAccessState = "available" | "reauth-required" | "restricted" | "session-expired";
 
 export const documentStatusTone: Record<DocumentTemplate["status"], string> = {
+  active: "Active",
+  archived: "Archived",
+  expired: "Expired",
+  needs_review: "Needs review",
   uploaded: "Saved",
   "expiring-soon": "Soon",
-  missing: "Missing",
-  expired: "Expired"
+  missing: "Missing"
 };
 
 export const documentAccessTone: Record<DocumentAccessState, string> = {
@@ -18,14 +21,15 @@ export const documentAccessTone: Record<DocumentAccessState, string> = {
 };
 
 export function getDocumentAccessState(template: DocumentTemplate): DocumentAccessState {
-  if (template.status === "uploaded") return "available";
-  if (template.status === "expiring-soon") return "reauth-required";
+  if (template.status === "active" || template.status === "uploaded") return "available";
+  if (template.status === "needs_review" || template.status === "expiring-soon") return "reauth-required";
+  if (template.status === "archived") return "restricted";
   if (template.status === "expired") return "session-expired";
   return "restricted";
 }
 
 export function getDocumentCompleteness(template: DocumentTemplate) {
-  return template.status === "uploaded" ? "Complete" : "Needs attention";
+  return template.status === "active" || template.status === "uploaded" ? "Complete" : "Needs attention";
 }
 
 export function formatDocumentExpiration(template: DocumentTemplate) {
@@ -45,7 +49,9 @@ export function buildAccessMessage(action: ProtectedAction, template: DocumentTe
   const accessState = getDocumentAccessState(template);
 
   if (accessState === "restricted") {
-    return `${template.title} is missing. Complete the record before requesting ${noun} access.`;
+    return template.status === "archived"
+      ? `${template.title} is archived. Restore the record before requesting ${noun} access.`
+      : `${template.title} is missing. Complete the record before requesting ${noun} access.`;
   }
 
   if (accessState === "reauth-required") {

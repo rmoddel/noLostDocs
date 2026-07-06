@@ -1309,12 +1309,14 @@ li {
 }
 
 .status-uploaded,
+.status-active,
 .access-available {
   background: rgba(63, 127, 104, 0.12);
   color: var(--nld-success);
 }
 
 .status-expiring-soon,
+.status-needs_review,
 .access-reauth-required {
   background: rgba(169, 93, 77, 0.14);
   color: var(--nld-accent);
@@ -1322,10 +1324,85 @@ li {
 
 .status-missing,
 .status-expired,
+.status-archived,
 .access-restricted,
 .access-session-expired {
   background: rgba(35, 29, 27, 0.08);
   color: var(--nld-primary);
+}
+
+.vault-search-input {
+  padding: 16px 18px;
+  border-radius: 18px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--nld-primary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 16px rgba(22, 24, 29, 0.04);
+}
+
+.filter-chip.active {
+  background: rgba(201, 101, 69, 0.12);
+  border-color: rgba(201, 101, 69, 0.24);
+  color: var(--nld-accent);
+}
+
+.dashboard-category-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.document-row-list {
+  display: grid;
+  gap: 10px;
+}
+
+.document-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(120px, 0.65fr)) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: left;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 22px rgba(22, 24, 29, 0.04);
+}
+
+.document-row.active {
+  border-color: rgba(201, 101, 69, 0.28);
+  background: rgba(201, 101, 69, 0.08);
+}
+
+.document-row-title {
+  display: grid;
+  gap: 4px;
+}
+
+.document-row-title strong {
+  color: var(--nld-primary);
+}
+
+.document-row-title span,
+.document-row-meta {
+  color: var(--nld-muted);
+  font-size: 0.92rem;
 }
 
 .detail-grid {
@@ -2149,6 +2226,14 @@ li {
 
   .vault-category-card {
     grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .document-row {
+    grid-template-columns: 1fr;
+  }
+
+  .document-row .status-pill {
+    justify-self: start;
   }
 
   .vault-card-count {

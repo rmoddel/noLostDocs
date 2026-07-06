@@ -19,10 +19,13 @@ type DocumentListProps = {
 };
 
 const statusTone: Record<DocumentTemplate["status"], string> = {
+  active: "Stored",
+  archived: "Archived",
+  expired: "Expired",
+  needs_review: "Review soon",
   uploaded: "Stored",
   "expiring-soon": "Review soon",
-  missing: "Add record",
-  expired: "Expired"
+  missing: "Add record"
 };
 
 function DocumentIcon() {

@@ -11,14 +11,16 @@ export type CategoryId =
   | "travel"
   | "custom";
 
+export type DocumentStatus = "active" | "expired" | "archived" | "needs_review" | "uploaded" | "missing" | "expiring-soon";
+export type DocumentProfileType = "person" | "family" | "business" | "other";
+export type DocumentFileRole = "original" | "preview" | "processed";
+
 export type VaultCategory = {
   id: CategoryId;
   title: string;
   subtitle: string;
   accent: string;
 };
-
-export type DocumentStatus = "uploaded" | "missing" | "expiring-soon" | "expired";
 
 export type DocumentCard = {
   id: string;
@@ -30,8 +32,15 @@ export type DocumentCard = {
 };
 
 export type DocumentTemplate = {
+  categoryId?: string;
+  categoryName?: string;
+  contentType?: string;
   documentFileId?: string;
   documentId?: string;
+  documentTypeId?: string;
+  documentTypeName?: string;
+  documentDate?: string;
+  fileRole?: DocumentFileRole;
   id: string;
   category: CategoryId;
   title: string;
@@ -39,10 +48,27 @@ export type DocumentTemplate = {
   hasFile?: boolean;
   mimeType?: string;
   status: DocumentStatus;
+  notes?: string;
+  ownerProfileId?: string;
+  ownerProfileName?: string;
+  ownerProfileType?: DocumentProfileType;
+  issueDate?: string;
   note?: string;
   expiresAt?: string;
+  expirationDate?: string;
+  pageCount?: number;
+  tags?: string[];
   storageBucket?: string;
   storagePath?: string;
+  originalFilename?: string;
+  updatedAt?: string;
+};
+
+export type DocumentLookupRow = {
+  id: string;
+  name: string;
+  slug?: string;
+  sort_order?: number;
 };
 
 export type DeviceRecord = {
