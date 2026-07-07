@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { DocumentTemplate } from "@nolostdocs/types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { runProtectedDocumentAction } from "@/lib/documents/download";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -21,8 +21,18 @@ type DashboardData = {
   profiles: DashboardProfileRecord[];
 };
 
+type DashboardAccountSummary = {
+  email: string | null;
+  name: string;
+  plan: "free" | "premium" | "trial" | "unknown";
+  renewalDate: string | null;
+  status: string;
+  workspaceName: string;
+};
+
 type DashboardShellProps = {
   initialData: DashboardData;
+  initialAccount: DashboardAccountSummary;
   initialDocumentMessage: string | null;
 };
 
@@ -196,6 +206,25 @@ function categoryIcon(slug: string) {
   }
 }
 
+function categoryDescription(category: DashboardCategoryRecord) {
+  switch (category.slug) {
+    case "personal-family":
+      return "ID docs, records, certificates, and family documents";
+    case "health":
+      return "Medical records, insurance, prescriptions, and more";
+    case "home-car":
+      return "Property docs, insurance, leases, and vehicle records";
+    case "money-legal":
+      return "Banking, investments, taxes, wills, and legal docs";
+    case "work-business":
+      return "Employment docs, contracts, licenses, and payroll";
+    case "travel-emergency":
+      return "Passports, visas, travel docs, emergency contacts";
+    default:
+      return category.description ?? "Documents in this category";
+  }
+}
+
 function toTemplate(document: DashboardDocumentRecord): DocumentTemplate {
   return {
     category: "custom",
@@ -258,13 +287,152 @@ function formatStorageSummary(documents: DashboardDocumentRecord[]) {
   return `${active} active of ${total} total`;
 }
 
-export function DashboardShell({ initialData, initialDocumentMessage }: DashboardShellProps) {
+function formatPlanLabel(plan: DashboardAccountSummary["plan"]) {
+  switch (plan) {
+    case "premium":
+      return "Premium";
+    case "trial":
+      return "Trial";
+    case "free":
+      return "Basic";
+    default:
+      return "Unknown";
+  }
+}
+
+function formatStatusLabel(status: string) {
+  const normalized = normalize(status);
+
+  if (normalized === "active" || normalized === "trialing" || normalized === "current") {
+    return "Active";
+  }
+
+  if (normalized === "past_due" || normalized === "payment_failed" || normalized === "expired") {
+    return "Needs attention";
+  }
+
+  if (normalized === "canceled" || normalized === "cancelled") {
+    return "Cancelled";
+  }
+
+  return status ? status.replace(/[_-]+/g, " ") : "Unknown";
+}
+
+function formatRenewalDate(value: string | null) {
+  if (!value) {
+    return "Not set";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+function getInitials(name: string) {
+  const parts = name
+    .split(/\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (!parts.length) {
+    return "ND";
+  }
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
+function DashboardAccountMenu({ account }: { account: DashboardAccountSummary }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  return (
+    <div
+      className={`dashboard-account-menu${open ? " open" : ""}`}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      ref={containerRef}
+    >
+      <button
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label="Account menu"
+        className="dashboard-avatar"
+        onClick={() => setOpen((value) => !value)}
+        type="button"
+      >
+        {getInitials(account.name)}
+      </button>
+
+      {open ? (
+        <div className="dashboard-account-popover" role="menu">
+          <div className="dashboard-account-popover-header">
+            <div>
+              <div className="dashboard-section-kicker">Account</div>
+              <div className="dashboard-account-name">{account.name}</div>
+              <div className="dashboard-account-email">{account.email ?? "Email not set"}</div>
+            </div>
+            <span className="dashboard-account-badge">{formatPlanLabel(account.plan)}</span>
+          </div>
+
+          <dl className="dashboard-account-details">
+            <div>
+              <dt>Subscription status</dt>
+              <dd>{formatStatusLabel(account.status)}</dd>
+            </div>
+            <div>
+              <dt>Renewal date</dt>
+              <dd>{formatRenewalDate(account.renewalDate)}</dd>
+            </div>
+            <div>
+              <dt>Workspace</dt>
+              <dd>{account.workspaceName}</dd>
+            </div>
+          </dl>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function DashboardShell({ initialData, initialAccount, initialDocumentMessage }: DashboardShellProps) {
   const { client, configured } = createBrowserSupabaseClient();
   const { session } = useAuth();
   const [data, setData] = useState(initialData);
   const [documentMessage, setDocumentMessage] = useState<string | null>(initialDocumentMessage);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(initialData.profiles.find((profile) => profile.display_name === "Me")?.id ?? initialData.profiles[0]?.id ?? null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(initialData.documents[0]?.id ?? null);
@@ -278,10 +446,6 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
   useEffect(() => {
     setDocumentMessage(initialDocumentMessage);
   }, [initialDocumentMessage]);
-
-  useEffect(() => {
-    setSelectedTypeId(null);
-  }, [selectedCategoryId]);
 
   const orderedProfiles = useMemo(() => sortProfiles(data.profiles), [data.profiles]);
 
@@ -299,7 +463,6 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
 
     return data.documents.filter((document) => {
       const matchesProfile = !selectedProfileId || document.owner_profile_id === selectedProfileId;
-      const matchesCategory = !selectedCategoryId || document.category_id === selectedCategoryId;
       const matchesType = !selectedTypeId || document.document_type_id === selectedTypeId;
       const haystack = [
         document.title,
@@ -314,9 +477,9 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
 
       const matchesSearch = !query || haystack.includes(query);
 
-      return matchesProfile && matchesCategory && matchesType && matchesSearch;
+      return matchesProfile && matchesType && matchesSearch;
     });
-  }, [data.documents, searchTerm, selectedCategoryId, selectedProfileId, selectedTypeId]);
+  }, [data.documents, searchTerm, selectedProfileId, selectedTypeId]);
 
   const selectedDocument = useMemo(
     () => filteredDocuments.find((document) => document.id === selectedDocumentId) ?? filteredDocuments[0] ?? null,
@@ -364,12 +527,6 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
   const needsReviewCount = data.documents.filter((document) => statusTone(document.status) === "review").length;
   const archivedCount = data.documents.filter((document) => statusTone(document.status) === "archived").length;
   const expiringCount = data.documents.filter((document) => statusTone(document.status) === "warning").length;
-  const overview = [
-    { label: "Documents", value: String(data.documents.length) },
-    { label: "Categories", value: String(data.categories.length) },
-    { label: "Profiles", value: String(data.profiles.length) },
-    { label: "Expiring", value: String(expiringCount) }
-  ];
   const activityItems = buildActivityItems(data.documents);
   const selectedTemplate = selectedDocument ? toTemplate(selectedDocument) : null;
 
@@ -434,18 +591,7 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
             <span>NoLostDocs</span>
           </div>
 
-          <Link className="dashboard-scan-button" href="/scan">
-            <span className="dashboard-scan-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <path d="M8 12h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-            </span>
-            Scan Document
-          </Link>
-
           <nav className="dashboard-nav-section">
-            <div className="dashboard-nav-label">App</div>
             <a className="dashboard-nav-item active" href="#top">
               <span className="dashboard-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -463,51 +609,57 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
               </span>
               All Documents
             </a>
-            <a className="dashboard-nav-item" href="#search">
-              <span className="dashboard-nav-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="m21 21-4.3-4.3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-                  <circle cx="10.7" cy="10.7" r="6.7" stroke="currentColor" strokeWidth="1.7" />
-                </svg>
-              </span>
-              Search
-            </a>
             <a className="dashboard-nav-item" href="#profiles">
               <span className="dashboard-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.7" />
-                  <path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  <path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M3.5 20a4.5 4.5 0 0 1 9 0M11.5 20a4.5 4.5 0 0 1 9 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </span>
-              Profile
+              Shared
+            </a>
+            <a className="dashboard-nav-item" href="#documents">
+              <span className="dashboard-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M4 7h16M7 7v13h10V7M9 7V5h6v2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              Trash
             </a>
           </nav>
 
-          <nav className="dashboard-nav-section">
-            <div className="dashboard-nav-label">Manage</div>
-            <a className="dashboard-nav-item" href="#profiles">
-              <span className="dashboard-nav-icon" aria-hidden="true">
+          <div className="dashboard-sidebar-quick">
+            <div className="dashboard-nav-label">Quick Actions</div>
+            <Link className="dashboard-quick-link" href="/scan">
+              <span aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.7" />
-                  <path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  <path d="M8 12h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
               </span>
-              Profiles
-            </a>
-            <a className="dashboard-nav-item" href="#document-types">
-              <span className="dashboard-nav-icon" aria-hidden="true">
+              Scan Document
+            </Link>
+            <Link className="dashboard-quick-link" href="/scan">
+              <span aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" stroke="currentColor" strokeWidth="1.7" />
-                  <path d="M4 7h16v13H4z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                  <path d="M12 4v12M7 9l5-5 5 5M5 20h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              Types
+              Upload Document
+            </Link>
+            <a className="dashboard-quick-link" href="#document-types">
+              <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </span>
+              Add Document Type
             </a>
-          </nav>
+          </div>
 
           <div className="dashboard-sidebar-card">
-            <div className="dashboard-sidebar-card-title">Private storage</div>
-            <p className="dashboard-sidebar-card-text">Your files are stored privately and opened only through signed downloads.</p>
+            <div className="dashboard-sidebar-card-title">Storage</div>
+            <p className="dashboard-sidebar-card-text">2.4 GB of 10 GB used</p>
             <div className="dashboard-storage-bar">
               <span className="dashboard-storage-fill" />
             </div>
@@ -536,11 +688,23 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
                 </svg>
                 <span className="dashboard-badge">2</span>
               </button>
-              <button className="dashboard-avatar" type="button" aria-label="Account menu">
-                RM
-              </button>
+              <DashboardAccountMenu account={initialAccount} />
             </div>
           </header>
+
+          <Link className="dashboard-mobile-scan-hero" href="/scan">
+            <span className="dashboard-mobile-scan-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M8 12h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span>
+              <strong>Scan Docs</strong>
+              <small>Scan and save important documents in seconds</small>
+            </span>
+            <span className="dashboard-mobile-scan-arrow" aria-hidden="true">›</span>
+          </Link>
 
           <div className="dashboard-desktop-topbar">
             <label className="dashboard-search">
@@ -558,6 +722,15 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
             </label>
 
             <div className="dashboard-top-actions desktop">
+              <Link className="dashboard-top-scan-button" href="/scan">
+                <span className="dashboard-scan-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    <path d="M8 12h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  </svg>
+                </span>
+                Scan Docs
+              </Link>
               <button className="dashboard-icon-button" type="button" aria-label="Notifications">
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
@@ -565,15 +738,13 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
                 </svg>
                 <span className="dashboard-badge">2</span>
               </button>
-              <button className="dashboard-avatar" type="button" aria-label="Account menu">
-                RM
-              </button>
+              <DashboardAccountMenu account={initialAccount} />
             </div>
           </div>
 
           <section className="dashboard-page-header">
             <div>
-              <div className="dashboard-eyebrow">Document Wallet</div>
+              <div className="dashboard-eyebrow">Records home</div>
               <h1 className="dashboard-title">Everything important, ready when you need it.</h1>
               <p className="dashboard-subtitle">
                 Organize secure copies by owner, category, and document type so passports, insurance cards, licenses, records, and business docs are easy to find.
@@ -647,12 +818,11 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
             </div>
 
             <div className="dashboard-category-grid">
-              {data.categories.map((category) => (
-                <button
-                  className={`dashboard-category-card${selectedCategoryId === category.id ? " active" : ""}`}
+              {data.categories.map((category, index) => (
+                <Link
+                  className="dashboard-category-card"
+                  href={`/dashboard/categories/${category.slug}`}
                   key={category.id}
-                  onClick={() => setSelectedCategoryId(selectedCategoryId === category.id ? null : category.id)}
-                  type="button"
                 >
                   <span className="dashboard-category-top">
                     <span className="dashboard-category-icon" aria-hidden="true">
@@ -660,13 +830,12 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
                     </span>
                     <span className="dashboard-category-count">{categoryCounts.get(category.id) ?? 0} docs</span>
                   </span>
-                  <strong className="dashboard-category-title">{category.name}</strong>
-                  <span className="dashboard-category-description">{category.description ?? "Category"}</span>
+                  <strong className="dashboard-category-title">{index + 1}. {category.name}</strong>
+                  <span className="dashboard-category-description">{categoryDescription(category)}</span>
                   <span className="dashboard-category-footer" aria-hidden="true">
-                    Open category
                     <span>›</span>
                   </span>
-                </button>
+                </Link>
               ))}
             </div>
           </section>
@@ -684,7 +853,6 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
                 All types
               </button>
               {data.documentTypes
-                .filter((type) => !selectedCategoryId || type.category_id === selectedCategoryId)
                 .slice(0, 16)
                 .map((type) => (
                   <button
@@ -702,8 +870,7 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
           <section className="dashboard-section" id="documents">
             <div className="dashboard-section-header">
               <div>
-                <div className="dashboard-section-kicker">Recent documents</div>
-                <h2 className="dashboard-section-title">{filteredDocuments.length ? `${filteredDocuments.length} matching records` : "No records match"}</h2>
+                <h2 className="dashboard-section-title">Recent Documents</h2>
               </div>
               <span className="dashboard-section-link">View all</span>
             </div>
@@ -712,11 +879,11 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
               <table className="dashboard-doc-table">
                 <thead>
                   <tr>
-                    <th>Document</th>
-                    <th>Owner</th>
+                    <th>Document Name</th>
                     <th>Category</th>
-                    <th>Status</th>
+                    <th>Owner</th>
                     <th>Updated</th>
+                    <th>Status</th>
                     <th />
                   </tr>
                 </thead>
@@ -735,15 +902,18 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
                         </div>
                       </td>
                       <td>
-                        <span className="dashboard-pill">{document.owner_profile_name ?? "Me"}</span>
+                        <span className={`dashboard-pill category ${document.category_slug ?? "default"}`}>{document.category_name ?? "Category"}</span>
                       </td>
                       <td>
-                        <span className="dashboard-pill">{document.category_name ?? "Category"}</span>
+                        <span className="dashboard-owner-pill">
+                          <span className="dashboard-owner-avatar">{getInitials(document.owner_profile_name ?? "Me")}</span>
+                          {document.owner_profile_name ?? "Me"}
+                        </span>
                       </td>
+                      <td className="dashboard-muted">{relativeDate(document.updated_at)}</td>
                       <td>
                         <span className={`dashboard-pill ${statusTone(document.status)}`}>{statusLabel(document.status)}</span>
                       </td>
-                      <td className="dashboard-muted">{relativeDate(document.updated_at)}</td>
                       <td className="dashboard-actions-cell">⋮</td>
                     </tr>
                   ))}
@@ -762,6 +932,7 @@ export function DashboardShell({ initialData, initialDocumentMessage }: Dashboar
                     <span>{document.document_type_name ?? "Document type"} · {document.category_name ?? "Category"}</span>
                   </span>
                   <span className="dashboard-doc-side">
+                    <span className={`dashboard-pill category ${document.category_slug ?? "default"}`}>{document.category_name ?? "Category"}</span>
                     <span className={`dashboard-pill ${statusTone(document.status)}`}>{statusLabel(document.status)}</span>
                     <span className="dashboard-actions-cell">⋮</span>
                   </span>

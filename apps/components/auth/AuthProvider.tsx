@@ -9,7 +9,9 @@ type AuthContextValue = {
   configured: boolean;
   ready: boolean;
   session: Session | null;
+  signInWithGoogle: (redirectTo: string) => Promise<{ errorMessage: string | null }>;
   signInWithOtp: (email: string, redirectTo: string) => Promise<{ errorMessage: string | null }>;
+  signUpWithPassword: (values: { email: string; fullName: string; password: string; redirectTo: string }) => Promise<{ errorMessage: string | null }>;
   signOut: () => Promise<{ errorMessage: string | null }>;
 };
 
@@ -57,6 +59,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       configured,
       ready,
       session,
+      async signInWithGoogle(redirectTo: string) {
+        if (!configured) {
+          return { errorMessage: "Sign-in is not enabled yet." };
+        }
+
+        const { error } = await client.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo
+          }
+        });
+
+        return { errorMessage: error?.message ?? null };
+      },
       async signInWithOtp(email: string, redirectTo: string) {
         if (!configured) {
           return { errorMessage: "Sign-in is not enabled yet." };
@@ -66,6 +82,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
           email,
           options: {
             emailRedirectTo: redirectTo
+          }
+        });
+
+        return { errorMessage: error?.message ?? null };
+      },
+      async signUpWithPassword({ email, fullName, password, redirectTo }) {
+        if (!configured) {
+          return { errorMessage: "Sign-up is not enabled yet." };
+        }
+
+        const { error } = await client.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: redirectTo,
+            data: {
+              full_name: fullName,
+              name: fullName
+            }
           }
         });
 

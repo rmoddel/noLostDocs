@@ -10,8 +10,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const nextValue = resolvedSearchParams.next;
   const authErrorValue = resolvedSearchParams.authError;
+  const modeValue = resolvedSearchParams.mode;
   const nextPath = Array.isArray(nextValue) ? nextValue[0] : nextValue;
   const authError = Array.isArray(authErrorValue) ? authErrorValue[0] : authErrorValue;
+  const modeParam = Array.isArray(modeValue) ? modeValue[0] : modeValue;
+  const mode = modeParam === "signin" ? "signin" : "create";
   const safeNextPath = typeof nextPath === "string" && nextPath.startsWith("/") ? nextPath : "/dashboard";
   const initialMessage =
     authError === "exchange_failed"
@@ -35,5 +38,5 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     }
   }
 
-  return <LoginForm initialMessage={initialMessage} nextPath={safeNextPath} />;
+  return <LoginForm initialMessage={initialMessage} mode={mode} nextPath={safeNextPath} />;
 }

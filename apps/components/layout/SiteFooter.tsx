@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { assetPaths } from "@/constants/assets";
 
 const footerLinks = [
@@ -13,6 +14,12 @@ const footerLinks = [
 ];
 
 export function SiteFooter() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/dashboard")) {
+    return null;
+  }
+
   return (
     <footer className="site-footer">
       <div className="site-footer-inner">
