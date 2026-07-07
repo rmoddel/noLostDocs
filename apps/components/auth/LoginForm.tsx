@@ -25,7 +25,7 @@ function GoogleMark() {
 
 export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormProps) {
   const router = useRouter();
-  const { configured, ready, session, signInWithGoogle, signInWithOtp, signUpWithPassword } = useAuth();
+  const { configured, ready, session, signInWithGoogle, signInWithPassword, signUpWithPassword } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -90,7 +90,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
     setMessage("Check your email to confirm your account.");
   }
 
-  async function handleSendLink(event: React.FormEvent<HTMLFormElement>) {
+  async function handlePasswordSignIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedEmail = email.trim();
@@ -99,11 +99,18 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
       return;
     }
 
+    if (!password.trim()) {
+      setMessage("Enter your password.");
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
-    const redirectUrl = typeof window === "undefined" ? "" : buildAuthCallbackUrl(nextPath);
-    const { errorMessage } = await signInWithOtp(trimmedEmail, redirectUrl);
+    const { errorMessage } = await signInWithPassword({
+      email: trimmedEmail,
+      password
+    });
 
     setLoading(false);
 
@@ -112,7 +119,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
       return;
     }
 
-    setMessage("Check your email for a secure sign-in link.");
+    router.replace(nextPath);
   }
 
   async function handleGoogleSignIn() {
@@ -138,7 +145,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
           <p className="login-lede">
             {mode === "create"
               ? "Start with a private records space for the important papers you always need to find."
-              : "Use an email link to open the protected records view and continue to your workspace."}
+              : "Sign in with Google or your password to open the protected records view and continue to your workspace."}
           </p>
         </div>
 
@@ -200,21 +207,44 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
             </form>
           </>
         ) : (
-          <form className="login-form signin" onSubmit={(event) => void handleSendLink(event)}>
-            <label className="login-field">
-              <span>Email address</span>
-              <input
-                autoComplete="email"
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Email address"
-                type="email"
-                value={email}
-              />
-            </label>
-            <button className="login-primary-button" disabled={loading} type="submit">
-              {loading ? "Sending..." : "Send sign-in link"}
+          <>
+            <button className="login-google-button" disabled={!configured || loading} onClick={() => void handleGoogleSignIn()} type="button">
+              <GoogleMark />
+              Continue with Google
             </button>
-          </form>
+
+            <div className="login-divider" aria-hidden="true">
+              <span />
+              <strong>OR SIGN IN WITH EMAIL</strong>
+              <span />
+            </div>
+
+            <form className="login-form signin" onSubmit={(event) => void handlePasswordSignIn(event)}>
+              <label className="login-field">
+                <span>Email address</span>
+                <input
+                  autoComplete="email"
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="Email address"
+                  type="email"
+                  value={email}
+                />
+              </label>
+              <label className="login-field">
+                <span>Password</span>
+                <input
+                  autoComplete="current-password"
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Password"
+                  type="password"
+                  value={password}
+                />
+              </label>
+              <button className="login-primary-button" disabled={loading} type="submit">
+                {loading ? "Signing in..." : "Sign in"}
+              </button>
+            </form>
+          </>
         )}
 
         <p className="login-fineprint">

@@ -1,5 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 function resolveSafeRedirectTarget(requestUrl: URL, rawRedirectTo: string | null) {
@@ -49,6 +50,20 @@ export async function GET(request: Request) {
 
   if (error) {
     return createLoginRedirect(requestUrl, redirectTarget, "verify_failed");
+  }
+
+  const {
+    data: { user }
+  } = await client.auth.getUser();
+
+  if (user) {
+    try {
+      await ensureUserProfile(client, user);
+    } catch (profileError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Failed to ensure user profile", profileError);
+      }
+    }
   }
 
   return NextResponse.redirect(redirectTarget);

@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/requireUser";
-import { isLocalDashboardPreviewEnabled } from "@/lib/dev/localDashboardPreview";
+import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
 import { loadDashboardDocuments, type DashboardDocumentRecord } from "@/lib/documents/dashboard";
-import { buildPreviewDashboardData } from "@/lib/documents/previewDashboard";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type CategoryPageProps = {
@@ -99,15 +98,23 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const query = (Array.isArray(qValue) ? qValue[0] : qValue ?? "").trim();
   const normalizedQuery = query.toLowerCase();
 
-  const dashboardData = isLocalDashboardPreviewEnabled()
-    ? buildPreviewDashboardData()
-    : await (async () => {
-        const user = await requireUser(`/dashboard/categories/${slug}`);
-        const { client, configured } = await createServerSupabaseClient();
-        return configured && client
-          ? await loadDashboardDocuments(client, user.id)
-          : { categories: [], documentTypes: [], documents: [], errorMessage: null, profiles: [] };
-      })();
+  const user = await requireUser(`/dashboard/categories/${slug}`);
+  const { client, configured } = await createServerSupabaseClient();
+
+  if (configured && client) {
+    try {
+      await ensureUserProfile(client, user);
+    } catch (profileError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Failed to ensure user profile", profileError);
+      }
+    }
+  }
+
+  const dashboardData =
+    configured && client
+      ? await loadDashboardDocuments(client, user.id)
+      : { categories: [], documentTypes: [], documents: [], errorMessage: null, profiles: [] };
 
   const category = dashboardData.categories.find((item) => item.slug === slug);
 
@@ -158,7 +165,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           </div>
 
           <div className="category-document-list">
-            {documents.map((document) => (
+            {documents.length ? documents.map((document) => (
               <article className="category-document-row" key={document.id}>
                 <div>
                   <h3>{document.title}</h3>
@@ -167,7 +174,11 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                 <span className={`dashboard-pill ${statusTone(document.status)}`}>{statusLabel(document.status)}</span>
                 <time>{relativeDate(document.updated_at)}</time>
               </article>
-            ))}
+            )) : (
+              <div className="category-empty-state">
+                No documents match this category yet.
+              </div>
+            )}
           </div>
         </section>
       </div>

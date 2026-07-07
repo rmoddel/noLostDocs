@@ -54,7 +54,9 @@ export function getPublicAppUrl() {
 export function buildAuthCallbackUrl(nextPath: string) {
   const safeNextPath = nextPath.startsWith("/") ? nextPath : "/dashboard";
   const baseUrl = getPublicAppUrl();
-  return new URL(safeNextPath, `${baseUrl}/`).toString();
+  const callbackUrl = new URL("/auth/callback", `${baseUrl}/`);
+  callbackUrl.searchParams.set("next", safeNextPath);
+  return callbackUrl.toString();
 }
 
 export function isLocalAuthOrigin(url: string) {

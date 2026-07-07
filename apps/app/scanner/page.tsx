@@ -1,6 +1,7 @@
-import { getScanProviderStatus } from "@/lib/scan/providerStatus";
-import { ScanWorkspace } from "@/components/scan/ScanWorkspace";
+import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/auth/requireUser";
 
-export default function ScannerPage() {
-  return <ScanWorkspace mode="public" providerStatus={getScanProviderStatus()} />;
+export default async function ScannerPage() {
+  await requireUser("/scanner");
+  redirect("/scan");
 }

@@ -3,6 +3,7 @@
 import type { Session } from "@supabase/supabase-js";
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 type AuthContextValue = {
@@ -10,7 +11,7 @@ type AuthContextValue = {
   ready: boolean;
   session: Session | null;
   signInWithGoogle: (redirectTo: string) => Promise<{ errorMessage: string | null }>;
-  signInWithOtp: (email: string, redirectTo: string) => Promise<{ errorMessage: string | null }>;
+  signInWithPassword: (values: { email: string; password: string }) => Promise<{ errorMessage: string | null }>;
   signUpWithPassword: (values: { email: string; fullName: string; password: string; redirectTo: string }) => Promise<{ errorMessage: string | null }>;
   signOut: () => Promise<{ errorMessage: string | null }>;
 };
@@ -73,26 +74,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         return { errorMessage: error?.message ?? null };
       },
-      async signInWithOtp(email: string, redirectTo: string) {
+      async signInWithPassword({ email, password }) {
         if (!configured) {
           return { errorMessage: "Sign-in is not enabled yet." };
         }
 
-        const { error } = await client.auth.signInWithOtp({
+        const { data, error } = await client.auth.signInWithPassword({
           email,
-          options: {
-            emailRedirectTo: redirectTo
-          }
+          password
         });
 
-        return { errorMessage: error?.message ?? null };
+        if (error) {
+          return { errorMessage: error.message };
+        }
+
+        if (data.user) {
+          try {
+            await ensureUserProfile(client, data.user);
+          } catch (profileError) {
+            return { errorMessage: profileError instanceof Error ? profileError.message : "Profile setup failed." };
+          }
+        }
+
+        return { errorMessage: null };
       },
       async signUpWithPassword({ email, fullName, password, redirectTo }) {
         if (!configured) {
           return { errorMessage: "Sign-up is not enabled yet." };
         }
 
-        const { error } = await client.auth.signUp({
+        const { data, error } = await client.auth.signUp({
           email,
           password,
           options: {
@@ -104,7 +115,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         });
 
-        return { errorMessage: error?.message ?? null };
+        if (error) {
+          return { errorMessage: error.message };
+        }
+
+        if (data.user && data.session) {
+          try {
+            await ensureUserProfile(client, data.user);
+          } catch (profileError) {
+            return { errorMessage: profileError instanceof Error ? profileError.message : "Profile setup failed." };
+          }
+        }
+
+        return { errorMessage: null };
       },
       async signOut() {
         if (!configured) {

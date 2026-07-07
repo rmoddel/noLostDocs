@@ -1,26 +1,24 @@
 import { requireUser } from "@/lib/auth/requireUser";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
 import { loadDashboardDocuments } from "@/lib/documents/dashboard";
-import { buildPreviewDashboardData } from "@/lib/documents/previewDashboard";
-import { isLocalDashboardPreviewEnabled } from "@/lib/dev/localDashboardPreview";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { resolveAccountPlan } from "@/lib/plans/resolvePlan";
 
 export default async function DashboardPage() {
-  if (isLocalDashboardPreviewEnabled()) {
-    const previewData = buildPreviewDashboardData();
-
-    return (
-      <DashboardShell
-        initialDocumentMessage="Local preview is enabled. Sign-in is bypassed on localhost."
-        initialAccount={previewData.account}
-        initialData={previewData}
-      />
-    );
-  }
-
   const user = await requireUser("/dashboard");
   const { client, configured } = await createServerSupabaseClient();
+
+  if (configured && client) {
+    try {
+      await ensureUserProfile(client, user);
+    } catch (profileError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Failed to ensure user profile", profileError);
+      }
+    }
+  }
+
   const [{ data: profileRow }, { data: subscriptionRows }] = configured && client
     ? await Promise.all([
         client.from("profiles").select("full_name, email, plan, cloud_enabled").eq("id", user.id).maybeSingle(),

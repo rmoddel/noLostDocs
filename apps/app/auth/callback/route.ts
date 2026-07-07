@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 function resolveSafeNextPath(rawNext: string | null) {
@@ -32,6 +33,20 @@ export async function GET(request: Request) {
 
   if (error) {
     return createLoginRedirect(requestUrl, nextPath, "exchange_failed");
+  }
+
+  const {
+    data: { user }
+  } = await client.auth.getUser();
+
+  if (user) {
+    try {
+      await ensureUserProfile(client, user);
+    } catch (profileError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Failed to ensure user profile", profileError);
+      }
+    }
   }
 
   return NextResponse.redirect(redirectUrl);

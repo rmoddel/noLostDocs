@@ -20,7 +20,7 @@ export function SiteHeader() {
   const { ready, session, signOut } = useAuth();
   const showDashboardButton = ready && session && pathname !== "/dashboard";
 
-  if (pathname.startsWith("/dashboard")) {
+  if (pathname.startsWith("/dashboard") || pathname === "/scan" || pathname === "/scanner") {
     return null;
   }
 

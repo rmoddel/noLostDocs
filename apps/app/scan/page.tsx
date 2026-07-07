@@ -1,7 +1,8 @@
 import { requireUser } from "@/lib/auth/requireUser";
-import { redirect } from "next/navigation";
+import { ScanWorkspace } from "@/components/scan/ScanWorkspace";
+import { getScanProviderStatus } from "@/lib/scan/providerStatus";
 
 export default async function ScanPage() {
   await requireUser("/scan");
-  redirect("/dashboard#scan");
+  return <ScanWorkspace providerStatus={getScanProviderStatus()} />;
 }

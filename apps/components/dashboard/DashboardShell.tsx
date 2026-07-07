@@ -287,6 +287,23 @@ function formatStorageSummary(documents: DashboardDocumentRecord[]) {
   return `${active} active of ${total} total`;
 }
 
+function formatBytes(value: number) {
+  if (!value) {
+    return "0 bytes";
+  }
+
+  const units = ["bytes", "KB", "MB", "GB"];
+  let unitIndex = 0;
+  let nextValue = value;
+
+  while (nextValue >= 1024 && unitIndex < units.length - 1) {
+    nextValue /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${nextValue >= 10 || unitIndex === 0 ? Math.round(nextValue) : nextValue.toFixed(1)} ${units[unitIndex]}`;
+}
+
 function formatPlanLabel(plan: DashboardAccountSummary["plan"]) {
   switch (plan) {
     case "premium":
@@ -527,6 +544,10 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
   const needsReviewCount = data.documents.filter((document) => statusTone(document.status) === "review").length;
   const archivedCount = data.documents.filter((document) => statusTone(document.status) === "archived").length;
   const expiringCount = data.documents.filter((document) => statusTone(document.status) === "warning").length;
+  const attentionCount = needsReviewCount + expiringCount;
+  const storageBytes = data.documents.reduce((total, document) => total + (document.size_bytes ?? 0), 0);
+  const storedFileCount = data.documents.filter((document) => Boolean(document.storage_path || document.size_bytes)).length;
+  const storagePercent = Math.min(100, storageBytes ? Math.max(4, (storageBytes / (1024 * 1024 * 1024)) * 100) : 0);
   const activityItems = buildActivityItems(data.documents);
   const selectedTemplate = selectedDocument ? toTemplate(selectedDocument) : null;
 
@@ -659,11 +680,11 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
 
           <div className="dashboard-sidebar-card">
             <div className="dashboard-sidebar-card-title">Storage</div>
-            <p className="dashboard-sidebar-card-text">2.4 GB of 10 GB used</p>
+            <p className="dashboard-sidebar-card-text">{formatBytes(storageBytes)} stored</p>
             <div className="dashboard-storage-bar">
-              <span className="dashboard-storage-fill" />
+              <span className="dashboard-storage-fill" style={{ width: `${storagePercent}%` }} />
             </div>
-            <div className="dashboard-sidebar-card-meta">{formatStorageSummary(data.documents)}</div>
+            <div className="dashboard-sidebar-card-meta">{storedFileCount} {storedFileCount === 1 ? "file" : "files"} · {formatStorageSummary(data.documents)}</div>
           </div>
         </aside>
 
@@ -686,7 +707,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
                   <path d="M10 21h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
                 </svg>
-                <span className="dashboard-badge">2</span>
+                {attentionCount ? <span className="dashboard-badge">{attentionCount}</span> : null}
               </button>
               <DashboardAccountMenu account={initialAccount} />
             </div>
@@ -736,7 +757,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
                   <path d="M10 21h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
                 </svg>
-                <span className="dashboard-badge">2</span>
+                {attentionCount ? <span className="dashboard-badge">{attentionCount}</span> : null}
               </button>
               <DashboardAccountMenu account={initialAccount} />
             </div>
@@ -888,7 +909,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredDocuments.map((document) => (
+                  {filteredDocuments.length ? filteredDocuments.map((document) => (
                     <tr className="dashboard-doc-table-row" key={document.id} onClick={() => setSelectedDocumentId(document.id)}>
                       <td>
                         <div className="dashboard-doc-cell">
@@ -916,13 +937,19 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                       </td>
                       <td className="dashboard-actions-cell">⋮</td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td className="dashboard-empty-row" colSpan={6}>
+                        No documents yet. Use Scan Docs to add your first record.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
 
             <div className="dashboard-doc-list-mobile">
-              {filteredDocuments.map((document) => (
+              {filteredDocuments.length ? filteredDocuments.map((document) => (
                 <button className="dashboard-doc-card" key={document.id} onClick={() => setSelectedDocumentId(document.id)} type="button">
                   <span className={`dashboard-doc-icon ${document.category_slug ?? "default"}`} aria-hidden="true">
                     {categoryIcon(document.category_slug ?? "default")}
@@ -937,7 +964,9 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                     <span className="dashboard-actions-cell">⋮</span>
                   </span>
                 </button>
-              ))}
+              )) : (
+                <div className="dashboard-mobile-empty">No documents yet. Use Scan to add your first record.</div>
+              )}
             </div>
           </section>
         </main>
