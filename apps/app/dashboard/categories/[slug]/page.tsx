@@ -161,7 +161,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         <section className="category-results">
           <div className="category-results-header">
             <h2>{documents.length} documents</h2>
-            <Link href="/scan">Add document</Link>
+            <Link href={`/dashboard?scan=open&category=${encodeURIComponent(category.slug)}`}>Add document</Link>
           </div>
 
           <div className="category-document-list">

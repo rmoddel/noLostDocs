@@ -1,92 +1,114 @@
-import type { DashboardGroup, DashboardGroupId } from "@/constants/launcherGroups";
-import { documentTypeFeatured, documentTypeSuggestions } from "@/constants/documentTypeTaxonomy";
+import { useId } from "react";
+import type {
+  DashboardCategoryRecord,
+  DashboardDocumentTypeRecord,
+  DashboardProfileRecord
+} from "@/lib/documents/dashboard";
 
 type ScanCaptureProps = {
+  categories: DashboardCategoryRecord[];
+  documentTypes: DashboardDocumentTypeRecord[];
   fileName: string | null;
-  groups: DashboardGroup[];
-  metadataEnabled?: boolean;
   onFileChange: (file: File | null) => void;
-  onGroupChange: (groupId: DashboardGroupId) => void;
+  onCategoryChange: (categoryId: string) => void;
+  onDocumentTypeChange: (documentTypeId: string) => void;
+  onOwnerProfileChange: (profileId: string) => void;
   onTitleChange: (value: string) => void;
-  selectedGroupId: DashboardGroupId;
+  profiles: DashboardProfileRecord[];
+  selectedCategoryId: string;
+  selectedDocumentTypeId: string;
+  selectedOwnerProfileId: string;
   title: string;
 };
 
 export function ScanCapture({
+  categories,
+  documentTypes,
   fileName,
-  groups,
-  metadataEnabled = true,
   onFileChange,
-  onGroupChange,
+  onCategoryChange,
+  onDocumentTypeChange,
+  onOwnerProfileChange,
   onTitleChange,
-  selectedGroupId,
+  profiles,
+  selectedCategoryId,
+  selectedDocumentTypeId,
+  selectedOwnerProfileId,
   title
 }: ScanCaptureProps) {
-  const selectedSuggestedType = documentTypeSuggestions.includes(title) ? title : "";
+  const fileInputId = useId();
+  const filteredTypes = documentTypes.filter((type) => type.category_id === selectedCategoryId);
+  const quickTypes = filteredTypes.slice(0, 4);
 
   return (
     <>
-      {metadataEnabled ? (
-        <>
-          <label className="field">
-            <span>Record category</span>
-            <select onChange={(event) => onGroupChange(event.target.value as DashboardGroupId)} value={selectedGroupId}>
-              {groups.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.title}
-                </option>
-              ))}
-            </select>
-          </label>
+      <label className="field">
+        <span>Owner / profile</span>
+        <select onChange={(event) => onOwnerProfileChange(event.target.value)} value={selectedOwnerProfileId}>
+          {profiles.map((profile) => (
+            <option key={profile.id} value={profile.id}>
+              {profile.display_name}
+            </option>
+          ))}
+        </select>
+      </label>
 
-          <label className="field">
-            <span>Document title</span>
-            <div className="scan-type-picks" aria-label="Suggested file types">
-              {documentTypeFeatured.map((suggestion) => (
-                <button
-                  className="scan-type-pill"
-                  key={suggestion}
-                  onClick={() => onTitleChange(suggestion)}
-                  type="button"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-            <select
-              aria-label="Suggested file type"
-              onChange={(event) => onTitleChange(event.target.value)}
-              value={selectedSuggestedType}
-            >
-              <option value="">Choose a suggested type</option>
-              {documentTypeSuggestions.map((suggestion) => (
-                <option key={suggestion} value={suggestion}>
-                  {suggestion}
-                </option>
-              ))}
-            </select>
-            <input
-              list="file-name-suggestions"
-              onChange={(event) => onTitleChange(event.target.value)}
-              placeholder="Enter a document title"
-              type="text"
-              value={title}
-            />
-            <span className="field-note">Choose a standard type, then adjust the title as needed.</span>
-            <datalist id="file-name-suggestions">
-              {documentTypeSuggestions.map((suggestion) => (
-                <option key={suggestion} value={suggestion} />
-              ))}
-            </datalist>
-          </label>
-        </>
-      ) : null}
+      <label className="field">
+        <span>Category</span>
+        <select onChange={(event) => onCategoryChange(event.target.value)} value={selectedCategoryId}>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </label>
 
-      <label className="scan-dropzone" htmlFor="scan-file">
+      <label className="field">
+        <span>Document type</span>
+        <select onChange={(event) => onDocumentTypeChange(event.target.value)} value={selectedDocumentTypeId}>
+          {filteredTypes.length ? (
+            filteredTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))
+          ) : (
+            <option value="">No document types available</option>
+          )}
+        </select>
+        {quickTypes.length ? (
+          <div className="scan-type-picks" aria-label="Common document types">
+            {quickTypes.map((type) => (
+              <button
+                className={`scan-type-pill${selectedDocumentTypeId === type.id ? " active" : ""}`}
+                key={type.id}
+                onClick={() => onDocumentTypeChange(type.id)}
+                type="button"
+              >
+                {type.name}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </label>
+
+      <label className="field">
+        <span>Title</span>
+        <input
+          onChange={(event) => onTitleChange(event.target.value)}
+          placeholder="Enter a document title"
+          type="text"
+          value={title}
+        />
+        <span className="field-note">Use the official name or the label you will search for later.</span>
+      </label>
+
+      <label className="scan-dropzone" htmlFor={fileInputId}>
         <input
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
           capture="environment"
-          id="scan-file"
+          id={fileInputId}
           onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
           type="file"
         />

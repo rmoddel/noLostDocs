@@ -4,9 +4,23 @@ import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
 import { loadDashboardDocuments } from "@/lib/documents/dashboard";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { resolveAccountPlan } from "@/lib/plans/resolvePlan";
+import { getScanProviderStatus } from "@/lib/scan/providerStatus";
 
-export default async function DashboardPage() {
-  const user = await requireUser("/dashboard");
+type DashboardPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const scanValue = resolvedSearchParams.scan;
+  const categoryValue = resolvedSearchParams.category;
+  const scanParam = Array.isArray(scanValue) ? scanValue[0] : scanValue;
+  const categoryParam = Array.isArray(categoryValue) ? categoryValue[0] : categoryValue;
+  const nextPath =
+    scanParam === "open"
+      ? `/dashboard?scan=open${categoryParam ? `&category=${encodeURIComponent(categoryParam)}` : ""}`
+      : "/dashboard";
+  const user = await requireUser(nextPath);
   const { client, configured } = await createServerSupabaseClient();
 
   if (configured && client) {
@@ -53,6 +67,7 @@ export default async function DashboardPage() {
         workspaceName: profileRow?.full_name ? `${profileRow.full_name}'s workspace` : "NoLostDocs Workspace"
       }}
       initialDocumentMessage={initialDashboardData.errorMessage}
+      scanProviderStatus={getScanProviderStatus()}
     />
   );
 }

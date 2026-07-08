@@ -4163,6 +4163,212 @@ li {
   text-align: center;
 }
 
+button.dashboard-quick-link,
+button.dashboard-mobile-scan-hero,
+button.dashboard-top-scan-button,
+button.dashboard-primary-button,
+button.dashboard-secondary-button,
+button.dashboard-quick-action,
+button.dashboard-bottom-nav-item {
+  appearance: none;
+  border-style: solid;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+}
+
+button.dashboard-quick-link {
+  width: 100%;
+  border: 0;
+  background: transparent;
+}
+
+button.dashboard-mobile-scan-hero,
+button.dashboard-top-scan-button,
+button.dashboard-primary-button,
+button.dashboard-quick-action,
+button.dashboard-bottom-nav-item {
+  border: 0;
+}
+
+button.dashboard-secondary-button {
+  border-width: 1px;
+}
+
+button.dashboard-bottom-nav-item {
+  background: transparent;
+}
+
+.scan-type-pill.active {
+  border-color: rgba(199, 100, 81, 0.36);
+  color: #ffffff;
+  background: linear-gradient(180deg, #c76451, #9e493c);
+}
+
+.dashboard-scan-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(12, 12, 11, 0.58);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+.dashboard-scan-dialog {
+  width: min(1120px, 100%);
+  max-height: min(860px, calc(100vh - 44px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  color: #151515;
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.34);
+}
+
+.dashboard-scan-dialog-header,
+.dashboard-scan-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-scan-dialog-header h2,
+.dashboard-scan-meta-panel h3,
+.dashboard-scan-panel-heading h3 {
+  margin: 0;
+  color: #111111;
+  letter-spacing: 0;
+}
+
+.dashboard-scan-dialog-header h2 {
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.dashboard-scan-close {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: #202020;
+  background: #ffffff;
+}
+
+.dashboard-scan-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.dashboard-scan-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dashboard-scan-dialog-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 0;
+  overflow: auto;
+}
+
+.dashboard-scan-meta-panel,
+.dashboard-scan-capture-panel {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 22px;
+}
+
+.dashboard-scan-meta-panel {
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fbfaf8;
+}
+
+.dashboard-scan-capture-panel {
+  background: #ffffff;
+}
+
+.dashboard-scan-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.dashboard-scan-pill {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #974435;
+  background: rgba(199, 100, 81, 0.1);
+  border: 1px solid rgba(199, 100, 81, 0.16);
+  font-size: 12px;
+  font-weight: 720;
+  line-height: 1;
+}
+
+.dashboard-scan-dialog .scan-launcher {
+  gap: 8px;
+}
+
+.dashboard-scan-dialog .scan-docs-button {
+  min-width: 100%;
+  border-radius: 8px;
+}
+
+.dashboard-scan-dialog .scan-dropzone {
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.dashboard-scan-dialog .scan-preview {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.dashboard-scan-dialog .scan-preview img,
+.dashboard-scan-dialog .scan-preview-file {
+  background: #f7f4f0;
+}
+
+.dashboard-scan-dialog .button-row {
+  justify-content: flex-start;
+}
+
+.dashboard-scan-dialog-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 0;
+  background: #ffffff;
+}
+
+.dashboard-scan-feedback {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.dashboard-scan-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
 @media (max-width: 760px) {
   .dashboard-page,
   .page-section.dashboard-page {
@@ -4460,6 +4666,86 @@ li {
     border-radius: 999px;
     background: linear-gradient(180deg, #c76451, #9e493c);
     border: 4px solid rgba(15, 15, 14, 0.95);
+  }
+
+  .dashboard-scan-overlay {
+    align-items: stretch;
+    justify-items: stretch;
+    padding: 0;
+    background: rgba(10, 14, 20, 0.96);
+  }
+
+  .dashboard-scan-dialog {
+    width: 100%;
+    max-height: none;
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+    background: #10100f;
+    color: #ffffff;
+  }
+
+  .dashboard-scan-dialog-header,
+  .dashboard-scan-dialog-footer {
+    padding: 16px 18px;
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(16, 16, 15, 0.96);
+  }
+
+  .dashboard-scan-dialog-header h2,
+  .dashboard-scan-meta-panel h3,
+  .dashboard-scan-panel-heading h3 {
+    color: #ffffff;
+  }
+
+  .dashboard-scan-close {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .dashboard-scan-dialog-body {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-scan-meta-panel,
+  .dashboard-scan-capture-panel {
+    padding: 18px;
+  }
+
+  .dashboard-scan-meta-panel {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.055);
+  }
+
+  .dashboard-scan-capture-panel {
+    background: transparent;
+  }
+
+  .dashboard-scan-dialog .field span,
+  .dashboard-scan-dialog .field-note,
+  .dashboard-scan-feedback {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .dashboard-scan-dialog .scan-dropzone,
+  .dashboard-scan-dialog .scan-preview {
+    color: #111111;
+  }
+
+  .dashboard-scan-dialog-footer {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+  }
+
+  .dashboard-scan-footer-actions {
+    width: 100%;
+  }
+
+  .dashboard-scan-footer-actions .button {
+    flex: 1;
   }
 }
 

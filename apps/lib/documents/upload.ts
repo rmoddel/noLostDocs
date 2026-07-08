@@ -3,13 +3,6 @@ import type { Session, SupabaseClient } from "@supabase/supabase-js";
 const ALLOWED_SCAN_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"]);
 export const MAX_SCAN_FILE_BYTES = 10 * 1024 * 1024;
 
-const scanCategorySlugMap: Record<string, string> = {
-  basic: "personal-family",
-  family: "personal-family",
-  medical: "health",
-  professional: "work-business"
-};
-
 export function validateScanFile(file: File | null) {
   if (!file) {
     return "Choose a document image or PDF first.";
@@ -28,10 +21,6 @@ export function validateScanFile(file: File | null) {
 
 function isImageFile(file: File) {
   return file.type.startsWith("image/");
-}
-
-function normalizeTitle(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, " ");
 }
 
 export function buildDisplayFileName(baseName: string) {
@@ -89,12 +78,13 @@ export async function rotateImageFile(file: File, rotation: number) {
 }
 
 type SaveScanArgs = {
+  categoryId: string;
   client: SupabaseClient;
   configured: boolean;
+  documentTypeId: string;
   documentTitle: string;
   file: File;
-  groupId: string;
-  groupTitle: string;
+  ownerProfileId: string;
   rotation: number;
   scanMetadata?: Record<string, unknown>;
   session: Session;
@@ -114,62 +104,14 @@ function getFileExtension(fileName: string, mimeType: string) {
   return "jpg";
 }
 
-async function resolveDocumentPlacement(client: SupabaseClient, userId: string, documentTitle: string, groupId: string) {
-  const [
-    { data: profiles, error: profilesError },
-    { data: categories, error: categoriesError },
-    { data: types, error: typesError }
-  ] = await Promise.all([
-    client.from("document_profiles").select("id, display_name, profile_type, sort_order").eq("user_id", userId).order("sort_order", { ascending: true }),
-    client.from("document_categories").select("id, name, slug, description, sort_order, is_system").order("sort_order", { ascending: true }),
-    client.from("document_types").select("id, category_id, user_id, name, slug, is_system, is_custom")
-  ]);
-
-  if (profilesError) throw profilesError;
-  if (categoriesError) throw categoriesError;
-  if (typesError) throw typesError;
-
-  let profileId = profiles?.[0]?.id ?? null;
-  if (!profileId) {
-    const createdProfile = await client
-      .from("document_profiles")
-      .insert({
-        user_id: userId,
-        display_name: "Me",
-        profile_type: "person",
-        sort_order: 0
-      })
-      .select("id")
-      .single();
-
-    if (createdProfile.error) throw createdProfile.error;
-    profileId = createdProfile.data?.id ?? null;
-  }
-
-  const categorySlug = scanCategorySlugMap[groupId] ?? "personal-family";
-  const category = categories?.find((row) => row.slug === categorySlug) ?? categories?.[0] ?? null;
-  const normalizedTitle = normalizeTitle(documentTitle);
-  const exactType =
-    types?.find((row) => {
-      const normalizedTypeName = normalizeTitle(row.name);
-      return row.category_id === category?.id && (normalizedTypeName === normalizedTitle || normalizedTypeName.includes(normalizedTitle) || normalizedTitle.includes(normalizedTypeName));
-    }) ?? null;
-  const fallbackType = types?.find((row) => row.category_id === category?.id && row.name === "General Document") ?? null;
-
-  return {
-    categoryId: category?.id ?? null,
-    documentTypeId: exactType?.id ?? fallbackType?.id ?? null,
-    profileId
-  };
-}
-
 export async function saveScan({
+  categoryId,
   client,
   configured,
+  documentTypeId,
   documentTitle,
   file,
-  groupId,
-  groupTitle,
+  ownerProfileId,
   rotation,
   scanMetadata,
   session
@@ -181,6 +123,10 @@ export async function saveScan({
   const validationError = validateScanFile(file);
   if (validationError) {
     throw new Error(validationError);
+  }
+
+  if (!ownerProfileId || !categoryId || !documentTypeId) {
+    throw new Error("Choose an owner, category, and document type before saving.");
   }
 
   const rotatedFile = rotation && file.type.startsWith("image/") ? await rotateImageFile(file, rotation) : file;
@@ -219,21 +165,26 @@ export async function saveScan({
     throw new Error(uploadResult.error.message);
   }
 
-  const placement = await resolveDocumentPlacement(client, session.user.id, documentTitle, groupId);
-
   const { data: documentRow, error: documentError } = await client
     .from("documents")
     .insert({
       user_id: session.user.id,
-      owner_profile_id: placement.profileId,
-      category_id: placement.categoryId,
-      document_type_id: placement.documentTypeId,
+      owner_profile_id: ownerProfileId,
+      category_id: categoryId,
+      document_type_id: documentTypeId,
       title: documentTitle,
       status: "active",
       issue_date: null,
       expiration_date: null,
       document_date: null,
-      notes: `Captured from ${groupTitle}`,
+      metadata: {
+        scan: {
+          rotation,
+          source: "dashboard-overlay",
+          ...(scanMetadata ?? {})
+        }
+      },
+      notes: "Captured with NoLostDocs scan",
       tags: ["scan"]
     })
     .select("id")

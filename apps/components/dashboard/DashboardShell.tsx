@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { DocumentTemplate } from "@nolostdocs/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { runProtectedDocumentAction } from "@/lib/documents/download";
+import { loadDashboardDocuments } from "@/lib/documents/dashboard";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import type {
   DashboardCategoryRecord,
@@ -12,6 +14,8 @@ import type {
   DashboardDocumentTypeRecord,
   DashboardProfileRecord
 } from "@/lib/documents/dashboard";
+import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
+import { ScanWorkspace } from "@/components/scan/ScanWorkspace";
 import { DocumentDetail } from "./DocumentDetail";
 
 type DashboardData = {
@@ -34,6 +38,7 @@ type DashboardShellProps = {
   initialData: DashboardData;
   initialAccount: DashboardAccountSummary;
   initialDocumentMessage: string | null;
+  scanProviderStatus: ScanProviderStatus;
 };
 
 const preferredProfileOrder = ["Me", "Spouse", "Child 1", "Child 2", "Family", "Business"];
@@ -444,7 +449,9 @@ function DashboardAccountMenu({ account }: { account: DashboardAccountSummary })
   );
 }
 
-export function DashboardShell({ initialData, initialAccount, initialDocumentMessage }: DashboardShellProps) {
+export function DashboardShell({ initialData, initialAccount, initialDocumentMessage, scanProviderStatus }: DashboardShellProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { client, configured } = createBrowserSupabaseClient();
   const { session } = useAuth();
   const [data, setData] = useState(initialData);
@@ -455,6 +462,8 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(initialData.documents[0]?.id ?? null);
   const [actionLoading, setActionLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanInitialCategorySlug, setScanInitialCategorySlug] = useState<string | null>(null);
 
   useEffect(() => {
     setData(initialData);
@@ -463,6 +472,18 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
   useEffect(() => {
     setDocumentMessage(initialDocumentMessage);
   }, [initialDocumentMessage]);
+
+  const scanQuery = searchParams.get("scan");
+  const categoryQuery = searchParams.get("category");
+
+  useEffect(() => {
+    if (scanQuery !== "open") {
+      return;
+    }
+
+    setScanInitialCategorySlug(categoryQuery);
+    setScanOpen(true);
+  }, [categoryQuery, scanQuery]);
 
   const orderedProfiles = useMemo(() => sortProfiles(data.profiles), [data.profiles]);
 
@@ -550,6 +571,36 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
   const storagePercent = Math.min(100, storageBytes ? Math.max(4, (storageBytes / (1024 * 1024 * 1024)) * 100) : 0);
   const activityItems = buildActivityItems(data.documents);
   const selectedTemplate = selectedDocument ? toTemplate(selectedDocument) : null;
+
+  function openScanOverlay(categorySlug: string | null = null) {
+    setScanInitialCategorySlug(categorySlug);
+    setScanOpen(true);
+  }
+
+  function closeScanOverlay() {
+    setScanOpen(false);
+
+    if (scanQuery === "open") {
+      router.replace("/dashboard", { scroll: false });
+    }
+  }
+
+  async function refreshDashboardDataAfterScan() {
+    if (!configured || !session) {
+      setDocumentMessage("Document saved to records.");
+      return;
+    }
+
+    const nextData = await loadDashboardDocuments(client, session.user.id);
+    setData({
+      categories: nextData.categories,
+      documentTypes: nextData.documentTypes,
+      documents: nextData.documents,
+      profiles: nextData.profiles
+    });
+    setDocumentMessage(nextData.errorMessage ?? "Document saved to records.");
+    setSelectedDocumentId(nextData.documents[0]?.id ?? null);
+  }
 
   async function handlePreview(document: DashboardDocumentRecord) {
     if (!session) {
@@ -651,7 +702,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
 
           <div className="dashboard-sidebar-quick">
             <div className="dashboard-nav-label">Quick Actions</div>
-            <Link className="dashboard-quick-link" href="/scan">
+            <button className="dashboard-quick-link" onClick={() => openScanOverlay()} type="button">
               <span aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -659,15 +710,15 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                 </svg>
               </span>
               Scan Document
-            </Link>
-            <Link className="dashboard-quick-link" href="/scan">
+            </button>
+            <button className="dashboard-quick-link" onClick={() => openScanOverlay()} type="button">
               <span aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M12 4v12M7 9l5-5 5 5M5 20h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
               Upload Document
-            </Link>
+            </button>
             <a className="dashboard-quick-link" href="#document-types">
               <span aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -713,7 +764,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
             </div>
           </header>
 
-          <Link className="dashboard-mobile-scan-hero" href="/scan">
+          <button className="dashboard-mobile-scan-hero" onClick={() => openScanOverlay()} type="button">
             <span className="dashboard-mobile-scan-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
                 <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -725,7 +776,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
               <small>Scan and save important documents in seconds</small>
             </span>
             <span className="dashboard-mobile-scan-arrow" aria-hidden="true">›</span>
-          </Link>
+          </button>
 
           <div className="dashboard-desktop-topbar">
             <label className="dashboard-search">
@@ -743,7 +794,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
             </label>
 
             <div className="dashboard-top-actions desktop">
-              <Link className="dashboard-top-scan-button" href="/scan">
+              <button className="dashboard-top-scan-button" onClick={() => openScanOverlay()} type="button">
                 <span className="dashboard-scan-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none">
                     <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -751,7 +802,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   </svg>
                 </span>
                 Scan Docs
-              </Link>
+              </button>
               <button className="dashboard-icon-button" type="button" aria-label="Notifications">
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
@@ -773,10 +824,10 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
             </div>
 
             <div className="dashboard-header-actions">
-              <Link className="dashboard-secondary-button" href="/scan">
+              <button className="dashboard-secondary-button" onClick={() => openScanOverlay()} type="button">
                 Upload
-              </Link>
-              <Link className="dashboard-primary-button" href="/scan">
+              </button>
+              <button className="dashboard-primary-button" onClick={() => openScanOverlay()} type="button">
                 <span className="dashboard-scan-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none">
                     <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -784,7 +835,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   </svg>
                 </span>
                 Scan Document
-              </Link>
+              </button>
             </div>
           </section>
 
@@ -981,12 +1032,12 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
             </div>
 
             <div className="dashboard-quick-actions">
-              <Link className="dashboard-quick-action" href="/scan">
+              <button className="dashboard-quick-action" onClick={() => openScanOverlay()} type="button">
                 Scan document <span>›</span>
-              </Link>
-              <Link className="dashboard-quick-action" href="/scan">
+              </button>
+              <button className="dashboard-quick-action" onClick={() => openScanOverlay()} type="button">
                 Upload file <span>›</span>
-              </Link>
+              </button>
               <a className="dashboard-quick-action" href="#document-types">
                 Add custom type <span>›</span>
               </a>
@@ -1094,7 +1145,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
           Docs
         </a>
 
-        <Link className="dashboard-bottom-nav-item dashboard-scan-nav" href="/scan">
+        <button className="dashboard-bottom-nav-item dashboard-scan-nav" onClick={() => openScanOverlay()} type="button">
           <span className="dashboard-scan-circle" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -1102,7 +1153,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
             </svg>
           </span>
           Scan
-        </Link>
+        </button>
 
         <a className="dashboard-bottom-nav-item" href="#search">
           <span aria-hidden="true">
@@ -1126,6 +1177,17 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
       </nav>
 
       <div className="dashboard-home-indicator" aria-hidden="true" />
+
+      <ScanWorkspace
+        categories={data.categories}
+        documentTypes={data.documentTypes}
+        initialCategorySlug={scanInitialCategorySlug}
+        onClose={closeScanOverlay}
+        onSaved={refreshDashboardDataAfterScan}
+        open={scanOpen}
+        profiles={data.profiles}
+        providerStatus={scanProviderStatus}
+      />
     </section>
   );
 }

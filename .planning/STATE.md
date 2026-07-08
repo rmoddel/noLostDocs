@@ -4,8 +4,8 @@ milestone: v2.0
 milestone_name: rearchitecture
 status: active
 stopped_at: Milestone complete
-last_updated: "2026-06-25T11:30:00.000Z"
-last_activity: 2026-06-25 -- Completed the OCR-first scan flow and renamed active workspace packages to @nolostdocs/*
+last_updated: "2026-07-07T19:10:00.000Z"
+last_activity: 2026-07-07 -- Completed overlay-first dashboard scan modal quick task
 progress:
   total_phases: 8
   completed_phases: 8
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-18)
 Phase: 08 complete
 Plan: 8 of 8
 Status: Phases 07 and 08 completed; milestone ready for ship prep
-Last activity: 2026-06-25 -- Verified the OCR-first scan flow and internal package rename on the live web app path
+Last activity: 2026-07-07 -- Completed overlay-first dashboard scan modal quick task
 
 Progress: [██████████] 100%
 
@@ -79,6 +79,12 @@ Recent decisions affecting current work:
 
 - The active GSD phase artifacts from the legacy roadmap are archived and preserved for reference only.
 - The milestone code is complete, but live launch still depends on real environment configuration and backend project setup outside the repo.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260707-egp | Implement overlay-first scan modal launched from dashboard with /scan redirect fallback | 2026-07-07 | uncommitted | [260707-egp-implement-overlay-first-scan-modal-launc](./quick/260707-egp-implement-overlay-first-scan-modal-launc/) |
 
 ## Deferred Items
 
