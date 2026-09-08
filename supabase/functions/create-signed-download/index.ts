@@ -1,4 +1,7 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { recordAuditEvent } from "../_shared/audit.ts";
+import { requireTrustedDevice } from "../_shared/device.ts";
+import { requireRecentAuth } from "../_shared/session.ts";
 import { requireUser } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
@@ -7,8 +10,10 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const { admin, user } = await requireUser(request);
+    const { admin, token, user } = await requireUser(request);
+    requireRecentAuth(token, "create-signed-download", 30 * 60);
     const payload = await request.json().catch(() => ({}));
+    const device = await requireTrustedDevice(admin, user.id, request, payload, "create-signed-download");
     const documentFileId =
       typeof payload?.documentFileId === "string" && payload.documentFileId.trim() ? payload.documentFileId.trim() : null;
 
@@ -90,6 +95,19 @@ Deno.serve(async (request) => {
         { status: 500, headers: corsHeaders }
       );
     }
+
+    await recordAuditEvent(admin, {
+      action: "document_file.signed_download_created",
+      deviceId: device.id,
+      metadata: {
+        expires_in: expiresIn,
+        storage_bucket: fileRow.storage_bucket
+      },
+      request,
+      resourceId: documentFileId,
+      resourceType: "document_file",
+      userId: user.id
+    });
 
     return Response.json(
       {

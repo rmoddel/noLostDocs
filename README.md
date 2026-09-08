@@ -4,8 +4,7 @@ NoLostDocs is a secure document vault for keeping important records organized, r
 
 ## What It Is
 
-- A public brand site
-- A signed-in document workspace
+- A working signed-in document workspace at the app root
 - A recovery-first account model
 - A paid upgrade path for broader document coverage
 - A product that stays honest about legal acceptance and original documents
@@ -17,8 +16,9 @@ To get this live:
 1. Set the production domain for the app host.
 2. Populate the live web environment with the public backend values and the server-only secrets.
 3. Build and deploy the web app from `apps`.
-4. Verify the public homepage, login, dashboard, scan, sitemap, and metadata routes.
-5. Keep the archived prototype untouched until the live app is proven in production.
+4. Verify the app root, login, dashboard, scan, sitemap, and metadata routes.
+5. Apply Supabase migrations and deploy the Edge Functions.
+6. Configure Stripe webhook signing before enabling paid access.
 
 To make money:
 
@@ -46,6 +46,8 @@ cp apps/.env.local.example apps/.env.local
 ```
 
 ## Install
+
+Use Node.js 20.9 or newer. Local verification currently passes on Node.js 22.
 
 ```bash
 npm install
@@ -75,14 +77,24 @@ Required frontend environment variables for the web app:
 
 Server-side secrets such as the service-role key, payment secret key, and ABBYY OCR connector values should stay in trusted backend/operator workflows, not browser-exposed frontend env vars.
 
+Required Edge Function secrets:
+
+- `SUPABASE_URL`
+- `SERVICE_ROLE_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+
 ## Current App Direction
 
+- `/` redirects to the working records app instead of a marketing homepage.
 - Signed-in web workspace with category-first browsing
 - Persistent visible/hidden workspace category preferences
 - Protected preview/download UI framed as authorized short-lived access
 - Login-required plan model across the product
-- `Free Basic` gating versus `Premium` unlock messaging on the responsive web app
-- Backend-owned subscription sync and upload quota enforcement scaffolding
+- `Free Basic` gating versus `Premium` unlock messaging based on subscription rows
+- Verified Stripe webhook subscription sync
+- Browser-side encryption before Supabase Storage upload
+- Trusted-device checks before signed uploads and downloads
+- Durable audit events for sensitive file and billing actions
 
 ## Trust Boundary
 
@@ -91,6 +103,7 @@ Server-side secrets such as the service-role key, payment secret key, and ABBYY 
 - Web access is the responsive cloud-backed surface; local-only behavior is intentionally not implied on the website.
 - NoLostDocs is a secure document vault and recovery tool, not a legal replacement for official originals.
 - Product language should stay recovery-capable and should not claim HIPAA compliance or zero-knowledge guarantees that the implementation does not prove.
+- Encrypted uploads currently use a local browser wrapping key. Cross-device encrypted-file recovery is not implemented yet.
 
 ## Current Status
 
@@ -98,8 +111,12 @@ Server-side secrets such as the service-role key, payment secret key, and ABBYY 
 - Archived legacy app variants were moved out of the active app path
 - The selected Phase 7 stack is `Scanbot SDK` for guided capture and `ABBYY FineReader` for accuracy-oriented OCR
 - Active internal workspace packages now use the `@nolostdocs/*` scope
+- The web app builds on Next.js 16 without a build-time Google Fonts dependency
 
 ## Verification
 
 - `npm run typecheck`
 - `npm run build:web`
+- `npm audit --omit=dev`
+- `deno check supabase/functions/audit-log/index.ts supabase/functions/cleanup-uploaded-file/index.ts supabase/functions/create-signed-upload/index.ts supabase/functions/create-signed-download/index.ts supabase/functions/register-device/index.ts supabase/functions/unlock-device/index.ts supabase/functions/stripe-webhook/index.ts`
+- `supabase start` then `supabase test db --local`

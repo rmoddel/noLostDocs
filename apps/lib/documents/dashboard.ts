@@ -36,6 +36,8 @@ export type DashboardDocumentRecord = {
   document_file_id: string | null;
   document_type_id: string | null;
   document_type_name: string | null;
+  encrypted_file_key: Record<string, unknown> | null;
+  encryption_version: string | null;
   expiration_date: string | null;
   file_role: "original" | "preview" | "processed" | null;
   id: string;
@@ -85,6 +87,8 @@ type FileRow = {
   document_id: string;
   file_role: "original" | "preview" | "processed" | null;
   id: string;
+  encrypted_file_key: Record<string, unknown> | null;
+  encryption_version: string | null;
   mime_type: string | null;
   original_filename: string | null;
   page_count: number | null;
@@ -142,6 +146,8 @@ function mapDocument(row: DocumentRow, file: FileRow | null, profiles: Map<strin
     document_file_id: file?.id ?? null,
     document_type_id: row.document_type_id,
     document_type_name: type?.name ?? null,
+    encrypted_file_key: file?.encrypted_file_key ?? null,
+    encryption_version: file?.encryption_version ?? null,
     expiration_date: row.expiration_date,
     file_role: buildFileRole(file),
     id: row.id,
@@ -177,7 +183,7 @@ export async function loadDashboardDocuments(client: SupabaseClient, userId: str
       .order("updated_at", { ascending: false }),
     client
       .from("document_files")
-      .select("id, document_id, storage_bucket, storage_path, original_filename, content_type, mime_type, file_role, page_count, size_bytes, created_at")
+      .select("id, document_id, storage_bucket, storage_path, original_filename, content_type, mime_type, file_role, encryption_version, encrypted_file_key, page_count, size_bytes, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false }),
     client

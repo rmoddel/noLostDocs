@@ -9,6 +9,7 @@ import type {
   DashboardProfileRecord
 } from "@/lib/documents/dashboard";
 import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
+import { analyzeScanQuality, type ScanQualityReport } from "@/lib/scan/quality";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Button } from "../ui/Button";
 import { ScanActions } from "./ScanActions";
@@ -58,6 +59,8 @@ export function ScanWorkspace({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
   const [scanTitle, setScanTitle] = useState("");
+  const [qualityReport, setQualityReport] = useState<ScanQualityReport | null>(null);
+  const [qualityMessage, setQualityMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -95,6 +98,8 @@ export function ScanWorkspace({
     setFile(null);
     setPreviewUrl(null);
     setRotation(0);
+    setQualityMessage(null);
+    setQualityReport(null);
     setSaving(false);
     setMessage(null);
   }, [categories, documentTypes, initialCategorySlug, open, profiles]);
@@ -116,6 +121,8 @@ export function ScanWorkspace({
 
   useEffect(() => {
     if (!file) {
+      setQualityMessage(null);
+      setQualityReport(null);
       setPreviewUrl(null);
       return;
     }
@@ -130,6 +137,45 @@ export function ScanWorkspace({
 
     return () => URL.revokeObjectURL(url);
   }, [file]);
+
+  useEffect(() => {
+    if (!file) {
+      setQualityMessage(null);
+      setQualityReport(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setQualityMessage("PDF selected. Image quality checks apply to camera captures.");
+      setQualityReport(null);
+      return;
+    }
+
+    let active = true;
+    setQualityMessage("Checking image quality...");
+
+    analyzeScanQuality(file, rotation)
+      .then((report) => {
+        if (!active) {
+          return;
+        }
+
+        setQualityReport(report);
+        setQualityMessage(`${report.headline} ${report.ocrSummary}`);
+      })
+      .catch((error) => {
+        if (!active) {
+          return;
+        }
+
+        setQualityReport(null);
+        setQualityMessage(error instanceof Error ? error.message : "Image quality check is unavailable.");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [file, rotation]);
 
   useEffect(() => {
     if (!open) {
@@ -200,6 +246,15 @@ export function ScanWorkspace({
       return;
     }
 
+    if (file.type.startsWith("image/")) {
+      const report = qualityReport ?? (await analyzeScanQuality(file, rotation));
+      if (!report.canSave) {
+        setQualityReport(report);
+        setMessage(`${report.headline} ${report.ocrSummary}`);
+        return;
+      }
+    }
+
     setSaving(true);
     setMessage(null);
 
@@ -220,6 +275,9 @@ export function ScanWorkspace({
           documentTypeName: selectedDocumentType?.name ?? null,
           ocrProvider: providerStatus.ocrProvider,
           ocrReady: providerStatus.ocrReady,
+          qualityFlags: qualityReport?.flags ?? [],
+          qualityHeadline: qualityReport?.headline ?? null,
+          qualityTone: qualityReport?.tone ?? null,
           ownerProfileName: selectedProfile?.display_name ?? null
         },
         session
@@ -240,6 +298,8 @@ export function ScanWorkspace({
   function handleClear() {
     setMessage(null);
     setFile(null);
+    setQualityMessage(null);
+    setQualityReport(null);
     setRotation(0);
   }
 
@@ -316,7 +376,7 @@ export function ScanWorkspace({
 
         <div className="dashboard-scan-dialog-footer">
           <p className="dashboard-scan-feedback" role="status">
-            {message ?? "Private upload flow. Files are saved only after you choose Save Document."}
+            {message ?? qualityMessage ?? "Encrypted upload flow. Files are stored only after you choose Save Document."}
           </p>
           <div className="dashboard-scan-footer-actions">
             <Button disabled={saving} onClick={onClose} variant="secondary">
@@ -324,7 +384,7 @@ export function ScanWorkspace({
             </Button>
             <ScanActions
               actionLabel="Save Document"
-              canAct={Boolean(file) && hasRequiredMetadata}
+              canAct={Boolean(file) && hasRequiredMetadata && qualityReport?.tone !== "blocked"}
               loading={saving}
               onAction={() => void handleSave()}
             />

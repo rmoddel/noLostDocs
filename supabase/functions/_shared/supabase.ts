@@ -1,5 +1,6 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
-import type { User } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.108.2";
+import type { User } from "npm:@supabase/supabase-js@2.108.2";
+import { corsHeaders } from "./cors.ts";
 import { requireEnv } from "./env.ts";
 
 export function createAdminClient() {
@@ -17,13 +18,13 @@ export function createAdminClient() {
   });
 }
 
-export async function requireUser(request: Request): Promise<{ admin: ReturnType<typeof createAdminClient>; user: User }> {
+export async function requireUser(request: Request): Promise<{ admin: ReturnType<typeof createAdminClient>; token: string; user: User }> {
   const authHeader = request.headers.get("Authorization");
 
   if (!authHeader?.startsWith("Bearer ")) {
     throw new Response(JSON.stringify({ error: "Missing bearer token" }), {
       status: 401,
-      headers: { "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 
@@ -37,9 +38,9 @@ export async function requireUser(request: Request): Promise<{ admin: ReturnType
   if (error || !user) {
     throw new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
-      headers: { "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 
-  return { admin, user };
+  return { admin, token, user };
 }

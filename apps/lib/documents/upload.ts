@@ -1,4 +1,6 @@
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import { getBrowserFingerprint, registerBrowser } from "@/lib/devices/actions";
+import { encryptFileForLocalDevice } from "./encryption";
 
 const ALLOWED_SCAN_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"]);
 export const MAX_SCAN_FILE_BYTES = 10 * 1024 * 1024;
@@ -129,14 +131,23 @@ export async function saveScan({
     throw new Error("Choose an owner, category, and document type before saving.");
   }
 
+  await registerBrowser(client, configured, session);
+
   const rotatedFile = rotation && file.type.startsWith("image/") ? await rotateImageFile(file, rotation) : file;
+  const encryptedPayload = await encryptFileForLocalDevice(rotatedFile);
+  const encryptedFile = encryptedPayload.file;
   const safeTitle = buildDisplayFileName(documentTitle);
+  let documentId: string | null = null;
+  let uploadedPath: string | null = null;
 
   const uploadResponse = await client.functions.invoke("create-signed-upload", {
     body: {
+      deviceFingerprint: getBrowserFingerprint(),
       documentTitle,
-      fileName: rotatedFile.name,
-      mimeType: rotatedFile.type,
+      fileName: encryptedFile.name,
+      mimeType: encryptedFile.type,
+      originalFileName: rotatedFile.name,
+      originalMimeType: rotatedFile.type,
       safeTitle
     }
   });
@@ -156,14 +167,15 @@ export async function saveScan({
     throw new Error("Upload authorization failed.");
   }
 
-  const uploadResult = await client.storage.from("user-documents").uploadToSignedUrl(payload.path, payload.token, rotatedFile, {
-    contentType: rotatedFile.type || "image/jpeg",
-    upsert: true
+  const uploadResult = await client.storage.from("user-documents").uploadToSignedUrl(payload.path, payload.token, encryptedFile, {
+    contentType: encryptedFile.type
   });
 
   if (uploadResult.error) {
     throw new Error(uploadResult.error.message);
   }
+
+  uploadedPath = payload.path;
 
   const { data: documentRow, error: documentError } = await client
     .from("documents")
@@ -191,8 +203,11 @@ export async function saveScan({
     .single();
 
   if (documentError) {
+    await cleanupUploadedFile(client, uploadedPath);
     throw new Error(documentError.message);
   }
+
+  documentId = documentRow.id;
 
   const fileInsert = await client.from("document_files").insert({
     document_id: documentRow.id,
@@ -202,13 +217,54 @@ export async function saveScan({
     original_filename: rotatedFile.name,
     content_type: rotatedFile.type || "image/jpeg",
     file_role: "original",
-    mime_type: rotatedFile.type || "image/jpeg",
-    size_bytes: rotatedFile.size,
+    mime_type: encryptedFile.type,
+    size_bytes: encryptedFile.size,
     page_count: rotatedFile.type === "application/pdf" ? 1 : null,
-    encryption_version: "v1"
+    encryption_version: encryptedPayload.encryptionVersion,
+    encrypted_file_key: encryptedPayload.encryptionMetadata
   });
 
   if (fileInsert.error) {
+    await cleanupUploadedFile(client, uploadedPath);
+    await cleanupDocumentRow(client, documentId);
     throw new Error(fileInsert.error.message);
   }
+
+  await client.functions.invoke("audit-log", {
+    body: {
+      action: "document.created",
+      deviceFingerprint: getBrowserFingerprint(),
+      resourceId: documentRow.id,
+      resourceType: "document",
+      metadata: {
+        category_id: categoryId,
+        document_type_id: documentTypeId,
+        encrypted: true,
+        encryption_version: encryptedPayload.encryptionVersion,
+        original_file_name: rotatedFile.name,
+        owner_profile_id: ownerProfileId
+      }
+    }
+  });
+}
+
+async function cleanupUploadedFile(client: SupabaseClient, path: string | null) {
+  if (!path) {
+    return;
+  }
+
+  await client.functions.invoke("cleanup-uploaded-file", {
+    body: {
+      deviceFingerprint: getBrowserFingerprint(),
+      path
+    }
+  });
+}
+
+async function cleanupDocumentRow(client: SupabaseClient, documentId: string | null) {
+  if (!documentId) {
+    return;
+  }
+
+  await client.from("documents").delete().eq("id", documentId);
 }

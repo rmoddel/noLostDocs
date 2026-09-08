@@ -28,17 +28,28 @@ export async function ensureUserProfile(client: SupabaseClient, user: User) {
     throw existingProfileError;
   }
 
-  const { error: profileError } = await client.from("profiles").upsert(
-    {
-      id: user.id,
-      full_name: existingProfile?.full_name || fullName,
-      email: existingProfile?.email || email
-    },
-    { onConflict: "id" }
-  );
+  if (existingProfile) {
+    const { error: profileError } = await client
+      .from("profiles")
+      .update({
+        full_name: existingProfile.full_name || fullName,
+        email: existingProfile.email || email
+      })
+      .eq("id", user.id);
 
-  if (profileError) {
-    throw profileError;
+    if (profileError) {
+      throw profileError;
+    }
+  } else {
+    const { error: profileError } = await client.from("profiles").insert({
+      id: user.id,
+      full_name: fullName,
+      email
+    });
+
+    if (profileError) {
+      throw profileError;
+    }
   }
 
   const { data: ownerProfiles, error: ownerProfilesError } = await client

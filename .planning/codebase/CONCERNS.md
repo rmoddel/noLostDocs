@@ -2,22 +2,26 @@
 
 ## High Priority
 
-- Web implementation and planning direction diverge: the repo ships a Vite SPA while planning still describes Next.js as the target portal stack.
-- Supabase backend logic is scaffold-only: edge functions currently return placeholder JSON and do not enforce device, file, or billing flows.
-- Security posture is documented but not exercised: there is no live auth, no live storage path generation, and no test coverage for RLS or storage policies.
+- Encrypted file recovery is local-device only. Users who lose browser storage cannot decrypt prior uploads until a recovery-key or multi-device key-sharing design is implemented.
+- Device trust is stronger than before but still client-declared. Add MFA/step-up auth and session-aware device authorization before public launch.
+- The new migration and pgTAP tests still need to run against a real local or remote Supabase project.
+- Stripe webhook verification now requires `STRIPE_WEBHOOK_SECRET`; production subscription sync will fail until that secret is configured.
 
 ## Medium Priority
 
-- The Scanbot and ABBYY selections are product-approved, but live commercial credentials and backend connector setup still need to happen outside the repo.
-- The repo still contains a deferred mobile app, which can confuse scope and create maintenance noise during the web-first cycle.
+- Scanbot and ABBYY selections are still not live production integrations.
+- Contact form abuse controls are still missing.
+- `packages/config` retains prototype snapshot fallbacks and should be removed from protected app flows before launch.
+- Legacy plaintext rows are marked `plaintext-v1`; decide whether to migrate/re-encrypt them or block retrieval until re-upload.
 
 ## Low Priority
 
-- README references `apps/mobile/.env.local.example`, but that file does not exist.
-- Planning artifacts are ahead of execution in some areas and behind it in others; codebase mapping helps, but phase artifacts are still sparse.
-- Vite dev server may require running outside this sandbox due to local bind restrictions, even though production build succeeds.
+- Public marketing components remain in the repo but `/` now redirects to the working app.
+- Planning artifacts still include archived phase history that may mention old Vite paths.
+- There is no local lint implementation beyond the root workspace passthrough.
 
 ## Open Alignment Questions
 
-- Decide whether the mobile scaffold should stay in-repo during the web-first pass or be explicitly parked.
-- Decide when the deploy environment should turn on the Scanbot and ABBYY connectors for the live product.
+- Choose whether `NoLostDocs` remains the brand name after trademark/domain review.
+- Define the recovery-key UX before inviting real users to store irreplaceable documents.
+- Decide which workflows deserve first-class dashboard routes next: sharing packets, expiration reminders, trusted contacts, or document-type management.

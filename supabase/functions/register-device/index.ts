@@ -33,13 +33,12 @@ Deno.serve(async (request) => {
       platform,
       device_fingerprint: deviceFingerprint || null,
       is_trusted: true,
-      is_locked: false,
       last_seen_at: new Date().toISOString()
     };
 
     const query = existingId
       ? admin.from("devices").update(payload).eq("id", existingId).select("*").single()
-      : admin.from("devices").insert(payload).select("*").single();
+      : admin.from("devices").insert({ ...payload, is_locked: false }).select("*").single();
 
     const { data, error } = await query;
 

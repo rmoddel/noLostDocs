@@ -23,7 +23,20 @@ export function getBrowserFingerprint() {
     return "web-server-render";
   }
 
-  return `${navigator.platform}:${navigator.userAgent}`.slice(0, 180);
+  const storageKey = "nolostdocs:browser-device-id";
+
+  try {
+    const existing = window.localStorage.getItem(storageKey);
+    if (existing) {
+      return existing;
+    }
+
+    const next = `${navigator.platform || "web"}:${crypto.randomUUID()}`;
+    window.localStorage.setItem(storageKey, next);
+    return next;
+  } catch {
+    return `${navigator.platform}:${navigator.userAgent}`.slice(0, 180);
+  }
 }
 
 export async function loadDevices(client: SupabaseClient, configured: boolean, session: Session | null) {

@@ -1,6 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
+import { resolveSafeAppPath } from "@/lib/auth/getAuthRedirectUrl";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 function resolveSafeRedirectTarget(requestUrl: URL, rawRedirectTo: string | null) {
@@ -8,15 +9,15 @@ function resolveSafeRedirectTarget(requestUrl: URL, rawRedirectTo: string | null
     return new URL("/dashboard", requestUrl.origin);
   }
 
-  if (rawRedirectTo.startsWith("/")) {
-    return new URL(rawRedirectTo, requestUrl.origin);
-  }
-
   try {
     const redirectUrl = new URL(rawRedirectTo);
-    return redirectUrl.origin === requestUrl.origin ? redirectUrl : new URL("/dashboard", requestUrl.origin);
+    if (redirectUrl.origin !== requestUrl.origin) {
+      return new URL("/dashboard", requestUrl.origin);
+    }
+
+    return new URL(resolveSafeAppPath(`${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`), requestUrl.origin);
   } catch {
-    return new URL("/dashboard", requestUrl.origin);
+    return new URL(resolveSafeAppPath(rawRedirectTo), requestUrl.origin);
   }
 }
 

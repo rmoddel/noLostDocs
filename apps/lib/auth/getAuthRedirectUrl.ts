@@ -51,8 +51,27 @@ export function getPublicAppUrl() {
   return brand.siteUrl;
 }
 
+export function resolveSafeAppPath(value: string | null | undefined, fallback = "/dashboard") {
+  const nextPath = value?.trim();
+
+  if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//") || nextPath.includes("\\")) {
+    return fallback;
+  }
+
+  try {
+    const parsed = new URL(nextPath, "https://nolostdocs.local");
+    if (parsed.origin !== "https://nolostdocs.local") {
+      return fallback;
+    }
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return fallback;
+  }
+}
+
 export function buildAuthCallbackUrl(nextPath: string) {
-  const safeNextPath = nextPath.startsWith("/") ? nextPath : "/dashboard";
+  const safeNextPath = resolveSafeAppPath(nextPath);
   const baseUrl = getPublicAppUrl();
   const callbackUrl = new URL("/auth/callback", `${baseUrl}/`);
   callbackUrl.searchParams.set("next", safeNextPath);

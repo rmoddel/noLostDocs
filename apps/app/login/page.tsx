@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { resolveSafeAppPath } from "@/lib/auth/getAuthRedirectUrl";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type LoginPageProps = {
@@ -15,7 +16,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const authError = Array.isArray(authErrorValue) ? authErrorValue[0] : authErrorValue;
   const modeParam = Array.isArray(modeValue) ? modeValue[0] : modeValue;
   const mode = modeParam === "signin" ? "signin" : "create";
-  const safeNextPath = typeof nextPath === "string" && nextPath.startsWith("/") ? nextPath : "/dashboard";
+  const safeNextPath = resolveSafeAppPath(nextPath);
   const initialMessage =
     authError === "exchange_failed"
       ? "That sign-in link could not be completed. Request a new link and try again."

@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import { ensureUserProfile } from "@/lib/auth/ensureUserProfile";
+import { resolveSafeAppPath } from "@/lib/auth/getAuthRedirectUrl";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-function resolveSafeNextPath(rawNext: string | null) {
-  return rawNext && rawNext.startsWith("/") ? rawNext : "/dashboard";
-}
 
 function createLoginRedirect(requestUrl: URL, nextPath: string, authError: string) {
   const loginUrl = new URL("/login", requestUrl.origin);
@@ -16,7 +13,7 @@ function createLoginRedirect(requestUrl: URL, nextPath: string, authError: strin
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const nextPath = resolveSafeNextPath(requestUrl.searchParams.get("next"));
+  const nextPath = resolveSafeAppPath(requestUrl.searchParams.get("next"));
   const redirectUrl = new URL(nextPath, requestUrl.origin);
 
   if (!code) {

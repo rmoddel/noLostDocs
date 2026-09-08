@@ -40,6 +40,8 @@ export type DocumentTemplate = {
   documentTypeId?: string;
   documentTypeName?: string;
   documentDate?: string;
+  encryptedFileKey?: Record<string, unknown>;
+  encryptionVersion?: string;
   fileRole?: DocumentFileRole;
   id: string;
   category: CategoryId;

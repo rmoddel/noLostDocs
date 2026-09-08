@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { DocumentTemplate } from "@nolostdocs/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { runProtectedDocumentAction } from "@/lib/documents/download";
+import { registerBrowser } from "@/lib/devices/actions";
+import { createProtectedDocumentUrl, runProtectedDocumentAction } from "@/lib/documents/download";
 import { loadDashboardDocuments } from "@/lib/documents/dashboard";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import type {
@@ -241,6 +242,8 @@ function toTemplate(document: DashboardDocumentRecord): DocumentTemplate {
     documentId: document.id,
     documentTypeId: document.document_type_id ?? undefined,
     documentTypeName: document.document_type_name ?? undefined,
+    encryptedFileKey: document.encrypted_file_key ?? undefined,
+    encryptionVersion: document.encryption_version ?? undefined,
     expirationDate: document.expiration_date ?? undefined,
     expiresAt: document.expiration_date ?? undefined,
     fileRole: document.file_role ?? undefined,
@@ -263,6 +266,20 @@ function toTemplate(document: DashboardDocumentRecord): DocumentTemplate {
     title: document.title,
     updatedAt: document.updated_at
   };
+}
+
+function formatFileType(document: DashboardDocumentRecord) {
+  const contentType = document.content_type?.toLowerCase() ?? "";
+
+  if (contentType === "application/pdf") {
+    return "PDF";
+  }
+
+  if (contentType.startsWith("image/")) {
+    return contentType.replace("image/", "").toUpperCase();
+  }
+
+  return document.original_filename?.split(".").pop()?.toUpperCase() ?? "File";
 }
 
 function sortProfiles(profiles: DashboardProfileRecord[]) {
@@ -473,6 +490,24 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
     setDocumentMessage(initialDocumentMessage);
   }, [initialDocumentMessage]);
 
+  useEffect(() => {
+    if (!configured || !session) {
+      return;
+    }
+
+    let active = true;
+
+    registerBrowser(client, configured, session).then(({ message }) => {
+      if (active && message && message !== "Browser registered or refreshed.") {
+        setDocumentMessage(message);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [client, configured, session]);
+
   const scanQuery = searchParams.get("scan");
   const categoryQuery = searchParams.get("category");
 
@@ -530,6 +565,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
 
   useEffect(() => {
     let active = true;
+    let revokePreviewUrl: (() => void) | null = null;
     const documentFileId = selectedDocument?.document_file_id;
 
     if (!configured || !session || !documentFileId || !selectedDocument?.content_type?.startsWith("image/")) {
@@ -540,24 +576,35 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
     }
 
     async function loadPreviewUrl() {
-      const { data: downloadData, error } = await client.functions.invoke("create-signed-download", {
-        body: {
-          documentFileId
+      try {
+        const result = await createProtectedDocumentUrl({
+          action: "preview",
+          client,
+          configured,
+          session,
+          template: toTemplate(selectedDocument)
+        });
+
+        if (!active || !result.url) {
+          result.revoke?.();
+          return;
         }
-      });
 
-      if (!active || error) {
-        return;
+        setPreviewUrl(result.url);
+        revokePreviewUrl = result.revoke ?? null;
+      } catch (error) {
+        if (active) {
+          setPreviewUrl(null);
+          setDocumentMessage(error instanceof Error ? error.message : "Protected preview failed.");
+        }
       }
-
-      const signedUrl = typeof downloadData?.signedUrl === "string" ? downloadData.signedUrl : null;
-      setPreviewUrl(signedUrl);
     }
 
     void loadPreviewUrl();
 
     return () => {
       active = false;
+      revokePreviewUrl?.();
     };
   }, [client, configured, selectedDocument, session]);
 
@@ -583,6 +630,13 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
     if (scanQuery === "open") {
       router.replace("/dashboard", { scroll: false });
     }
+  }
+
+  function clearDocumentFilters() {
+    setSelectedProfileId(null);
+    setSelectedTypeId(null);
+    setSearchTerm("");
+    setSelectedDocumentId(data.documents[0]?.id ?? null);
   }
 
   async function refreshDashboardDataAfterScan() {
@@ -688,7 +742,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   <path d="M3.5 20a4.5 4.5 0 0 1 9 0M11.5 20a4.5 4.5 0 0 1 9 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </span>
-              Shared
+              Owners
             </a>
             <a className="dashboard-nav-item" href="#documents">
               <span className="dashboard-nav-icon" aria-hidden="true">
@@ -696,7 +750,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   <path d="M4 7h16M7 7v13h10V7M9 7V5h6v2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              Trash
+              Needs Review
             </a>
           </nav>
 
@@ -725,7 +779,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                   <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
               </span>
-              Add Document Type
+              Browse Types
             </a>
           </div>
 
@@ -886,7 +940,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                 <div className="dashboard-section-kicker">Categories</div>
                 <h2 className="dashboard-section-title">Six high-level categories</h2>
               </div>
-              <span className="dashboard-section-link">Manage</span>
+              <a className="dashboard-section-link" href="#documents">Open documents</a>
             </div>
 
             <div className="dashboard-category-grid">
@@ -944,7 +998,9 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
               <div>
                 <h2 className="dashboard-section-title">Recent Documents</h2>
               </div>
-              <span className="dashboard-section-link">View all</span>
+              <button className="dashboard-section-link" onClick={clearDocumentFilters} type="button">
+                Clear filters
+              </button>
             </div>
 
             <div className="dashboard-doc-table-wrap">
@@ -969,7 +1025,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                           </span>
                           <div>
                             <div className="dashboard-doc-title">{document.title}</div>
-                            <div className="dashboard-doc-sub">{document.document_type_name ?? "Document type"} · PDF</div>
+                            <div className="dashboard-doc-sub">{document.document_type_name ?? "Document type"} · {formatFileType(document)}</div>
                           </div>
                         </div>
                       </td>
@@ -1027,7 +1083,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
             <div className="dashboard-panel-heading">
               <div>
                 <div className="dashboard-section-kicker">Quick actions</div>
-                <h2 className="dashboard-section-title">Add a document, create a type, or manage owners.</h2>
+                <h2 className="dashboard-section-title">Add a document or jump to filters.</h2>
               </div>
             </div>
 
@@ -1039,10 +1095,10 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
                 Upload file <span>›</span>
               </button>
               <a className="dashboard-quick-action" href="#document-types">
-                Add custom type <span>›</span>
+                Browse types <span>›</span>
               </a>
               <a className="dashboard-quick-action" href="#profiles">
-                Manage profiles <span>›</span>
+                Owner filters <span>›</span>
               </a>
             </div>
           </section>

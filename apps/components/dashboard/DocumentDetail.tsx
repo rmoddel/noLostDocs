@@ -29,6 +29,7 @@ export function DocumentDetail({
   }
 
   const accessState = getDocumentAccessState(document);
+  const locallyEncrypted = document.encryptionVersion === "client-webcrypto-aes-gcm-local-device-v1";
 
   return (
     <section className="dashboard-panel dashboard-selected-card">
@@ -61,7 +62,13 @@ export function DocumentDetail({
               </svg>
             </div>
             <strong>{document.title}</strong>
-            <p>{document.mimeType === "application/pdf" ? "PDF available for protected retrieval." : "File available for protected retrieval."}</p>
+            <p>
+              {locallyEncrypted
+                ? "Encrypted file available for local-device decryption."
+                : document.mimeType === "application/pdf"
+                  ? "PDF available for protected retrieval."
+                  : "File available for protected retrieval."}
+            </p>
           </div>
         )}
       </div>
@@ -78,6 +85,10 @@ export function DocumentDetail({
         <div className="dashboard-detail-stat">
           <span>Completeness</span>
           <strong>{getDocumentCompleteness(document)}</strong>
+        </div>
+        <div className="dashboard-detail-stat">
+          <span>Protection</span>
+          <strong>{locallyEncrypted ? "Encrypted" : "Legacy"}</strong>
         </div>
       </div>
 

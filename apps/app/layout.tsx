@@ -1,24 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Fraunces, Sora } from "next/font/google";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { assetPaths } from "@/constants/assets";
 import { brand } from "@/constants/brand";
 import "@/styles/globals.css";
-
-const sora = Sora({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-sora"
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-fraunces"
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(brand.siteUrl),
@@ -67,7 +54,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html className={`${sora.variable} ${fraunces.variable}`} lang="en">
+    <html lang="en">
       <body>
         <AppProviders>
           <div className="site-shell">

@@ -2,32 +2,42 @@
 
 ## Supabase
 
-- Client wiring exists through `@nolostdocs/supabase`
-- Web reads `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- Shared helper supports `publishableKey` and legacy-compatible `anonKey` fallback
-- Repository contains SQL for schema, RLS, and storage policies
-- Repository contains placeholder edge functions for device and file access workflows
+- Web reads `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- Server/Edge code uses `SUPABASE_URL` and `SERVICE_ROLE_KEY`.
+- Migrations define profiles, devices, document metadata, document files, shares, subscriptions, audit events, RLS, grants, storage bucket intent, and hardening triggers.
+- Sensitive Storage access is intended to flow through Edge Functions and short-lived signed URLs, not direct client bucket policies.
+- Local pgTAP tests live under `supabase/tests`.
 
-## Expo
+## Stripe
 
-- Mobile app depends on Expo 53 and React Native 0.79
-- Current mobile scaffold is local only and does not yet implement camera, secure storage, or auth flows
+- `supabase/functions/stripe-webhook` handles subscription lifecycle events.
+- Webhook payloads must include a valid `Stripe-Signature` header.
+- Deployment must set `STRIPE_WEBHOOK_SECRET`.
+- Premium entitlement is resolved from active/trialing `subscriptions` rows only.
 
-## Web Bundler
+## Browser Crypto
 
-- Live web app uses Next.js App Router in `apps/web`
-- Archived Vite reference app remains in `apps/web-vite-reference`
+- Uploads are encrypted client-side with Web Crypto.
+- Wrapped file-key metadata is stored in `document_files.encrypted_file_key`.
+- The wrapping key is local to the browser IndexedDB store.
+- Cross-device recovery is still deferred.
+
+## Scan And OCR
+
+- Browser file/camera capture is active.
+- Image quality analysis runs before image saves and records quality metadata.
+- Scanbot remains the selected guided-capture provider once licensed.
+- ABBYY remains the selected OCR provider once connector credentials and processing are implemented.
 
 ## Deployment Targets
 
-- Intended web deployment target is Vercel or equivalent static/frontend hosting
-- Intended backend target is a single Supabase project for now
+- Web deploys from `apps`.
+- Root Amplify config exists in `amplify.yml`.
+- Next.js now builds without Google Fonts network fetches.
 
 ## Missing or Deferred Integrations
 
-- No live Supabase project is linked in repo
-- No Stripe implementation yet
-- Scanbot SDK is the selected guided-capture layer; the live app currently falls back to browser capture until a Scanbot license is configured
-- ABBYY FineReader is the selected OCR layer; the live app records OCR readiness and quality metadata, while extraction stays gated on deploy-time ABBYY connector setup
-- No analytics, error monitoring, or email provider integration yet
-- No automated Supabase CLI workflow is committed yet
+- No committed live Supabase project link or Docker-backed local test environment is guaranteed.
+- No full OCR extraction pipeline yet.
+- No multi-device key recovery yet.
+- No analytics, monitoring, rate limiting, or CAPTCHA/Turnstile integration yet.

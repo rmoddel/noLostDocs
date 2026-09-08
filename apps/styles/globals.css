@@ -23,8 +23,8 @@
   --nld-radius-sm: 14px;
   --nld-max-width: 1180px;
   --nld-measure: 68ch;
-  --font-ui: var(--font-sora), "Segoe UI", system-ui, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-ui: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
 }
 
 * {
@@ -2175,6 +2175,7 @@ li {
   }
 
   .brand-image {
+    width: auto;
     height: 34px;
   }
 
@@ -2782,9 +2783,14 @@ li {
 }
 
 .dashboard-section-link {
+  background: none;
+  border: 0;
   color: #e68270;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 760;
+  padding: 0;
+  text-decoration: none;
 }
 
 .dashboard-chip-row {
@@ -3209,7 +3215,7 @@ li {
 
 .dashboard-detail-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 12px;
   margin: 16px 0;
 }

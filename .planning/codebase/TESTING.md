@@ -2,30 +2,32 @@
 
 ## Current Verification
 
-- Root workspace typecheck via `npm run typecheck`
-- Web production build via `npm run build:web`
-- Mobile TypeScript compile has also been run successfully in prior work
-- Accessibility review guidance now lives in `.planning/research/ACCESSIBILITY-EVALUATION.md`
+- Root workspace typecheck: `npm run typecheck`
+- Web production build: `npm run build:web`
+- Dependency audit: `npm audit --omit=dev`
+- Edge Function typecheck: `deno check supabase/functions/...`
+- Supabase pgTAP tests: `supabase test db --local`
 
-## What Exists Today
+## Current Status
 
-- Type-level verification only
-- Build verification for the web app
-- No unit tests
-- No integration tests
-- No end-to-end browser tests
-- No SQL policy test harness
-- No edge function tests
+- Web TypeScript checks pass.
+- Next.js production build passes on Next 16.
+- npm audit reports zero vulnerabilities after the Next upgrade.
+- Edge Functions typecheck under Deno with pinned Supabase npm imports.
+- `supabase/tests/security_overhaul_rls_test.sql` covers the new RLS/grant/encryption-policy assumptions.
+- pgTAP tests could not be executed in the current environment because Docker Desktop is not running, so local Supabase Postgres is unavailable on `127.0.0.1:54322`.
 
-## Practical Impact
+## Remaining Gaps
 
-- UI regressions will be caught late
-- Supabase RLS and storage policy correctness is currently unverified in automation
-- Placeholder edge functions may look complete in structure while still doing no real work
+- No React unit/component tests yet.
+- No Playwright end-to-end tests yet.
+- No Edge Function behavior tests with a seeded local Supabase project yet.
+- No browser crypto recovery tests across multiple devices.
+- No Stripe webhook fixture tests.
 
 ## Recommended Near-Term Additions
 
-- Add lightweight React component or smoke tests for the web shell
-- Add Supabase policy verification scripts once a project is connected
-- Add function-level tests for device lock and signed download behavior
-- Add a repeatable accessibility review pass for key routes, using the guidance in `.planning/research/ACCESSIBILITY-EVALUATION.md`
+- Start Docker Desktop and run `supabase start`, then `supabase test db --local`.
+- Add Playwright smoke tests for `/`, `/login`, `/dashboard`, scan upload, and signed download denial states.
+- Add function-level tests for locked-device denial, stale-session denial, webhook signature rejection, and valid subscription sync.
+- Add a manual encrypted upload/download validation script using a real Supabase project.

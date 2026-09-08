@@ -1,4 +1,6 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { recordAuditEvent } from "../_shared/audit.ts";
+import { requireTrustedDevice } from "../_shared/device.ts";
 import { documentLimitForPlan, fetchAccountPlan } from "../_shared/plans.ts";
 import { requireUser } from "../_shared/supabase.ts";
 
@@ -27,6 +29,8 @@ Deno.serve(async (request) => {
 
   try {
     const { admin, user } = await requireUser(request);
+    const payload = await request.json().catch(() => ({}));
+    const device = await requireTrustedDevice(admin, user.id, request, payload, "create-signed-upload");
     const plan = await fetchAccountPlan(admin, user.id);
     const documentLimit = documentLimitForPlan(plan);
     const { count, error: countError } = await admin
@@ -55,7 +59,6 @@ Deno.serve(async (request) => {
       );
     }
 
-    const payload = await request.json().catch(() => ({}));
     const documentTitle =
       typeof payload?.documentTitle === "string" && payload.documentTitle.trim()
         ? payload.documentTitle.trim()
@@ -75,6 +78,20 @@ Deno.serve(async (request) => {
     if (error) {
       throw error;
     }
+
+    await recordAuditEvent(admin, {
+      action: "document_file.upload_authorized",
+      deviceId: device.id,
+      metadata: {
+        content_type: mimeType,
+        document_title: documentTitle,
+        original_file_name: fileName,
+        storage_bucket: "user-documents"
+      },
+      request,
+      resourceType: "document_file",
+      userId: user.id
+    });
 
     return Response.json(
       {

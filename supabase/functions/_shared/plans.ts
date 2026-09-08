@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.108.2";
 
 export type AccountPlan = "free" | "premium";
 
@@ -16,17 +16,13 @@ type SubscriptionRow = {
   status: string | null;
 };
 
-export function resolveAccountPlan(profile: ProfileRow | null, subscriptions: SubscriptionRow[] = []): AccountPlan {
+export function resolveAccountPlan(_profile: ProfileRow | null, subscriptions: SubscriptionRow[] = []): AccountPlan {
   const hasActivePremiumSubscription = subscriptions.some(
     (subscription) =>
       subscription.plan === "premium" && subscription.status && ACTIVE_SUBSCRIPTION_STATUSES.has(subscription.status)
   );
 
   if (hasActivePremiumSubscription) {
-    return "premium";
-  }
-
-  if (profile?.plan === "premium" || profile?.cloud_enabled) {
     return "premium";
   }
 

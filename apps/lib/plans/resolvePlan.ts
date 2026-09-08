@@ -12,12 +12,12 @@ type SubscriptionRow = {
   status: string | null;
 };
 
-export function resolveAccountPlan(profile: ProfileRow | null, subscriptions: SubscriptionRow[] = []): AccountPlan {
+export function resolveAccountPlan(_profile: ProfileRow | null, subscriptions: SubscriptionRow[] = []): AccountPlan {
   const activePremium = subscriptions.some(
     (subscription) => subscription.plan === "premium" && ["active", "trialing"].includes(subscription.status ?? "")
   );
 
-  if (activePremium || profile?.plan === "premium" || profile?.cloud_enabled) {
+  if (activePremium) {
     return "premium";
   }
 

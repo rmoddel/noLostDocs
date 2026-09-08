@@ -1,4 +1,5 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { requireRecentAuth } from "../_shared/session.ts";
 import { requireUser } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
@@ -7,7 +8,8 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const { admin, user } = await requireUser(request);
+    const { admin, token, user } = await requireUser(request);
+    requireRecentAuth(token, "unlock-device", 10 * 60);
     const body = await request.json();
     const deviceId = String(body.deviceId ?? "");
 
