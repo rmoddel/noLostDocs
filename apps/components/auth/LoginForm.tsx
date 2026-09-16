@@ -29,7 +29,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [consent, setConsent] = useState(true);
+  const [consent, setConsent] = useState(false);
   const [message, setMessage] = useState<string | null>(initialMessage);
   const [loading, setLoading] = useState(false);
 
@@ -137,7 +137,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
   }
 
   return (
-    <main className="login-shell">
+    <div className="login-shell">
       <section className="login-card">
         <div className="login-copy">
           <p className="login-eyebrow">{mode === "create" ? "Create account" : "Sign in"}</p>
@@ -168,7 +168,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
                 <input
                   autoComplete="name"
                   onChange={(event) => setFullName(event.target.value)}
-                  placeholder="Reuben Modell"
+                  placeholder="Your full name"
                   type="text"
                   value={fullName}
                 />
@@ -201,7 +201,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
                 <span>I agree to create a private NoLostDocs account.</span>
               </label>
 
-              <button className="login-primary-button" disabled={loading} type="submit">
+              <button className="login-primary-button" disabled={!configured || loading} type="submit">
                 {loading ? "Creating..." : "Create account"}
               </button>
             </form>
@@ -240,7 +240,7 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
                   value={password}
                 />
               </label>
-              <button className="login-primary-button" disabled={loading} type="submit">
+              <button className="login-primary-button" disabled={!configured || loading} type="submit">
                 {loading ? "Signing in..." : "Sign in"}
               </button>
             </form>
@@ -266,6 +266,6 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
           )}
         </p>
       </section>
-    </main>
+    </div>
   );
 }

@@ -66,6 +66,7 @@ export default function PrivacyPage() {
           evolve as the service matures, but the operating direction is to keep access narrow and deliberate.
         </p>
         <p className="section-copy">
+          File contents are encrypted using a key stored in the uploading browser. Cross-device recovery is not yet available. Keep originals and do not clear browser data you depend on to open encrypted files.
           Avoid uploading information you are not comfortable storing digitally unless the product experience, terms,
           and your own requirements support that use case.
         </p>

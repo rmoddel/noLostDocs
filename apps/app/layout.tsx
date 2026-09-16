@@ -57,9 +57,10 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en">
       <body>
         <AppProviders>
+          <a className="skip-link" href="#main-content">Skip to content</a>
           <div className="site-shell">
             <SiteHeader />
-            <main className="site-main">{children}</main>
+            <main className="site-main" id="main-content" tabIndex={-1}>{children}</main>
             <SiteFooter />
           </div>
         </AppProviders>

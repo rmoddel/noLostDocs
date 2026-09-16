@@ -7,16 +7,14 @@ export type ScanProviderStatus = {
   ocrReady: boolean;
 };
 
+// Credentials alone do not implement a provider integration.
 export function getScanProviderStatus(): ScanProviderStatus {
-  const captureReady = Boolean(process.env.NEXT_PUBLIC_SCANBOT_LICENSE_KEY?.trim());
-  const ocrReady = Boolean(process.env.ABBYY_OCR_ENGINE_URL?.trim() && process.env.ABBYY_OCR_LICENSE_KEY?.trim());
-
   return {
-    captureLabel: captureReady ? "Guided capture enabled" : "Browser capture fallback",
-    captureProvider: captureReady ? "scanbot-sdk" : "browser-file-input",
-    captureReady,
-    ocrLabel: ocrReady ? "OCR extraction enabled" : "OCR connector pending",
+    captureLabel: "Camera or file upload",
+    captureProvider: "browser-file-input",
+    captureReady: false,
+    ocrLabel: "Text extraction coming later",
     ocrProvider: "abbyy-finereader",
-    ocrReady
+    ocrReady: false
   };
 }

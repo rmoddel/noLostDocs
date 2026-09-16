@@ -7,9 +7,9 @@ export function LostPhoneSection() {
       <div className="split-section">
         <div>
           <SectionHeader
-            description="Cloud-backed records can be recovered through the web experience. Device recovery controls keep access scoped in the account."
+            description="Account access and file recovery are different. Encrypted files currently require the browser that saved them."
             eyebrow="Lost a device?"
-            title="Pause access quickly, then recover through the account when ready."
+            title="Protect account access. Keep independent backups."
           />
         </div>
         <Card className="recovery-card">
@@ -31,7 +31,7 @@ export function LostPhoneSection() {
             <span className="step-index">03</span>
             <div>
               <strong>Continue in the web app</strong>
-              <p>Return through signed-in access when records are needed before the device is back in hand.</p>
+              <p>Signing in on another device does not restore the original browser’s encryption key. Keep your originals and backups.</p>
             </div>
           </div>
         </Card>

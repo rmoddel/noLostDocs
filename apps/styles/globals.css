@@ -4969,3 +4969,23 @@ button.dashboard-bottom-nav-item {
     gap: 10px;
   }
 }
+
+/* Accessible scanner dialogs and global keyboard navigation. */
+dialog.dashboard-scan-overlay, dialog.scan-modal {
+  margin: 0; border: 0; width: 100%; height: 100dvh;
+  max-width: none; max-height: none; overflow: auto;
+}
+dialog:not([open]) { display: none; }
+dialog::backdrop { background: rgba(12, 12, 11, .58); }
+.scan-fields { margin: 0; padding: 0; min-width: 0; border: 0; }
+.scan-recovery-notice { font-size: .85rem; line-height: 1.5; padding: 12px; border: 1px solid #bb9b49; border-radius: 6px; background: #fff8e5; color: #493707; }
+:where(button, a, input, select, textarea):focus-visible { outline: 3px solid #147d82; outline-offset: 3px; }
+.skip-link { position: fixed; top: 8px; left: 8px; transform: translateY(-200%); z-index: 999; padding: 12px 18px; background: white; color: #151515; }
+.skip-link:focus { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
+@media (max-width: 640px) {
+  .scan-modal-shell { min-height: 100dvh; padding: 12px; }
+  .dashboard-scan-dialog { max-height: calc(100dvh - 24px); }
+}

@@ -33,6 +33,7 @@ This directory is the code-authoritative home for NoLostDocs backend infrastruct
 - Supabase service role key for local CLI/deploy workflows only, stored as `SERVICE_ROLE_KEY` for Edge Functions
 - Database password / access for migration execution
 - Stripe webhook signing secret stored as `STRIPE_WEBHOOK_SECRET`
+- ABBYY OCR endpoint and license key for server-side OCR extraction, stored as `ABBYY_OCR_ENGINE_URL` and `ABBYY_OCR_LICENSE_KEY`
 - Stripe and other provider secrets as needed
 
 ## Edge Function Env
@@ -40,6 +41,7 @@ This directory is the code-authoritative home for NoLostDocs backend infrastruct
 - Use `SUPABASE_URL` in local `--env-file` values for `supabase functions serve`
 - Use `SERVICE_ROLE_KEY` for the service-role secret in both local env files and `supabase secrets set`
 - Use `STRIPE_WEBHOOK_SECRET` for verified subscription webhook handling
+- Use `ABBYY_OCR_ENGINE_URL` and `ABBYY_OCR_LICENSE_KEY` only in trusted server/Edge Function environments
 - Do not try to store `SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` with `supabase secrets set`; the CLI rejects names that start with `SUPABASE_`
 
 ## Protected Storage Flow

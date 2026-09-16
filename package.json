@@ -4,7 +4,8 @@
   "private": true,
   "overrides": {
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "postcss": "8.5.28"
   },
   "workspaces": [
     "apps",
@@ -17,6 +18,7 @@
     "build:web": "npm run build -w @nolostdocs/web",
     "build:web-next": "npm run build -w @nolostdocs/web",
     "lint": "npm run lint -ws --if-present",
-    "typecheck": "npm run typecheck -ws --if-present"
+    "typecheck": "npm run typecheck -ws --if-present",
+    "test:security-scan": "node --experimental-strip-types --test tests/security-and-scan.mjs"
   }
 }

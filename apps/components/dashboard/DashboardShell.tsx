@@ -115,7 +115,11 @@ function buildActivityItems(documents: DashboardDocumentRecord[]) {
   const needsReview = documents.find((document) => statusTone(document.status) === "review");
   const expiring =
     documents.find((document) => statusTone(document.status) === "warning") ??
-    documents.find((document) => Boolean(document.expiration_date));
+    documents.find((document) => {
+      if (!document.expiration_date) return false;
+      const days = (new Date(document.expiration_date).getTime() - Date.now()) / 86_400_000;
+      return days >= 0 && days <= 30;
+    });
 
   return [
     latest
@@ -126,8 +130,8 @@ function buildActivityItems(documents: DashboardDocumentRecord[]) {
         }
       : {
           icon: "✓",
-          title: "Document stored",
-          meta: "Saved under the active owner profile"
+          title: "No documents yet",
+          meta: "Scan or upload your first document"
         },
     needsReview
       ? {
@@ -148,8 +152,8 @@ function buildActivityItems(documents: DashboardDocumentRecord[]) {
         }
       : {
           icon: "↗",
-          title: "Protected documents ready",
-          meta: "Use scan, upload, or signed downloads when needed"
+          title: "No upcoming expirations",
+          meta: "No document expiration is due in the next 30 days"
         }
   ];
 }
@@ -566,6 +570,7 @@ export function DashboardShell({ initialData, initialAccount, initialDocumentMes
   useEffect(() => {
     let active = true;
     let revokePreviewUrl: (() => void) | null = null;
+    setPreviewUrl(null);
     const documentFileId = selectedDocument?.document_file_id;
 
     if (!configured || !session || !documentFileId || !selectedDocument?.content_type?.startsWith("image/")) {

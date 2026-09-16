@@ -97,6 +97,7 @@ export function ScanCapture({
         <span>Title</span>
         <input
           onChange={(event) => onTitleChange(event.target.value)}
+          maxLength={200}
           placeholder="Enter a document title"
           type="text"
           value={title}
@@ -107,14 +108,13 @@ export function ScanCapture({
       <label className="scan-dropzone" htmlFor={fileInputId}>
         <input
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
-          capture="environment"
           id={fileInputId}
-          onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+          onChange={(event) => { onFileChange(event.target.files?.[0] ?? null); event.target.value = ""; }}
           type="file"
         />
-        <strong>{fileName ?? "Take a photo or choose a file"}</strong>
+        <strong>{fileName ?? "Choose a document"}</strong>
         <span>Keep the document flat and fully inside the frame.</span>
-        <span>Fallback: browser file upload</span>
+        <span>JPG, PNG, WebP, HEIC or PDF · up to 10 MB</span>
       </label>
     </>
   );

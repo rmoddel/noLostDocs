@@ -45,6 +45,13 @@ Deno.serve(async (request) => {
       return jsonError("Name, email, subject, and message are required.");
     }
 
+    if (name.length > 200 || email.length > 254 || subject.length > 200 || message.length > 5000 || sourceRoute.length > 500) {
+      return jsonError("Use a subject under 200 characters and a message under 5,000 characters.");
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return jsonError("Enter a valid email address.");
+    }
+
     const { data, error } = await admin
       .from("contact_requests")
       .insert({

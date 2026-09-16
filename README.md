@@ -9,6 +9,12 @@ NoLostDocs is a secure document vault for keeping important records organized, r
 - A paid upgrade path for broader document coverage
 - A product that stays honest about legal acceptance and original documents
 
+## Production readiness
+
+Start with [getlive.md](getlive.md) for the step-by-step deployment guide, dashboard settings, commands, and launch checks.
+
+See [the production launch review](docs/PRODUCTION-LAUNCH.md) for current blockers, completed hardening, exact manual configuration, and validation limits. Cross-device file recovery is not implemented; do not rely on this as the only copy of sensitive records.
+
 ## Launch And Revenue
 
 To get this live:
@@ -73,7 +79,7 @@ Required frontend environment variables for the web app:
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_SCANBOT_LICENSE_KEY` when enabling guided Scanbot capture
+- `NEXT_PUBLIC_SCANBOT_LICENSE_KEY` only when enabling licensed guided Scanbot capture
 
 Server-side secrets such as the service-role key, payment secret key, and ABBYY OCR connector values should stay in trusted backend/operator workflows, not browser-exposed frontend env vars.
 
@@ -82,6 +88,7 @@ Required Edge Function secrets:
 - `SUPABASE_URL`
 - `SERVICE_ROLE_KEY`
 - `STRIPE_WEBHOOK_SECRET`
+- `ABBYY_OCR_ENGINE_URL` and `ABBYY_OCR_LICENSE_KEY` when enabling OCR extraction
 
 ## Current App Direction
 
@@ -109,9 +116,9 @@ Required Edge Function secrets:
 
 - The live web app is deployed from `apps`
 - Archived legacy app variants were moved out of the active app path
-- The selected Phase 7 stack is `Scanbot SDK` for guided capture and `ABBYY FineReader` for accuracy-oriented OCR
+- The selected Phase 7 stack is `Scanbot SDK` for licensed guided capture and `ABBYY FineReader` for accuracy-oriented OCR
 - Active internal workspace packages now use the `@nolostdocs/*` scope
-- The web app builds on Next.js 16 without a build-time Google Fonts dependency
+- The web app is pinned to Next.js 15 for managed Amplify SSR compatibility and builds without a build-time Google Fonts dependency
 
 ## Verification
 

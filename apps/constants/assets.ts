@@ -22,7 +22,7 @@ export const assetPaths = {
     twitter: "/twitter-card.png"
   },
   seo: {
-    manifest: "/manifest.webmanifest",
+    manifest: "/site.webmanifest",
     browserConfig: "/browserconfig.xml",
     humans: "/humans.txt",
     security: "/.well-known/security.txt"

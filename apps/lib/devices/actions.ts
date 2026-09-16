@@ -1,4 +1,3 @@
-import { prototypeSnapshot } from "@nolostdocs/config";
 import type { DeviceRecord } from "@nolostdocs/types";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
@@ -41,7 +40,7 @@ export function getBrowserFingerprint() {
 
 export async function loadDevices(client: SupabaseClient, configured: boolean, session: Session | null) {
   if (!configured || !session) {
-    return { devices: prototypeSnapshot.devices, message: null };
+    return { devices: [], message: "Sign in to view registered browsers." };
   }
 
   const { data, error } = await client
@@ -50,7 +49,7 @@ export async function loadDevices(client: SupabaseClient, configured: boolean, s
     .order("last_seen_at", { ascending: false });
 
   if (error) {
-    return { devices: prototypeSnapshot.devices, message: error.message };
+    return { devices: [], message: "Unable to load registered browsers. Please try again." };
   }
 
   return {
@@ -61,7 +60,7 @@ export async function loadDevices(client: SupabaseClient, configured: boolean, s
 
 export async function registerBrowser(client: SupabaseClient, configured: boolean, session: Session | null) {
   if (!configured || !session) {
-    return { message: "Device setup isn't connected yet." };
+    return { ok: false, message: "Device setup isn't connected yet." };
   }
 
   const { error } = await client.functions.invoke("register-device", {
@@ -73,10 +72,10 @@ export async function registerBrowser(client: SupabaseClient, configured: boolea
   });
 
   if (error) {
-    return { message: error.message };
+    return { ok: false, message: error.message };
   }
 
-  return { message: "Browser registered or refreshed." };
+  return { ok: true, message: "Browser registered or refreshed." };
 }
 
 export async function setDeviceLocked(
@@ -88,7 +87,7 @@ export async function setDeviceLocked(
 ) {
   if (!configured || !session) {
     return {
-      message: shouldLock ? "Demo device locked." : "Demo device unlocked."
+      message: "Sign in to manage registered browsers."
     };
   }
 

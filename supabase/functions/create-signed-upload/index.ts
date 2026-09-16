@@ -4,24 +4,6 @@ import { requireTrustedDevice } from "../_shared/device.ts";
 import { documentLimitForPlan, fetchAccountPlan } from "../_shared/plans.ts";
 import { requireUser } from "../_shared/supabase.ts";
 
-function getFileExtension(fileName: string, mimeType: string) {
-  const match = fileName.match(/\.([a-z0-9]+)$/i);
-
-  if (match?.[1]) {
-    return match[1].toLowerCase();
-  }
-
-  if (mimeType.includes("jpeg")) return "jpg";
-  if (mimeType.includes("png")) return "png";
-  if (mimeType.includes("webp")) return "webp";
-  if (mimeType.includes("heic")) return "heic";
-  return "jpg";
-}
-
-function slugify(value: string) {
-  return value.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase() || "scan";
-}
-
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -68,10 +50,11 @@ Deno.serve(async (request) => {
     const mimeType =
       typeof payload?.mimeType === "string" && payload.mimeType.trim() ? payload.mimeType.trim() : "image/jpeg";
 
-    const path = `${user.id}/${Date.now()}-${crypto.randomUUID()}-${slugify(documentTitle)}.${getFileExtension(
-      fileName,
-      mimeType
-    )}`;
+    if (mimeType !== "application/octet-stream" || !fileName.endsWith(".nld.enc")) {
+      return Response.json({ ok: false, message: "Only encrypted document uploads are supported." }, { status: 400, headers: corsHeaders });
+    }
+    // Avoid sensitive document titles in URLs, access logs, and object names.
+    const path = `${user.id}/${crypto.randomUUID()}.nld.enc`;
 
     const { data, error } = await admin.storage.from("user-documents").createSignedUploadUrl(path);
 
@@ -84,8 +67,6 @@ Deno.serve(async (request) => {
       deviceId: device.id,
       metadata: {
         content_type: mimeType,
-        document_title: documentTitle,
-        original_file_name: fileName,
         storage_bucket: "user-documents"
       },
       request,

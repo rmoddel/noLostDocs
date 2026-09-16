@@ -21,11 +21,9 @@ export const documentAccessTone: Record<DocumentAccessState, string> = {
 };
 
 export function getDocumentAccessState(template: DocumentTemplate): DocumentAccessState {
-  if (template.status === "active" || template.status === "uploaded") return "available";
-  if (template.status === "needs_review" || template.status === "expiring-soon") return "reauth-required";
-  if (template.status === "archived") return "restricted";
-  if (template.status === "expired") return "session-expired";
-  return "restricted";
+  // A document's expiry/review state is not the user's authentication state.
+  // The backend checks the session, ownership, and device for every file request.
+  return template.status === "missing" ? "restricted" : "available";
 }
 
 export function getDocumentCompleteness(template: DocumentTemplate) {

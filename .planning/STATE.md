@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: rearchitecture
 status: active
-stopped_at: Security hardening implemented; Supabase local tests blocked on Docker
-last_updated: "2026-09-08T03:30:00.000Z"
-last_activity: 2026-09-08 -- Implemented security overhaul priority list and app-first homepage
+stopped_at: Production readiness hardening implemented; database and browser validation pending
+last_updated: "2026-09-16T03:40:00.000Z"
+last_activity: 2026-09-15 -- Added step-by-step getlive.md deployment guide
 progress:
   total_phases: 8
   completed_phases: 8
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-18)
 Phase: 08 complete
 Plan: 8 of 8
 Status: Rearchitecture complete; security hardening implemented with local Supabase validation pending
-Last activity: 2026-09-08 -- Implemented security overhaul priority list and app-first homepage
+Last activity: 2026-09-15 -- Added step-by-step getlive.md deployment guide
 
 Progress: [██████████] 100%
 
@@ -85,6 +85,14 @@ Recent decisions affecting current work:
 - Local pgTAP validation could not run because Docker Desktop is not running.
 - Encrypted uploads use a local browser wrapping key; cross-device recovery remains deferred.
 
+### Production Launch Review
+
+- Step-by-step operator guide: `getlive.md`.
+- Current operational checklist: `docs/PRODUCTION-LAUNCH.md`.
+- Next 15 middleware, scan original preservation/explicit enhancement, native dialogs, recent-auth checks, device trust preservation, opaque storage names, security headers, and dependency patch implemented.
+- Cross-device key recovery, paid checkout/reconciliation, abuse/storage lifecycle controls, and staging validation remain launch blockers.
+- No production mutations or deployment performed.
+
 ### Quick Tasks Completed
 
 | # | Description | Date | Commit | Directory |
@@ -92,6 +100,8 @@ Recent decisions affecting current work:
 | 260707-egp | Implement overlay-first scan modal launched from dashboard with /scan redirect fallback | 2026-07-07 | uncommitted | [260707-egp-implement-overlay-first-scan-modal-launc](./quick/260707-egp-implement-overlay-first-scan-modal-launc/) |
 | 260709-kwp | Fix documents category foreign key to document_categories | 2026-07-09 | uncommitted | [260709-kwp-fix-documents-category-foreign-key-to-do](./quick/260709-kwp-fix-documents-category-foreign-key-to-do/) |
 | 260908-security | Implement security overhaul priority list and app-first homepage | 2026-09-08 | uncommitted | [260908-security-overhaul-priority-list](./quick/260908-security-overhaul-priority-list/) |
+| 260915-wct | Production readiness, scan UX, and security hardening | 2026-09-15 | uncommitted | [260915-wct-production-readiness-scan-ux-and-securit](./quick/260915-wct-production-readiness-scan-ux-and-securit/) |
+| 260915-x6a | Write step-by-step getlive launch guide | 2026-09-15 | uncommitted | [260915-x6a-write-clear-getlive-production-launch-gu](./quick/260915-x6a-write-clear-getlive-production-launch-gu/) |
 
 ## Deferred Items
 

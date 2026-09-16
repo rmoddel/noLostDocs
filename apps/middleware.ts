@@ -1,8 +1,10 @@
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
-export async function proxy(request: NextRequest) {
-  return updateSession(request);
+export async function middleware(request: NextRequest) {
+  const response = await updateSession(request);
+  response.headers.set("Cache-Control", "private, no-store, max-age=0");
+  return response;
 }
 
 export const config = {

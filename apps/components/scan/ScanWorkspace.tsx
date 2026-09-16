@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { saveScan, validateScanFile } from "@/lib/documents/upload";
 import type {
@@ -9,8 +9,10 @@ import type {
   DashboardProfileRecord
 } from "@/lib/documents/dashboard";
 import type { ScanProviderStatus } from "@/lib/scan/providerStatus";
-import { analyzeScanQuality, type ScanQualityReport } from "@/lib/scan/quality";
+import { analyzeScanQuality, canInspectScanQuality, type ScanQualityReport } from "@/lib/scan/quality";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { Modal } from "../ui/Modal";
+import { canProcessScanImage, prepareScanImageForUpload } from "@/lib/scan/imageProcessing";
 import { Button } from "../ui/Button";
 import { ScanActions } from "./ScanActions";
 import { ScanCapture } from "./ScanCapture";
@@ -61,6 +63,9 @@ export function ScanWorkspace({
   const [scanTitle, setScanTitle] = useState("");
   const [qualityReport, setQualityReport] = useState<ScanQualityReport | null>(null);
   const [qualityMessage, setQualityMessage] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const saveLock = useRef(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -96,6 +101,7 @@ export function ScanWorkspace({
     setSelectedDocumentTypeId(defaultType?.id ?? "");
     setScanTitle(getFallbackTitle(defaultType));
     setFile(null);
+    setOriginalFile(null);
     setPreviewUrl(null);
     setRotation(0);
     setQualityMessage(null);
@@ -151,7 +157,14 @@ export function ScanWorkspace({
       return;
     }
 
+    if (!canInspectScanQuality(file)) {
+      setQualityMessage("Image selected. This browser cannot inspect that format before upload.");
+      setQualityReport(null);
+      return;
+    }
+
     let active = true;
+    setQualityReport(null);
     setQualityMessage("Checking image quality...");
 
     analyzeScanQuality(file, rotation)
@@ -177,23 +190,13 @@ export function ScanWorkspace({
     };
   }, [file, rotation]);
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && !saving) {
-        onClose();
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, open, saving]);
-
   function handleFileChange(nextFile: File | null) {
-    setMessage(nextFile ? validateScanFile(nextFile) : null);
+    if (saving || processing) return;
+    const error = nextFile ? validateScanFile(nextFile) : null;
+    setMessage(error);
+    if (error) return;
+    setQualityReport(null);
+    setOriginalFile(null);
     setRotation(0);
     setFile(nextFile);
   }
@@ -246,19 +249,20 @@ export function ScanWorkspace({
       return;
     }
 
-    if (file.type.startsWith("image/")) {
-      const report = qualityReport ?? (await analyzeScanQuality(file, rotation));
-      if (!report.canSave) {
-        setQualityReport(report);
-        setMessage(`${report.headline} ${report.ocrSummary}`);
-        return;
-      }
-    }
-
+    if (saveLock.current || processing) return;
+    saveLock.current = true;
     setSaving(true);
-    setMessage(null);
+    setMessage("Encrypting and saving your document…");
 
     try {
+      if (canInspectScanQuality(file)) {
+        const report = await analyzeScanQuality(file, rotation);
+        setQualityReport(report);
+        if (!report.canSave) {
+          setMessage(`${report.headline} ${report.ocrSummary}`);
+          return;
+        }
+      }
       await saveScan({
         categoryId: selectedCategoryId,
         client,
@@ -286,16 +290,43 @@ export function ScanWorkspace({
       setMessage("Document saved to records.");
       setFile(null);
       setRotation(0);
-      await onSaved?.();
+      try {
+        await onSaved?.();
+      } catch {
+        setMessage("Document saved. Close this dialog and refresh your records to see it.");
+        return;
+      }
       onClose();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Document save failed.");
     } finally {
+      saveLock.current = false;
       setSaving(false);
     }
   }
 
+  async function handleEnhance() {
+    if (!file || saving || processing) return;
+    setProcessing(true);
+    setMessage("Preparing a preview on this device…");
+    try {
+      const result = await prepareScanImageForUpload(file, rotation, true);
+      const error = validateScanFile(result.file);
+      if (error) throw new Error(error);
+      setOriginalFile(file);
+      setFile(result.file);
+      setRotation(0);
+      setQualityReport(null);
+      setMessage("Review all edges and text before saving. Restore the original if anything is missing.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Image enhancement failed. Your original is unchanged.");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
   function handleClear() {
+    setOriginalFile(null);
     setMessage(null);
     setFile(null);
     setQualityMessage(null);
@@ -308,21 +339,21 @@ export function ScanWorkspace({
   }
 
   return (
-    <div className="dashboard-scan-overlay" role="dialog" aria-modal="true" aria-labelledby="dashboard-scan-title">
+    <Modal className="dashboard-scan-overlay" labelledBy="dashboard-scan-title" onClose={onClose} busy={saving || processing}>
       <div className="dashboard-scan-dialog">
         <div className="dashboard-scan-dialog-header">
           <div>
             <p className="dashboard-section-kicker">Add document</p>
             <h2 id="dashboard-scan-title">Scan or upload</h2>
           </div>
-          <button aria-label="Close scan dialog" className="dashboard-scan-close" disabled={saving} onClick={onClose} type="button">
+          <button aria-label="Close scan dialog" className="dashboard-scan-close" disabled={saving || processing} onClick={onClose} type="button">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
             </svg>
           </button>
         </div>
 
-        <div className="dashboard-scan-dialog-body">
+        <fieldset className="dashboard-scan-dialog-body scan-fields" disabled={saving || processing}>
           <div className="dashboard-scan-meta-panel">
             <div>
               <p className="dashboard-section-kicker">Classify</p>
@@ -355,7 +386,7 @@ export function ScanWorkspace({
               <span className="dashboard-scan-pill">{selectedCategory?.name ?? "Category"}</span>
             </div>
 
-            <ScanDocsLauncher helperText="Use camera capture, or choose a file below." onScanReady={handleFileChange} />
+            <ScanDocsLauncher key={file?.name ?? "empty"} helperText="Keep all edges visible and avoid glare." onScanReady={handleFileChange} />
 
             <div className="scan-status-strip">
               <span className="dashboard-scan-pill">{providerStatus.captureLabel}</span>
@@ -363,34 +394,62 @@ export function ScanWorkspace({
             </div>
 
             <ScanPreview
-              disabled={saving}
+              disabled={saving || processing}
               fileName={file?.name ?? null}
               fileType={file?.type ?? null}
               onRetake={handleClear}
-              onRotate={() => setRotation((current) => current + 90)}
+              onRotate={() => { setQualityReport(null); setRotation((current) => (current + 90) % 360); }}
               previewUrl={previewUrl}
               rotation={rotation}
             />
+
+            {canProcessScanImage(file) ? <div className="button-row">
+              <Button disabled={saving || processing || Boolean(originalFile)} onClick={() => void handleEnhance()} size="sm" variant="secondary">
+                {processing ? "Preparing preview…" : "Auto-crop & enhance"}
+              </Button>
+              {originalFile ? <Button disabled={saving || processing} size="sm" variant="secondary" onClick={() => {
+                setFile(originalFile); setOriginalFile(null); setRotation(0); setQualityReport(null); setMessage("Original restored.");
+              }}>Restore original</Button> : null}
+            </div> : null}
+            <p className="field-note">Images stay unchanged unless you rotate or enhance them. Check every detail before saving.</p>
+            <p className="scan-recovery-notice">Keep your originals. Files are encrypted in cloud storage, but can currently be opened only in this browser. Clearing browser data or losing this device can make them unrecoverable.</p>
+
+            {qualityReport ? (
+              <ul className="scan-signal-list" aria-label="Scan quality signals">
+                {qualityReport.signals.map((signal) => (
+                  <li className={`scan-signal scan-signal-${signal.tone}`} key={signal.id}>
+                    <strong>{signal.label}</strong>
+                    <span>{signal.detail}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            {file?.type.startsWith("image/") && !canInspectScanQuality(file) ? (
+              <p className="scan-ocr-note quality-waiting">
+                Save is available, but scan quality preview needs JPG, PNG, or WebP in this browser.
+              </p>
+            ) : null}
           </div>
-        </div>
+        </fieldset>
 
         <div className="dashboard-scan-dialog-footer">
           <p className="dashboard-scan-feedback" role="status">
             {message ?? qualityMessage ?? "Encrypted upload flow. Files are stored only after you choose Save Document."}
           </p>
           <div className="dashboard-scan-footer-actions">
-            <Button disabled={saving} onClick={onClose} variant="secondary">
+            <Button disabled={saving || processing} onClick={onClose} variant="secondary">
               Cancel
             </Button>
             <ScanActions
               actionLabel="Save Document"
-              canAct={Boolean(file) && hasRequiredMetadata && qualityReport?.tone !== "blocked"}
+              canAct={Boolean(file) && !processing && hasRequiredMetadata && qualityReport?.tone !== "blocked"}
               loading={saving}
               onAction={() => void handleSave()}
             />
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

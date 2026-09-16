@@ -1,5 +1,6 @@
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { getBrowserFingerprint, registerBrowser } from "@/lib/devices/actions";
+import { prepareScanImageForUpload } from "@/lib/scan/imageProcessing";
 import { encryptFileForLocalDevice } from "./encryption";
 
 const ALLOWED_SCAN_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"]);
@@ -14,6 +15,10 @@ export function validateScanFile(file: File | null) {
     return "Use a JPG, PNG, WebP, HEIC, or PDF file.";
   }
 
+  if (file.size === 0) {
+    return "This file is empty. Choose another document.";
+  }
+
   if (file.size > MAX_SCAN_FILE_BYTES) {
     return "Use a file smaller than 10 MB.";
   }
@@ -21,62 +26,8 @@ export function validateScanFile(file: File | null) {
   return null;
 }
 
-function isImageFile(file: File) {
-  return file.type.startsWith("image/");
-}
-
 export function buildDisplayFileName(baseName: string) {
   return baseName.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase() || "scan";
-}
-
-export async function rotateImageFile(file: File, rotation: number) {
-  if (!isImageFile(file)) {
-    return file;
-  }
-
-  const angle = ((rotation % 360) + 360) % 360;
-  const blobUrl = URL.createObjectURL(file);
-
-  try {
-    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error("Unable to load the selected image."));
-      img.src = blobUrl;
-    });
-
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-      throw new Error("Canvas is not available in this browser.");
-    }
-
-    const swapDimensions = angle === 90 || angle === 270;
-    canvas.width = swapDimensions ? image.height : image.width;
-    canvas.height = swapDimensions ? image.width : image.height;
-
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.rotate((angle * Math.PI) / 180);
-    context.drawImage(image, -image.width / 2, -image.height / 2);
-
-    const mimeType = file.type || "image/jpeg";
-
-    const rotatedBlob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error("Unable to process the scan image."));
-          return;
-        }
-
-        resolve(blob);
-      }, mimeType, 0.95);
-    });
-
-    return new File([rotatedBlob], file.name, { type: mimeType, lastModified: Date.now() });
-  } finally {
-    URL.revokeObjectURL(blobUrl);
-  }
 }
 
 type SaveScanArgs = {
@@ -91,20 +42,6 @@ type SaveScanArgs = {
   scanMetadata?: Record<string, unknown>;
   session: Session;
 };
-
-function getFileExtension(fileName: string, mimeType: string) {
-  const match = fileName.match(/\.([a-z0-9]+)$/i);
-  if (match?.[1]) {
-    return match[1].toLowerCase();
-  }
-
-  if (mimeType.includes("jpeg")) return "jpg";
-  if (mimeType.includes("png")) return "png";
-  if (mimeType.includes("webp")) return "webp";
-  if (mimeType.includes("heic")) return "heic";
-  if (mimeType.includes("pdf")) return "pdf";
-  return "jpg";
-}
 
 export async function saveScan({
   categoryId,
@@ -131,10 +68,14 @@ export async function saveScan({
     throw new Error("Choose an owner, category, and document type before saving.");
   }
 
-  await registerBrowser(client, configured, session);
+  const registration = await registerBrowser(client, configured, session);
+  if (!registration.ok) throw new Error(registration.message);
 
-  const rotatedFile = rotation && file.type.startsWith("image/") ? await rotateImageFile(file, rotation) : file;
-  const encryptedPayload = await encryptFileForLocalDevice(rotatedFile);
+  const preparedScan = await prepareScanImageForUpload(file, rotation);
+  const uploadFile = preparedScan.file;
+  const preparedError = validateScanFile(uploadFile);
+  if (preparedError) throw new Error(preparedError);
+  const encryptedPayload = await encryptFileForLocalDevice(uploadFile);
   const encryptedFile = encryptedPayload.file;
   const safeTitle = buildDisplayFileName(documentTitle);
   let documentId: string | null = null;
@@ -146,8 +87,8 @@ export async function saveScan({
       documentTitle,
       fileName: encryptedFile.name,
       mimeType: encryptedFile.type,
-      originalFileName: rotatedFile.name,
-      originalMimeType: rotatedFile.type,
+      originalFileName: uploadFile.name,
+      originalMimeType: uploadFile.type,
       safeTitle
     }
   });
@@ -192,6 +133,7 @@ export async function saveScan({
       metadata: {
         scan: {
           rotation,
+          processing: preparedScan.metadata,
           source: "dashboard-overlay",
           ...(scanMetadata ?? {})
         }
@@ -214,12 +156,12 @@ export async function saveScan({
     user_id: session.user.id,
     storage_bucket: "user-documents",
     storage_path: payload.path,
-    original_filename: rotatedFile.name,
-    content_type: rotatedFile.type || "image/jpeg",
+    original_filename: uploadFile.name,
+    content_type: uploadFile.type || "image/jpeg",
     file_role: "original",
     mime_type: encryptedFile.type,
     size_bytes: encryptedFile.size,
-    page_count: rotatedFile.type === "application/pdf" ? 1 : null,
+    page_count: null,
     encryption_version: encryptedPayload.encryptionVersion,
     encrypted_file_key: encryptedPayload.encryptionMetadata
   });
@@ -241,7 +183,7 @@ export async function saveScan({
         document_type_id: documentTypeId,
         encrypted: true,
         encryption_version: encryptedPayload.encryptionVersion,
-        original_file_name: rotatedFile.name,
+        original_file_name: uploadFile.name,
         owner_profile_id: ownerProfileId
       }
     }

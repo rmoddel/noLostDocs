@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { Modal } from "../ui/Modal";
+import { validateScanFile } from "@/lib/documents/upload";
 import { Button } from "../ui/Button";
 
 type ScanDocsLauncherProps = {
@@ -33,8 +35,28 @@ function buildStatusLabel(cameraState: CameraState, capturedFile: File | null) {
     return "Review document";
   }
 
+  if (cameraState === "starting") {
+    return "Starting camera";
+  }
+
   if (cameraState === "ready") {
     return "Ready to capture";
+  }
+
+  if (cameraState === "denied") {
+    return "Camera access blocked";
+  }
+
+  if (cameraState === "unavailable") {
+    return "Camera unavailable";
+  }
+
+  if (cameraState === "unsupported") {
+    return "Upload a document";
+  }
+
+  if (cameraState === "error") {
+    return "Camera could not start";
   }
 
   return "Position the document in the frame";
@@ -90,7 +112,7 @@ export function ScanDocsLauncher({
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraState("unsupported");
-        setErrorMessage("This browser does not support camera capture. Upload a document instead.");
+      setErrorMessage("This browser does not support camera capture. Upload a document instead.");
       return;
     }
 
@@ -104,7 +126,9 @@ export function ScanDocsLauncher({
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: false,
           video: {
-            facingMode: "environment"
+            facingMode: { ideal: "environment" },
+            height: { ideal: 1440 },
+            width: { ideal: 1920 }
           }
         });
 
@@ -122,9 +146,10 @@ export function ScanDocsLauncher({
 
         setCameraState("ready");
       } catch (error) {
+        if (!active) return;
         setCameraState(buildCameraErrorState(error));
         setErrorMessage(
-            error instanceof Error
+          error instanceof Error
             ? error.message
             : "Camera access could not be started. Upload a document instead."
         );
@@ -223,6 +248,8 @@ export function ScanDocsLauncher({
       return;
     }
 
+    const error = validateScanFile(file);
+    if (error) { setErrorMessage(error); return; }
     setCapturedFile(file);
     setErrorMessage(null);
     stopCamera();
@@ -259,7 +286,7 @@ export function ScanDocsLauncher({
               <path d="M9 9h6M9 12h6M9 15h3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.7" />
             </svg>
           </span>
-          <span>Add record</span>
+          <span>Open camera</span>
         </Button>
         {helperText ? <p className="scan-launcher-helper">{helperText}</p> : null}
         {acceptedFile ? (
@@ -273,7 +300,7 @@ export function ScanDocsLauncher({
       </div>
 
       {open ? (
-        <div className="scan-modal" role="dialog" aria-modal="true" aria-labelledby="scan-modal-title">
+        <Modal className="scan-modal" labelledBy="scan-modal-title" onClose={handleClose}>
           <div className="scan-modal-shell">
             <div className="scan-modal-topbar">
               <div>
@@ -331,7 +358,7 @@ export function ScanDocsLauncher({
                 </div>
               ) : null}
 
-              {errorMessage ? <p className="scan-modal-error">{errorMessage}</p> : null}
+              {errorMessage ? <p className="scan-modal-error" role="alert">{errorMessage}</p> : null}
             </div>
 
             <div className="scan-modal-actions">
@@ -347,6 +374,7 @@ export function ScanDocsLauncher({
 
               {!capturedFile ? (
                 <button
+                  aria-label="Capture document"
                   className="scan-capture-button"
                   disabled={cameraState !== "ready"}
                   onClick={() => void handleCapture()}
@@ -366,7 +394,7 @@ export function ScanDocsLauncher({
               )}
             </div>
           </div>
-        </div>
+        </Modal>
       ) : null}
     </>
   );

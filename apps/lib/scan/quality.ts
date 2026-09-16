@@ -24,6 +24,12 @@ type ImageMetrics = {
   width: number;
 };
 
+const INSPECTABLE_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+export function canInspectScanQuality(file: File | null) {
+  return Boolean(file && INSPECTABLE_IMAGE_TYPES.has(file.type));
+}
+
 async function loadImageMetrics(file: File): Promise<ImageMetrics> {
   const blobUrl = URL.createObjectURL(file);
 
@@ -37,8 +43,9 @@ async function loadImageMetrics(file: File): Promise<ImageMetrics> {
 
     const width = image.naturalWidth || image.width;
     const height = image.naturalHeight || image.height;
-    const sampleWidth = Math.max(32, Math.min(256, width));
-    const sampleHeight = Math.max(32, Math.round((sampleWidth / width) * height));
+    const scale = Math.min(1, 256 / Math.max(width, height));
+    const sampleWidth = Math.max(1, Math.round(width * scale));
+    const sampleHeight = Math.max(1, Math.round(height * scale));
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", { willReadFrequently: true });
 

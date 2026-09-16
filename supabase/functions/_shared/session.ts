@@ -2,7 +2,7 @@ import { corsHeaders } from "./cors.ts";
 
 type JwtPayload = {
   auth_time?: number;
-  iat?: number;
+  amr?: { method?: string; timestamp?: number }[];
 };
 
 function base64UrlDecode(value: string) {
@@ -26,10 +26,15 @@ function readJwtPayload(token: string): JwtPayload | null {
 
 export function requireRecentAuth(token: string, functionName: string, maxAgeSeconds: number) {
   const payload = readJwtPayload(token);
-  const issuedAt = payload?.auth_time ?? payload?.iat;
+  // Only use authentication events, never JWT issuance (iat changes on refresh).
+  const timestamps = (Array.isArray(payload?.amr) ? payload.amr : [])
+    .filter((entry) => entry && ["password", "otp", "oauth", "totp", "sso/saml", "sso/oidc", "webauthn"].includes(entry.method ?? ""))
+    .map((entry) => entry.timestamp)
+    .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  const issuedAt = timestamps.length ? Math.max(...timestamps) : payload?.auth_time;
   const nowSeconds = Math.floor(Date.now() / 1000);
 
-  if (!issuedAt || nowSeconds - issuedAt > maxAgeSeconds) {
+  if (typeof issuedAt !== "number" || !Number.isFinite(issuedAt) || issuedAt > nowSeconds + 30 || nowSeconds - issuedAt > maxAgeSeconds) {
     throw Response.json(
       {
         ok: false,

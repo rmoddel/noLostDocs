@@ -12,6 +12,8 @@ export function isPlaceholderValue(value: string | undefined) {
     value.includes("your-project-ref") ||
     value.includes("your-supabase-publishable-key") ||
     value.includes("your-supabase-anon-key") ||
+    value.includes("your-scanbot-web-license-key") ||
+    value.includes("your-abbyy") ||
     value.includes("replace-me")
   );
 }
