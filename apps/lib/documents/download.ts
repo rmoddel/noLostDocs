@@ -36,7 +36,7 @@ function getDownloadName(template: DocumentTemplate) {
   return template.originalFilename ?? `${template.title.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase() || "document"}`;
 }
 
-async function resolveProtectedUrl(signedUrl: string, template: DocumentTemplate) {
+async function resolveProtectedUrl(signedUrl: string, template: DocumentTemplate, userId: string) {
   if (!isLocallyEncryptedDocument(template)) {
     return {
       encrypted: false,
@@ -55,7 +55,7 @@ async function resolveProtectedUrl(signedUrl: string, template: DocumentTemplate
     throw new Error("Unable to retrieve the encrypted file.");
   }
 
-  const decryptedBlob = await decryptFileFromLocalDevice(await response.blob(), metadata);
+  const decryptedBlob = await decryptFileFromLocalDevice(await response.blob(), metadata, userId);
   const url = URL.createObjectURL(decryptedBlob);
 
   return {
@@ -131,7 +131,7 @@ export async function createProtectedDocumentUrl({
     return { message: "No signed file link was returned." };
   }
 
-  const resolved = await resolveProtectedUrl(signedUrl, template);
+  const resolved = await resolveProtectedUrl(signedUrl, template, session.user.id);
 
   await logProtectedAction(client, session, action, template);
 

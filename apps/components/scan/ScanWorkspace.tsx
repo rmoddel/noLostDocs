@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { saveScan, validateScanFile } from "@/lib/documents/upload";
@@ -412,7 +413,7 @@ export function ScanWorkspace({
               }}>Restore original</Button> : null}
             </div> : null}
             <p className="field-note">Images stay unchanged unless you rotate or enhance them. Check every detail before saving.</p>
-            <p className="scan-recovery-notice">Keep your originals. Files are encrypted in cloud storage, but can currently be opened only in this browser. Clearing browser data or losing this device can make them unrecoverable.</p>
+            <p className="scan-recovery-notice">Keep your originals and recovery code safe. <Link href="/recovery">Set up or unlock recovery</Link> before saving in this browser.</p>
 
             {qualityReport ? (
               <ul className="scan-signal-list" aria-label="Scan quality signals">

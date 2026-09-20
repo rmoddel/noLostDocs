@@ -1,11 +1,12 @@
+import { readVaultKey, requireVaultKey } from "@/lib/vault/store";
 import type { DocumentTemplate } from "@nolostdocs/types";
 
-export const CLIENT_ENCRYPTION_VERSION = "client-webcrypto-aes-gcm-local-device-v1";
+export const LEGACY_ENCRYPTION_VERSION = "client-webcrypto-aes-gcm-local-device-v1";
+export const CLIENT_ENCRYPTION_VERSION = "client-webcrypto-aes-gcm-recovery-v2";
 
 const DB_NAME = "nolostdocs-vault-keys";
 const DB_VERSION = 1;
 const STORE_NAME = "wrappingKeys";
-const LOCAL_KEY_ID = "nolostdocs:vault-wrapping-key-id";
 const encoder = new TextEncoder();
 
 type StoredWrappingKey = {
@@ -19,10 +20,10 @@ export type ClientEncryptionMetadata = {
   original_name: string;
   original_size: number;
   original_type: string;
-  scheme: typeof CLIENT_ENCRYPTION_VERSION;
+  scheme: typeof CLIENT_ENCRYPTION_VERSION | typeof LEGACY_ENCRYPTION_VERSION;
   wrapped_file_key: string;
   wrapping_key_id: string;
-  wrapping_key_scope: "local-device";
+  wrapping_key_scope: "local-device" | "recovery-code";
   wrapping_key_iv: string;
 };
 
@@ -88,7 +89,7 @@ function openKeyDatabase() {
   });
 }
 
-async function readStoredWrappingKey(id: string) {
+export async function readStoredWrappingKey(id: string) {
   const database = await openKeyDatabase();
 
   return new Promise<StoredWrappingKey | null>((resolve, reject) => {
@@ -105,57 +106,6 @@ async function readStoredWrappingKey(id: string) {
   });
 }
 
-async function writeStoredWrappingKey(storedKey: StoredWrappingKey) {
-  const database = await openKeyDatabase();
-
-  return new Promise<void>((resolve, reject) => {
-    const transaction = database.transaction(STORE_NAME, "readwrite");
-    const request = transaction.objectStore(STORE_NAME).put(storedKey);
-
-    request.onerror = () => reject(request.error ?? new Error("Unable to store the local vault key."));
-    transaction.oncomplete = () => {
-      database.close();
-      resolve();
-    };
-    transaction.onerror = () => {
-      database.close();
-      reject(transaction.error ?? new Error("Unable to store the local vault key."));
-    };
-  });
-}
-
-async function generateWrappingKey() {
-  const key = await window.crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, [
-    "wrapKey",
-    "unwrapKey"
-  ]);
-
-  return key;
-}
-
-async function getOrCreateLocalWrappingKey() {
-  requireBrowserCrypto();
-
-  const existingId = window.localStorage.getItem(LOCAL_KEY_ID);
-  if (existingId) {
-    const existing = await readStoredWrappingKey(existingId);
-    if (existing?.key) {
-      return existing;
-    }
-  }
-
-  const id = window.crypto.randomUUID();
-  const storedKey = {
-    createdAt: new Date().toISOString(),
-    id,
-    key: await generateWrappingKey()
-  };
-
-  await writeStoredWrappingKey(storedKey);
-  window.localStorage.setItem(LOCAL_KEY_ID, id);
-  return storedKey;
-}
-
 function encryptedFileName(fileName: string) {
   return `${fileName.replace(/\s+/g, "-")}.nld.enc`;
 }
@@ -165,13 +115,13 @@ export function getEncryptionMetadata(template: DocumentTemplate) {
 }
 
 export function isLocallyEncryptedDocument(template: DocumentTemplate) {
-  return template.encryptionVersion === CLIENT_ENCRYPTION_VERSION && Boolean(getEncryptionMetadata(template));
+  return [CLIENT_ENCRYPTION_VERSION, LEGACY_ENCRYPTION_VERSION].includes(template.encryptionVersion ?? "") && Boolean(getEncryptionMetadata(template));
 }
 
-export async function encryptFileForLocalDevice(file: File): Promise<EncryptedFilePayload> {
+export async function encryptFileForLocalDevice(file: File, userId: string): Promise<EncryptedFilePayload> {
   requireBrowserCrypto();
 
-  const wrappingKey = await getOrCreateLocalWrappingKey();
+  const wrappingKey = await requireVaultKey(userId);
   const fileKey = await window.crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, [
     "encrypt",
     "decrypt"
@@ -194,7 +144,7 @@ export async function encryptFileForLocalDevice(file: File): Promise<EncryptedFi
     scheme: CLIENT_ENCRYPTION_VERSION,
     wrapped_file_key: arrayBufferToBase64(wrappedFileKey),
     wrapping_key_id: wrappingKey.id,
-    wrapping_key_scope: "local-device",
+    wrapping_key_scope: "recovery-code",
     wrapping_key_iv: bytesToBase64(wrappingKeyIv)
   };
 
@@ -208,18 +158,22 @@ export async function encryptFileForLocalDevice(file: File): Promise<EncryptedFi
   };
 }
 
-export async function decryptFileFromLocalDevice(encryptedBlob: Blob, metadata: ClientEncryptionMetadata) {
+export async function decryptFileFromLocalDevice(encryptedBlob: Blob, metadata: ClientEncryptionMetadata, userId: string) {
   requireBrowserCrypto();
 
-  const wrappingKey = await readStoredWrappingKey(metadata.wrapping_key_id);
-  if (!wrappingKey?.key) {
-    throw new Error("This file was encrypted from another browser. Recovery key support is not configured yet.");
+  const wrappingKey = metadata.scheme === CLIENT_ENCRYPTION_VERSION
+    ? await readVaultKey(userId, metadata.wrapping_key_id)
+    : (await readStoredWrappingKey(metadata.wrapping_key_id))?.key;
+  if (!wrappingKey) {
+    throw new Error(metadata.scheme === CLIENT_ENCRYPTION_VERSION
+      ? "Unlock this browser with your saved code on the Recovery page."
+      : "Open this older file in its original browser and set up recovery there first.");
   }
 
   const fileKey = await window.crypto.subtle.unwrapKey(
     "raw",
     base64ToBytes(metadata.wrapped_file_key),
-    wrappingKey.key,
+    wrappingKey,
     { name: "AES-GCM", iv: base64ToBytes(metadata.wrapping_key_iv) },
     { name: "AES-GCM", length: 256 },
     false,

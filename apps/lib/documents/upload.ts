@@ -75,7 +75,7 @@ export async function saveScan({
   const uploadFile = preparedScan.file;
   const preparedError = validateScanFile(uploadFile);
   if (preparedError) throw new Error(preparedError);
-  const encryptedPayload = await encryptFileForLocalDevice(uploadFile);
+  const encryptedPayload = await encryptFileForLocalDevice(uploadFile, session.user.id);
   const encryptedFile = encryptedPayload.file;
   const safeTitle = buildDisplayFileName(documentTitle);
   let documentId: string | null = null;

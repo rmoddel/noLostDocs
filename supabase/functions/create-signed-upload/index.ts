@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "../_shared/rate-limit.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { recordAuditEvent } from "../_shared/audit.ts";
 import { requireTrustedDevice } from "../_shared/device.ts";
@@ -11,6 +12,7 @@ Deno.serve(async (request) => {
 
   try {
     const { admin, user } = await requireUser(request);
+    await enforceRateLimit(admin, `upload:${user.id}`, 15, 60);
     const payload = await request.json().catch(() => ({}));
     const device = await requireTrustedDevice(admin, user.id, request, payload, "create-signed-upload");
     const plan = await fetchAccountPlan(admin, user.id);
@@ -56,9 +58,13 @@ Deno.serve(async (request) => {
     // Avoid sensitive document titles in URLs, access logs, and object names.
     const path = `${user.id}/${crypto.randomUUID()}.nld.enc`;
 
+    const reservation = await admin.rpc("reserve_document_upload", { p_user_id: user.id, p_path: path, p_limit: documentLimit });
+    if (reservation.error) throw reservation.error;
+    if (!reservation.data) return Response.json({ ok: false, message: "Your document or pending-upload limit is reached. Remove an unused document or contact support about an interrupted upload." }, { status: 403, headers: corsHeaders });
     const { data, error } = await admin.storage.from("user-documents").createSignedUploadUrl(path);
 
     if (error) {
+      await admin.from("upload_reservations").delete().eq("path", path).eq("user_id", user.id);
       throw error;
     }
 

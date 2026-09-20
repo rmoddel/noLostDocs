@@ -464,6 +464,8 @@ function DashboardAccountMenu({ account }: { account: DashboardAccountSummary })
               <dd>{account.workspaceName}</dd>
             </div>
           </dl>
+          <p><Link href="/recovery" role="menuitem">Document recovery</Link></p>
+          <p><Link href="/billing" role="menuitem">Plans and billing</Link></p>
         </div>
       ) : null}
     </div>

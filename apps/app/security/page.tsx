@@ -12,8 +12,8 @@ export default function SecurityPage() {
         </p>
       </Card>
       <Card className="content-card">
-        <h2>Know the current recovery limit</h2>
-        <p className="section-copy">Uploaded file contents are encrypted before they reach cloud storage. The key needed to open them stays in the browser used to save them. Another browser or device cannot currently recover those files, and clearing browser data can permanently remove access. Keep your original documents and independent backups.</p>
+        <h2>Keep your recovery code safe</h2>
+        <p className="section-copy">Uploaded file contents are encrypted before they reach cloud storage. Set up and save your recovery code before uploading. After signing in on another browser, use the code on the Recovery page to unlock your files. We cannot replace a lost recovery code. Older files must be migrated from a browser that still holds their keys. Keep your original documents and independent backups.</p>
         <p className="section-copy">Document titles, filenames, and classification metadata are stored separately from encrypted file contents. NoLostDocs does not claim zero-knowledge encryption or HIPAA compliance.</p>
       </Card>
       <SecuritySection />

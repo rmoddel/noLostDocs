@@ -1,3 +1,4 @@
+import { enforceRateLimit, hashLimitKey } from "../_shared/rate-limit.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { createAdminClient } from "../_shared/supabase.ts";
 
@@ -32,6 +33,10 @@ Deno.serve(async (request) => {
 
   try {
     const admin = createAdminClient();
+    // A global budget bounds anonymous abuse even when client-supplied headers vary.
+    await enforceRateLimit(admin, "contact:global", 100, 3600);
+    const source = request.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim() ?? "unknown";
+    await enforceRateLimit(admin, `contact:${await hashLimitKey(source)}`, 5, 600);
     const userId = await resolveUserId(request);
     const body = await request.json().catch(() => ({}));
 
@@ -92,6 +97,7 @@ Deno.serve(async (request) => {
       { headers: corsHeaders }
     );
   } catch (error) {
+    if (error instanceof Response) return error;
     return jsonError(error instanceof Error ? error.message : "Unexpected error", 500);
   }
 });

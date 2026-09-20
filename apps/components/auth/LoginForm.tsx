@@ -200,6 +200,8 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
           </>
         )}
 
+        {mode === "signin" ? <p><Link href="/forgot-password">Forgot your password?</Link></p> : null}
+
         <p className="login-fineprint">
           NoLostDocs helps keep secure copies organized. Acceptance of digital copies depends on the situation, provider,
           agency, or law.

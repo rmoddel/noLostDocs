@@ -71,12 +71,12 @@ Deno.serve(async (request) => {
       );
     }
 
-    if (!fileRow.storage_path) {
+    if (!fileRow.storage_path || !fileRow.storage_path.startsWith(`${user.id}/`) || fileRow.storage_path.includes("..")) {
       return Response.json(
         {
           ok: false,
           function: "create-signed-download",
-          message: "Missing storage path."
+          message: "Invalid storage path."
         },
         { status: 400, headers: corsHeaders }
       );

@@ -4989,3 +4989,5 @@ dialog::backdrop { background: rgba(12, 12, 11, .58); }
   .scan-modal-shell { min-height: 100dvh; padding: 12px; }
   .dashboard-scan-dialog { max-height: calc(100dvh - 24px); }
 }
+
+.recovery-code { white-space: pre-wrap; overflow-wrap: anywhere; padding: 1rem; background: #f5eee6; border-radius: 0.75rem; user-select: all; }

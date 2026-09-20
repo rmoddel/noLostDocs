@@ -34,6 +34,8 @@ Deno.serve(async (request) => {
       throw error;
     }
 
+    await admin.from("upload_reservations").delete().eq("path", payload.path).eq("user_id", user.id);
+
     await recordAuditEvent(admin, {
       action: "document_file.upload_cleanup",
       deviceId: device.id,
