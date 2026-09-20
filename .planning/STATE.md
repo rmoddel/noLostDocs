@@ -111,6 +111,10 @@ Recent decisions affecting current work:
 | Product | Family/emergency sharing | Deferred to v2 | 2026-06-18 |
 | Compliance | HIPAA marketing claims | Blocked on legal review | 2026-06-18 |
 
+## Production deployment in progress (2026-09-20)
+
+Quick task `260919-wzq`: production hostname and HTTPS configured, Amplify server credential removed, preview password protection enabled, local release checks passed. Backend deployment and end-to-end validation blocked on Supabase CLI login and confirmation/correction of the production project key. See [deployment handoff](./quick/260919-wzq-get-nolostdocs-production-deployment-liv/260919-wzq-SUMMARY.md). Do not declare public launch ready or remove preview restrictions.
+
 ## Session Continuity
 
 Last session: 2026-06-25

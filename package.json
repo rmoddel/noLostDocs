@@ -17,8 +17,8 @@
     "dev:web-next": "npm run dev -w @nolostdocs/web",
     "build:web": "npm run build -w @nolostdocs/web",
     "build:web-next": "npm run build -w @nolostdocs/web",
-    "lint": "npm run lint -ws --if-present",
-    "typecheck": "npm run typecheck -ws --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "test:security-scan": "node --experimental-strip-types --test tests/security-and-scan.mjs"
   }
 }

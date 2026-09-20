@@ -12,20 +12,9 @@ type LoginFormProps = {
   nextPath: string;
 };
 
-function GoogleMark() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24">
-      <path d="M21.6 12.27c0-.74-.06-1.3-.18-1.87H12v3.34h5.49c-.11.83-.7 2.07-2 2.9l-.03.11 2.82 2.18.2.02c1.84-1.7 3.12-4.22 3.12-7.68Z" fill="#4285F4" />
-      <path d="M12 22c2.62 0 4.82-.86 6.43-2.34l-3.07-2.38c-.82.56-1.92.95-3.36.95a5.82 5.82 0 0 1-5.48-4.02l-.1.01-2.94 2.27-.04.1A10 10 0 0 0 12 22Z" fill="#34A853" />
-      <path d="M6.52 14.21A5.9 5.9 0 0 1 6.2 12c0-.77.14-1.51.36-2.21l-.01-.15-3-2.31-.1.05A10 10 0 0 0 2 12c0 1.61.39 3.14 1.05 4.5l3.47-2.29Z" fill="#FBBC05" />
-      <path d="M12 6.18c1.82 0 3.05.79 3.76 1.45l2.74-2.67C16.81 3.35 14.62 2.4 12 2.4A9.99 9.99 0 0 0 3.05 9.59l3.46 2.7A5.9 5.9 0 0 1 12 6.18Z" fill="#EA4335" />
-    </svg>
-  );
-}
-
 export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormProps) {
   const router = useRouter();
-  const { configured, ready, session, signInWithGoogle, signInWithPassword, signUpWithPassword } = useAuth();
+  const { configured, ready, session, signInWithPassword, signUpWithPassword } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -122,20 +111,6 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
     router.replace(nextPath);
   }
 
-  async function handleGoogleSignIn() {
-    setLoading(true);
-    setMessage(null);
-
-    const redirectUrl = typeof window === "undefined" ? "" : buildAuthCallbackUrl(nextPath);
-    const { errorMessage } = await signInWithGoogle(redirectUrl);
-
-    setLoading(false);
-
-    if (errorMessage) {
-      setMessage(errorMessage);
-    }
-  }
-
   return (
     <div className="login-shell">
       <section className="login-card">
@@ -145,23 +120,12 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
           <p className="login-lede">
             {mode === "create"
               ? "Start with a private records space for the important papers you always need to find."
-              : "Sign in with Google or your password to open the protected records view and continue to your workspace."}
+              : "Sign in with your email and password to open the protected records view and continue to your workspace."}
           </p>
         </div>
 
         {mode === "create" ? (
           <>
-            <button className="login-google-button" disabled={!configured || loading} onClick={() => void handleGoogleSignIn()} type="button">
-              <GoogleMark />
-              Continue with Google
-            </button>
-
-            <div className="login-divider" aria-hidden="true">
-              <span />
-              <strong>OR SIGN UP WITH EMAIL</strong>
-              <span />
-            </div>
-
             <form className="login-form" onSubmit={(event) => void handleCreateAccount(event)}>
               <label className="login-field">
                 <span>Full name</span>
@@ -208,17 +172,6 @@ export function LoginForm({ initialMessage = null, mode, nextPath }: LoginFormPr
           </>
         ) : (
           <>
-            <button className="login-google-button" disabled={!configured || loading} onClick={() => void handleGoogleSignIn()} type="button">
-              <GoogleMark />
-              Continue with Google
-            </button>
-
-            <div className="login-divider" aria-hidden="true">
-              <span />
-              <strong>OR SIGN IN WITH EMAIL</strong>
-              <span />
-            </div>
-
             <form className="login-form signin" onSubmit={(event) => void handlePasswordSignIn(event)}>
               <label className="login-field">
                 <span>Email address</span>
